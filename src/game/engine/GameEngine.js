@@ -108,17 +108,15 @@ export class GameEngine {
   }
 
   setupNetworkHandlers() {
-    network.onDataCallback = (type, payload) => {
+    this.networkUnsub = network.on('data', (type, payload) => {
       if (this.mode !== 'ONLINE') return;
 
       if (type === MSG_TYPE.CLIENT_INPUT && this.isOnlineHost) {
-        // Host recebe inputs do cliente P2
         this.remoteClientInput = payload;
       } else if (type === MSG_TYPE.HOST_STATE && !this.isOnlineHost) {
-        // Cliente recebe snapshot de estado do Host
         this.applyHostStateSnapshot(payload);
       }
-    };
+    });
   }
 
   startFight(char1Id, char2Id, mode = 'VERSUS', difficulty = 'medium', stageId = 'cyber_arena', isHost = true) {
@@ -170,6 +168,10 @@ export class GameEngine {
   destroy() {
     this.stop();
     this.inputHandler.detach();
+    if (this.networkUnsub) {
+      this.networkUnsub();
+      this.networkUnsub = null;
+    }
   }
 
   loop() {

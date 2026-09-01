@@ -25,29 +25,35 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
   const [p2Ready, setP2Ready] = useState(false);
 
   const canvasRef = useRef(null);
+  const lobbyStateRef = useRef({ p1CharId: 1, p2CharId: 2, selectedStage: 'cyber_arena', p1Ready: false, p2Ready: false });
 
-  // Setup callbacks de rede
   useEffect(() => {
-    network.onConnectedCallback = (hostStatus) => {
+    lobbyStateRef.current = { p1CharId, p2CharId, selectedStage, p1Ready, p2Ready };
+  }, [p1CharId, p2CharId, selectedStage, p1Ready, p2Ready]);
+
+  // Setup de Listeners do NetworkManager
+  useEffect(() => {
+    const unsubConnected = network.on('connected', (hostStatus) => {
+      console.log('[Lobby] Conectado! Host:', hostStatus);
       setIsConnected(true);
       setIsConnecting(false);
       setIsHost(hostStatus);
       setErrorMsg('');
       sounds.playSelect();
 
-      // Host envia estado inicial do lobby
+      // Host envia estado atual do lobby
       if (hostStatus) {
         network.send(MSG_TYPE.LOBBY_SYNC, {
-          p1CharId,
-          p2CharId,
-          selectedStage,
-          p1Ready,
+          p1CharId: lobbyStateRef.current.p1CharId,
+          p2CharId: lobbyStateRef.current.p2CharId,
+          selectedStage: lobbyStateRef.current.selectedStage,
+          p1Ready: lobbyStateRef.current.p1Ready,
           p2Ready: false
         });
       }
-    };
+    });
 
-    network.onDataCallback = (type, payload) => {
+    const unsubData = network.on('data', (type, payload) => {
       if (type === MSG_TYPE.LOBBY_SYNC) {
         if (payload.p1CharId !== undefined) setP1CharId(payload.p1CharId);
         if (payload.p2CharId !== undefined) setP2CharId(payload.p2CharId);
@@ -63,38 +69,41 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
           isHost: network.isHost,
         });
       }
-    };
+    });
 
-    network.onDisconnectedCallback = () => {
+    const unsubDisconnected = network.on('disconnected', () => {
       setIsConnected(false);
       setP1Ready(false);
       setP2Ready(false);
       setErrorMsg('Oponente desconectou.');
-    };
+    });
 
-    network.onErrorCallback = (err) => {
+    const unsubError = network.on('error', (err) => {
       setIsConnecting(false);
-      setErrorMsg(`Erro de conexão: ${err.message || 'Sala não encontrada'}`);
-    };
+      setErrorMsg(`Erro de conexão: ${err.message || 'Verifique o código da sala'}`);
+    });
 
-    // Monitoramento de Ping a cada 1s
     const pingTimer = setInterval(() => {
       setPing(network.ping);
     }, 1000);
 
     return () => {
+      unsubConnected();
+      unsubData();
+      unsubDisconnected();
+      unsubError();
       clearInterval(pingTimer);
     };
-  }, [p1CharId, p2CharId, selectedStage, p1Ready, p2Ready]);
+  }, []);
 
-  // Se veio com initialRoomCode, tenta conectar automaticamente
+  // Conexão automática se initialRoomCode estiver preenchido
   useEffect(() => {
     if (initialRoomCode && !isConnected && !isConnecting) {
       handleJoinRoom(initialRoomCode);
     }
   }, [initialRoomCode]);
 
-  // Canvas Preview dos Personagens Selecionados
+  // Preview de Canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -148,7 +157,7 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
     }
   };
 
-  // Entrar em Sala
+  // Entrar na Sala
   const handleJoinRoom = async (codeToJoin = null) => {
     const targetCode = (codeToJoin || roomCodeInput).trim().toUpperCase();
     if (!targetCode) {
@@ -164,7 +173,7 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
       setIsHost(false);
     } catch (err) {
       setIsConnecting(false);
-      setErrorMsg('Não foi possível conectar à sala.');
+      setErrorMsg('Não foi possível conectar à sala. Verifique o código.');
     }
   };
 
@@ -180,7 +189,7 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
     }
   };
 
-  // Toggle "Pronto"
+  // Confirmar "Pronto"
   const handleToggleReady = () => {
     sounds.playSelect();
     if (isHost) {
@@ -188,7 +197,6 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
       setP1Ready(next);
       network.send(MSG_TYPE.LOBBY_SYNC, { p1Ready: next });
 
-      // Se ambos prontos, Host inicia a partida
       if (next && p2Ready) {
         setTimeout(() => {
           network.send(MSG_TYPE.START_MATCH, {
@@ -202,7 +210,7 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
             stageId: selectedStage,
             isHost: true
           });
-        }, 600);
+        }, 500);
       }
     } else {
       const next = !p2Ready;
@@ -251,7 +259,7 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
         )}
       </div>
 
-      {/* Se NÃO estiver conectado: Tela de Criação / Entrada na Sala */}
+      {/* Se NÃO estiver conectado: Tela de Criação / Entrada */}
       {!isConnected ? (
         <div className="flex-1 flex flex-col items-center justify-center max-w-md mx-auto w-full">
           <div className="w-full bg-slate-900 border border-slate-800 rounded p-6 shadow-xl">
@@ -294,11 +302,11 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
                     disabled={isConnecting}
                     className="w-full py-3 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm uppercase tracking-wider transition-colors cursor-pointer disabled:opacity-50"
                   >
-                    {isConnecting ? 'Criando...' : 'Gerar Código de Sala'}
+                    {isConnecting ? 'Criando Sala...' : 'Gerar Código de Sala'}
                   </button>
                 ) : (
                   <div className="flex flex-col gap-3">
-                    <span className="text-xs text-slate-400">Código da sua Sala:</span>
+                    <span className="text-xs text-slate-400">Código da Sala:</span>
                     <div className="text-4xl font-mono font-black text-white bg-slate-950 py-3 rounded border border-slate-700 tracking-widest">
                       {activeRoomCode}
                     </div>
@@ -323,7 +331,7 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
             {/* Tab: Entrar em Sala */}
             {tab === 'JOIN' && (
               <div className="flex flex-col gap-3">
-                <label className="text-xs text-slate-400">Código da Sala do Host:</label>
+                <label className="text-xs text-slate-400">Código da Sala:</label>
                 <input
                   type="text"
                   maxLength={6}
@@ -343,7 +351,6 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
               </div>
             )}
 
-            {/* Erro */}
             {errorMsg && (
               <div className="mt-4 p-2.5 rounded bg-red-950/60 border border-red-800 text-red-300 text-xs text-center">
                 {errorMsg}
@@ -352,9 +359,8 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
           </div>
         </div>
       ) : (
-        /* Se ESTIVER conectado: Seleção de Personagens em Tempo Real */
+        /* Se ESTIVER conectado: Seleção em Tempo Real */
         <div className="flex-1 flex gap-6 my-4 items-center justify-between overflow-hidden">
-          {/* Grade de 20 Personagens */}
           <div className="w-7/12 flex flex-col justify-center">
             <div className="grid grid-cols-5 gap-2 max-h-[480px]">
               {CHARACTERS.map((char) => {
@@ -403,7 +409,6 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
             </div>
           </div>
 
-          {/* Painel do Duelo Online */}
           <div className="w-5/12 h-full flex flex-col justify-between bg-slate-900/60 rounded border border-slate-800 p-4">
             <div className="relative w-full h-44 bg-slate-950 rounded border border-slate-800 overflow-hidden flex items-center justify-center">
               <canvas ref={canvasRef} width={500} height={300} className="w-full h-full object-contain" />
@@ -415,7 +420,6 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
               </div>
             </div>
 
-            {/* Cenário (Apenas Host altera) */}
             <div className="my-2 p-2 bg-slate-950 rounded border border-slate-800 text-xs flex justify-between items-center">
               <span className="text-slate-400">Cenário da Luta:</span>
               {isHost ? (
@@ -440,7 +444,6 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
               )}
             </div>
 
-            {/* Botão de Pronto / Iniciar */}
             <button
               onClick={handleToggleReady}
               className={`w-full py-3 rounded text-white font-bold text-sm uppercase tracking-wider transition-colors cursor-pointer ${

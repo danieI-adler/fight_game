@@ -1,6 +1,7 @@
 import { Peer } from 'peerjs';
 
 export const MSG_TYPE = {
+  HANDSHAKE: 'HANDSHAKE',
   LOBBY_SYNC: 'LOBBY_SYNC',
   START_MATCH: 'START_MATCH',
   CLIENT_INPUT: 'CLIENT_INPUT',
@@ -20,17 +21,38 @@ class NetworkManager {
     this.isConnected = false;
     this.ping = 0;
     this.pingInterval = null;
-
-    // Callbacks
-    this.onConnectedCallback = null;
-    this.onDataCallback = null;
-    this.onDisconnectedCallback = null;
-    this.onErrorCallback = null;
+    this.listeners = new Map();
   }
 
-  // Gera código aleatório de 4 caracteres alfanuméricos
+  // Event Emitter multi-listener para não sobrescrever callbacks
+  on(event, callback) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set());
+    }
+    this.listeners.get(event).add(callback);
+    return () => this.off(event, callback);
+  }
+
+  off(event, callback) {
+    if (this.listeners.has(event)) {
+      this.listeners.get(event).delete(callback);
+    }
+  }
+
+  emit(event, ...args) {
+    if (this.listeners.has(event)) {
+      for (const cb of this.listeners.get(event)) {
+        try {
+          cb(...args);
+        } catch (e) {
+          console.error(`Error in listener for ${event}:`, e);
+        }
+      }
+    }
+  }
+
   generateRoomCode() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
     let code = '';
     for (let i = 0; i < 4; i++) {
       code += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -38,37 +60,48 @@ class NetworkManager {
     return code;
   }
 
+  getIceServers() {
+    return [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' },
+      { urls: 'stun:stun3.l.google.com:19302' },
+      { urls: 'stun:stun4.l.google.com:19302' },
+      { urls: 'stun:stun.services.mozilla.com' },
+      { urls: 'stun:global.stun.twilio.com:3478' }
+    ];
+  }
+
   // --- CRIAR SALA (HOST / P1) ---
   createRoom(customCode = null) {
     this.disconnect();
     this.isHost = true;
     this.roomCode = (customCode || this.generateRoomCode()).toUpperCase();
-    const peerId = `fightgame-${this.roomCode}`;
+    const peerId = `fg2d-${this.roomCode.toLowerCase()}`;
 
     return new Promise((resolve, reject) => {
       try {
         this.peer = new Peer(peerId, {
           debug: 1,
           config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:global.stun.twilio.com:3478' }
-            ]
+            iceServers: this.getIceServers()
           }
         });
 
-        this.peer.on('open', () => {
+        this.peer.on('open', (id) => {
+          console.log(`[Host] Sala criada com ID: ${id}`);
           resolve(this.roomCode);
         });
 
         this.peer.on('connection', (connection) => {
+          console.log('[Host] Conexão recebida de cliente!');
           this.conn = connection;
           this.setupConnection();
         });
 
         this.peer.on('error', (err) => {
-          console.error('Peer error:', err);
-          if (this.onErrorCallback) this.onErrorCallback(err);
+          console.error('[Host] Peer erro:', err);
+          this.emit('error', err);
           reject(err);
         });
       } catch (err) {
@@ -82,23 +115,21 @@ class NetworkManager {
     this.disconnect();
     this.isHost = false;
     this.roomCode = roomCode.trim().toUpperCase();
-    const targetPeerId = `fightgame-${this.roomCode}`;
+    const targetPeerId = `fg2d-${this.roomCode.toLowerCase()}`;
 
     return new Promise((resolve, reject) => {
       try {
         this.peer = new Peer(null, {
           debug: 1,
           config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:global.stun.twilio.com:3478' }
-            ]
+            iceServers: this.getIceServers()
           }
         });
 
-        this.peer.on('open', () => {
+        this.peer.on('open', (id) => {
+          console.log(`[Client] Conectando ao host ${targetPeerId} com ID local: ${id}`);
           this.conn = this.peer.connect(targetPeerId, {
-            reliable: false // Modo baixa latência para fighting game
+            reliable: true // Garante abertura correta do DataChannel WebRTC
           });
 
           this.setupConnection();
@@ -106,8 +137,8 @@ class NetworkManager {
         });
 
         this.peer.on('error', (err) => {
-          console.error('Peer connection error:', err);
-          if (this.onErrorCallback) this.onErrorCallback(err);
+          console.error('[Client] Peer erro:', err);
+          this.emit('error', err);
           reject(err);
         });
       } catch (err) {
@@ -116,34 +147,43 @@ class NetworkManager {
     });
   }
 
-  // --- CONFIGURAÇÃO DO DATA CHANNEL ---
   setupConnection() {
     if (!this.conn) return;
 
-    this.conn.on('open', () => {
+    const onOpen = () => {
+      console.log(`[WebRTC] Canal de dados aberto! Host: ${this.isHost}`);
       this.isConnected = true;
       this.startPingLoop();
-      if (this.onConnectedCallback) this.onConnectedCallback(this.isHost);
-    });
+
+      // Envia aperto de mão imediato
+      this.send(MSG_TYPE.HANDSHAKE, { isHost: this.isHost, time: Date.now() });
+      this.emit('connected', this.isHost);
+    };
+
+    if (this.conn.open) {
+      onOpen();
+    } else {
+      this.conn.on('open', onOpen);
+    }
 
     this.conn.on('data', (data) => {
       this.handleIncomingData(data);
     });
 
     this.conn.on('close', () => {
+      console.log('[WebRTC] Canal fechado.');
       this.handleDisconnect();
     });
 
     this.conn.on('error', (err) => {
-      console.error('Data channel error:', err);
-      if (this.onErrorCallback) this.onErrorCallback(err);
+      console.error('[WebRTC] Erro no canal:', err);
+      this.emit('error', err);
     });
   }
 
   handleIncomingData(data) {
     if (!data || !data.type) return;
 
-    // Tratamento de Ping/Pong interno
     if (data.type === MSG_TYPE.PING) {
       this.send(MSG_TYPE.PONG, { timestamp: data.payload.timestamp });
       return;
@@ -152,18 +192,22 @@ class NetworkManager {
       this.ping = Math.round(performance.now() - data.payload.timestamp);
       return;
     }
-
-    if (this.onDataCallback) {
-      this.onDataCallback(data.type, data.payload);
+    if (data.type === MSG_TYPE.HANDSHAKE) {
+      if (!this.isConnected) {
+        this.isConnected = true;
+        this.emit('connected', this.isHost);
+      }
     }
+
+    this.emit('data', data.type, data.payload);
   }
 
   send(type, payload = {}) {
-    if (this.conn && this.isConnected) {
+    if (this.conn && this.conn.open) {
       try {
         this.conn.send({ type, payload });
       } catch (err) {
-        console.error('Send packet error:', err);
+        console.error('Erro ao enviar pacote:', err);
       }
     }
   }
@@ -171,7 +215,7 @@ class NetworkManager {
   startPingLoop() {
     if (this.pingInterval) clearInterval(this.pingInterval);
     this.pingInterval = setInterval(() => {
-      if (this.isConnected) {
+      if (this.isConnected && this.conn && this.conn.open) {
         this.send(MSG_TYPE.PING, { timestamp: performance.now() });
       }
     }, 2000);
@@ -183,9 +227,7 @@ class NetworkManager {
       clearInterval(this.pingInterval);
       this.pingInterval = null;
     }
-    if (this.onDisconnectedCallback) {
-      this.onDisconnectedCallback();
-    }
+    this.emit('disconnected');
   }
 
   disconnect() {
