@@ -38,16 +38,16 @@ export class Fighter {
     // Posição e Física
     this.position = new Vector2D(isPlayer2 ? 1400 : 600, stageGroundY);
     this.velocity = new Vector2D(0, 0);
-    this.gravity = 0.85;
-    this.facing = isPlayer2 ? -1 : 1; // 1 = Direita, -1 = Esquerda
+    this.gravity = 0.52; // Física de gravidade suave com tempo de suspensão natural
+    this.facing = isPlayer2 ? -1 : 1;
 
     // Atributos
     this.maxHealth = charData.stats.health || 1000;
     this.health = this.maxHealth;
-    this.energy = 20; // 0 a 100
+    this.energy = 20;
     this.maxEnergy = 100;
     this.speed = charData.stats.speed || 7.0;
-    this.jumpForce = charData.stats.jumpForce || 17.5;
+    this.jumpForce = 13.8;
     this.attackPower = charData.stats.attackPower || 1.0;
     this.defense = charData.stats.defense || 1.0;
 
@@ -60,6 +60,7 @@ export class Fighter {
     this.isBlocking = false;
     this.isInvulnerable = false;
     this.isDead = false;
+    this.jumpCooldown = 0; // Previne pulo duplo acidental
 
     // Sistema de Combate
     this.activeHitbox = null;
@@ -69,7 +70,7 @@ export class Fighter {
     this.blockstunTime = 0;
     this.hitstopTimer = 0;
 
-    // Esqueleto de Articulação (Pose em graus/radianos)
+    // Articulação Esquelética
     this.pose = {
       head: { x: 0, y: -115 },
       chest: { x: 0, y: -80 },
@@ -88,7 +89,6 @@ export class Fighter {
       rightFoot: { x: 10, y: 0 },
     };
 
-    // Referência do Oponente
     this.opponent = null;
   }
 
@@ -109,11 +109,12 @@ export class Fighter {
     this.comboCount = 0;
     this.hitstunTime = 0;
     this.blockstunTime = 0;
+    this.jumpCooldown = 0;
     this.activeHitbox = null;
     this.facing = this.isPlayer2 ? -1 : 1;
   }
 
-  // --- CONTROLES E AÇÕES ---
+  // --- CONTROLES ---
 
   move(dir) {
     if (!this.canAct() || !this.isGrounded) return;
@@ -123,7 +124,6 @@ export class Fighter {
       this.state = FIGHTER_STATE.WALK_FORWARD;
     } else if (dir === -this.facing) {
       this.state = FIGHTER_STATE.WALK_BACK;
-      // Caminhar para trás ativa guarda automática
       this.isBlocking = true;
     }
   }
@@ -137,8 +137,9 @@ export class Fighter {
   }
 
   jump(dirX = 0) {
-    if (!this.canAct() || !this.isGrounded) return;
+    if (!this.canAct() || !this.isGrounded || this.jumpCooldown > 0) return;
     this.isGrounded = false;
+    this.jumpCooldown = 0.22; // Cooldown de pulo
     this.velocity.y = -this.jumpForce;
     this.velocity.x = dirX * (this.speed * 0.85);
     this.state = FIGHTER_STATE.JUMP;
@@ -268,24 +269,22 @@ export class Fighter {
     return !this.isDead && this.hitstunTime <= 0 && this.blockstunTime <= 0 && !lockStates.includes(this.state);
   }
 
-  // --- REAÇÃO A GOLPES E DANO ---
+  // --- DANO ---
 
   receiveHit(attackData, hitPoint, particles) {
     if (this.isDead || this.isInvulnerable) return false;
 
-    // Verificar se o golpe foi defendido
     const isGuarding = this.isBlocking || (this.state === FIGHTER_STATE.WALK_BACK && this.isGrounded);
 
     if (isGuarding && !attackData.unblockable) {
-      // Dano reduzido por defesa (Chip damage)
       const chipDamage = Math.max(1, Math.round(attackData.damage * 0.15 / this.defense));
       this.health = Math.max(0, this.health - chipDamage);
-      this.blockstunTime = 0.2;
+      this.blockstunTime = 0.18;
       this.velocity.x = -this.facing * (attackData.knockback * 0.4);
 
       sounds.playBlock();
       if (particles) {
-        particles.emitSparks(hitPoint.x, hitPoint.y, '#38bdf8', 10, 5);
+        particles.emitSparks(hitPoint.x, hitPoint.y, '#38bdf8', 8, 4);
         particles.emitFloatingText('DEFESA!', hitPoint.x, hitPoint.y - 30, '#38bdf8');
       }
 
@@ -293,23 +292,21 @@ export class Fighter {
       return false;
     }
 
-    // Dano total
     const actualDamage = Math.round(attackData.damage * (attackData.attackerPower || 1.0) / this.defense);
     this.health = Math.max(0, this.health - actualDamage);
     this.energy = Math.min(this.maxEnergy, this.energy + 8);
 
-    // Efeitos de som e partículas
     if (attackData.isHeavy) {
       sounds.playPunch(true);
       if (particles) {
-        particles.emitSparks(hitPoint.x, hitPoint.y, this.charData.themeColor || '#ffaa00', 25, 9);
-        particles.emitShockwave(hitPoint.x, hitPoint.y, 70, this.charData.energyColor || '#ffffff');
+        particles.emitSparks(hitPoint.x, hitPoint.y, this.charData.themeColor || '#ffaa00', 20, 8);
+        particles.emitShockwave(hitPoint.x, hitPoint.y, 65, this.charData.energyColor || '#ffffff');
         particles.emitElectricArc(hitPoint.x - 20, hitPoint.y - 20, hitPoint.x + 20, hitPoint.y + 20, this.charData.themeColor);
       }
     } else {
       sounds.playPunch(false);
       if (particles) {
-        particles.emitSparks(hitPoint.x, hitPoint.y, '#ffea00', 14, 6);
+        particles.emitSparks(hitPoint.x, hitPoint.y, '#ffea00', 12, 5);
       }
     }
 
@@ -317,30 +314,27 @@ export class Fighter {
       particles.emitFloatingText(`-${actualDamage}`, hitPoint.x, hitPoint.y - 25, attackData.isHeavy ? '#ff3b30' : '#ffffff', attackData.isHeavy);
     }
 
-    // Knockback e Estado
     if (this.health <= 0) {
       this.health = 0;
       this.isDead = true;
       this.state = FIGHTER_STATE.KNOCKDOWN;
-      this.velocity.x = -this.facing * (attackData.knockback * 1.5);
-      this.velocity.y = -10;
+      this.velocity.x = -this.facing * (attackData.knockback * 1.4);
+      this.velocity.y = -8;
       this.isGrounded = false;
       sounds.playKO();
     } else if (attackData.knockdown || !this.isGrounded) {
       this.state = FIGHTER_STATE.KNOCKDOWN;
       this.velocity.x = -this.facing * attackData.knockback;
-      this.velocity.y = -8;
+      this.velocity.y = -7;
       this.isGrounded = false;
     } else {
       this.state = FIGHTER_STATE.HURT;
-      this.hitstunTime = attackData.isHeavy ? 0.35 : 0.2;
+      this.hitstunTime = attackData.isHeavy ? 0.32 : 0.18;
       this.velocity.x = -this.facing * attackData.knockback;
     }
 
     return true;
   }
-
-  // --- HITBOXES E HURTBOXES ---
 
   getHurtboxes() {
     const x = this.position.x;
@@ -349,11 +343,8 @@ export class Fighter {
     const height = 120 * crouchFactor;
 
     return [
-      // Cabeça
       new Box(x - 18, y - height, 36, 32 * crouchFactor, 'hurtbox'),
-      // Tronco e Corpo
       new Box(x - 26, y - height + 28, 52, 55 * crouchFactor, 'hurtbox'),
-      // Pernas
       new Box(x - 24, y - (height * 0.4), 48, height * 0.4, 'hurtbox'),
     ];
   }
@@ -362,17 +353,18 @@ export class Fighter {
     return new Box(this.position.x - 25, this.position.y - 120, 50, 120, 'pushbox');
   }
 
-  // --- ATUALIZAÇÃO POR FRAME ---
+  // --- ATUALIZAÇÃO ---
 
   update(dt = 1 / 60, stageWidth = 2000, particles = null) {
     this.stateTime += dt;
+    if (this.jumpCooldown > 0) this.jumpCooldown -= dt;
 
-    // 1. Orientação (Frente para o oponente)
+    // 1. Orientação
     if (this.opponent && this.canAct() && this.isGrounded) {
       this.facing = this.opponent.position.x > this.position.x ? 1 : -1;
     }
 
-    // 2. Gravidade e Física Vertical
+    // 2. Gravidade
     if (!this.isGrounded) {
       this.velocity.y += this.gravity;
       this.position.y += this.velocity.y;
@@ -383,26 +375,28 @@ export class Fighter {
         this.isGrounded = true;
 
         if (particles) {
-          particles.emitDust(this.position.x, this.groundY, 8);
+          particles.emitDust(this.position.x, this.groundY, 6);
         }
 
         if (this.state === FIGHTER_STATE.JUMP || this.state === FIGHTER_STATE.JUMP_PUNCH || this.state === FIGHTER_STATE.JUMP_KICK) {
           this.state = FIGHTER_STATE.IDLE;
+          this.stateTime = 0;
         }
       }
+    } else {
+      this.position.y = this.groundY;
     }
 
-    // 3. Física Horizontal e Desaceleração
+    // 3. Física Horizontal
     this.position.x += this.velocity.x;
     if (this.isGrounded) {
-      this.velocity.x *= 0.82; // Atrito no solo
+      this.velocity.x *= 0.82;
       if (Math.abs(this.velocity.x) < 0.1) this.velocity.x = 0;
     }
 
-    // Restringir limites da arena
     this.position.x = Math.max(60, Math.min(stageWidth - 60, this.position.x));
 
-    // 4. Hitstun e Blockstun
+    // 4. Hitstun & Blockstun
     if (this.hitstunTime > 0) {
       this.hitstunTime -= dt;
       if (this.hitstunTime <= 0 && !this.isDead) {
@@ -416,15 +410,36 @@ export class Fighter {
       }
     }
 
-    // 5. Regeneração passiva sutil de energia
+    // 5. Energia
     if (this.energy < this.maxEnergy) {
       this.energy = Math.min(this.maxEnergy, this.energy + (this.charData.stats.energyRegen || 1.0) * dt * 2.5);
     }
 
-    // 6. Atualização de Estados de Ataque e Duração
+    // 6. Atualização de Ataques
     this.updateAttackStates(dt, particles);
 
-    // 7. Atualização Cinemática da Pose dos Membros
+    // 7. Watchdog de Segurança Anti-Travamento (Se ficar preso num estado de golpe por > 0.8s, reseta)
+    const attackStates = [
+      FIGHTER_STATE.LIGHT_PUNCH,
+      FIGHTER_STATE.HEAVY_PUNCH,
+      FIGHTER_STATE.LIGHT_KICK,
+      FIGHTER_STATE.HEAVY_KICK,
+      FIGHTER_STATE.CROUCH_PUNCH,
+      FIGHTER_STATE.CROUCH_KICK,
+      FIGHTER_STATE.SPECIAL_1,
+      FIGHTER_STATE.SPECIAL_2,
+      FIGHTER_STATE.SUPER_MOVE,
+      FIGHTER_STATE.DASH_FORWARD,
+      FIGHTER_STATE.DASH_BACK
+    ];
+    if (attackStates.includes(this.state) && this.stateTime > 0.8) {
+      this.state = this.isGrounded ? FIGHTER_STATE.IDLE : FIGHTER_STATE.JUMP;
+      this.stateTime = 0;
+      this.activeHitbox = null;
+      this.isInvulnerable = false;
+    }
+
+    // 8. Pose Esquelética
     this.updateSkeletalPose();
   }
 
@@ -433,7 +448,6 @@ export class Fighter {
     const y = this.position.y;
     const f = this.facing;
 
-    // Reset hitbox padrão
     this.activeHitbox = null;
 
     switch (this.state) {
@@ -445,39 +459,43 @@ export class Fighter {
           this.activeHitbox.isHeavy = false;
           this.activeHitbox.attackerPower = this.attackPower;
         }
-        if (this.stateTime >= 0.24) this.state = FIGHTER_STATE.IDLE;
+        if (this.stateTime >= 0.22) {
+          this.state = FIGHTER_STATE.IDLE;
+        }
         break;
 
       case FIGHTER_STATE.HEAVY_PUNCH:
-        if (this.stateTime > 0.12 && this.stateTime < 0.28) {
+        if (this.stateTime > 0.1 && this.stateTime < 0.26) {
           this.activeHitbox = new Box(x + (f * 25), y - 100, 80, 40, 'hitbox');
           this.activeHitbox.damage = 95;
           this.activeHitbox.knockback = 12;
           this.activeHitbox.isHeavy = true;
           this.activeHitbox.attackerPower = this.attackPower;
 
-          // Emissão de rastro de faíscas estilo Electricman
-          if (particles && Math.random() < 0.4) {
-            particles.emitSparks(x + (f * 70), y - 85, this.charData.themeColor, 4, 4);
+          if (particles && Math.random() < 0.3) {
+            particles.emitSparks(x + (f * 70), y - 85, this.charData.themeColor, 3, 3);
           }
         }
-        if (this.stateTime >= 0.42) this.state = FIGHTER_STATE.IDLE;
+        if (this.stateTime >= 0.38) {
+          this.state = FIGHTER_STATE.IDLE;
+        }
         break;
 
       case FIGHTER_STATE.LIGHT_KICK:
-        if (this.stateTime > 0.06 && this.stateTime < 0.2) {
+        if (this.stateTime > 0.05 && this.stateTime < 0.18) {
           this.activeHitbox = new Box(x + (f * 25), y - 65, 70, 35, 'hitbox');
           this.activeHitbox.damage = 50;
           this.activeHitbox.knockback = 6;
           this.activeHitbox.isHeavy = false;
           this.activeHitbox.attackerPower = this.attackPower;
         }
-        if (this.stateTime >= 0.26) this.state = FIGHTER_STATE.IDLE;
+        if (this.stateTime >= 0.24) {
+          this.state = FIGHTER_STATE.IDLE;
+        }
         break;
 
       case FIGHTER_STATE.HEAVY_KICK:
-        // Chute Giratório 360 no ar estilo Electricman
-        if (this.stateTime > 0.12 && this.stateTime < 0.32) {
+        if (this.stateTime > 0.1 && this.stateTime < 0.28) {
           this.activeHitbox = new Box(x + (f * 30), y - 90, 85, 45, 'hitbox');
           this.activeHitbox.damage = 110;
           this.activeHitbox.knockback = 14;
@@ -485,7 +503,9 @@ export class Fighter {
           this.activeHitbox.isHeavy = true;
           this.activeHitbox.attackerPower = this.attackPower;
         }
-        if (this.stateTime >= 0.48) this.state = FIGHTER_STATE.IDLE;
+        if (this.stateTime >= 0.42) {
+          this.state = FIGHTER_STATE.IDLE;
+        }
         break;
 
       case FIGHTER_STATE.CROUCH_PUNCH:
@@ -496,12 +516,13 @@ export class Fighter {
           this.activeHitbox.isHeavy = false;
           this.activeHitbox.attackerPower = this.attackPower;
         }
-        if (this.stateTime >= 0.22) this.state = FIGHTER_STATE.CROUCH;
+        if (this.stateTime >= 0.22) {
+          this.state = FIGHTER_STATE.CROUCH;
+        }
         break;
 
       case FIGHTER_STATE.CROUCH_KICK:
-        // Rasteira
-        if (this.stateTime > 0.08 && this.stateTime < 0.24) {
+        if (this.stateTime > 0.07 && this.stateTime < 0.22) {
           this.activeHitbox = new Box(x + (f * 25), y - 25, 75, 25, 'hitbox');
           this.activeHitbox.damage = 65;
           this.activeHitbox.knockback = 9;
@@ -509,40 +530,47 @@ export class Fighter {
           this.activeHitbox.isHeavy = true;
           this.activeHitbox.attackerPower = this.attackPower;
         }
-        if (this.stateTime >= 0.35) this.state = FIGHTER_STATE.CROUCH;
+        if (this.stateTime >= 0.32) {
+          this.state = FIGHTER_STATE.CROUCH;
+        }
         break;
 
       case FIGHTER_STATE.JUMP_PUNCH:
-        if (this.stateTime > 0.05 && this.stateTime < 0.25) {
+        if (this.stateTime > 0.05 && this.stateTime < 0.22) {
           this.activeHitbox = new Box(x + (f * 20), y - 70, 60, 35, 'hitbox');
           this.activeHitbox.damage = 60;
           this.activeHitbox.knockback = 7;
           this.activeHitbox.isHeavy = false;
           this.activeHitbox.attackerPower = this.attackPower;
         }
+        if (this.stateTime >= 0.28) {
+          this.state = this.isGrounded ? FIGHTER_STATE.IDLE : FIGHTER_STATE.JUMP;
+        }
         break;
 
       case FIGHTER_STATE.JUMP_KICK:
-        // Voadora diagonal
-        if (this.stateTime > 0.05 && this.stateTime < 0.3) {
+        if (this.stateTime > 0.05 && this.stateTime < 0.26) {
           this.activeHitbox = new Box(x + (f * 25), y - 50, 75, 45, 'hitbox');
           this.activeHitbox.damage = 85;
           this.activeHitbox.knockback = 11;
           this.activeHitbox.isHeavy = true;
           this.activeHitbox.attackerPower = this.attackPower;
         }
+        if (this.stateTime >= 0.32) {
+          this.state = this.isGrounded ? FIGHTER_STATE.IDLE : FIGHTER_STATE.JUMP;
+        }
         break;
 
       case FIGHTER_STATE.DASH_FORWARD:
       case FIGHTER_STATE.DASH_BACK:
-        if (this.stateTime >= 0.22) {
+        if (this.stateTime >= 0.2) {
           this.state = FIGHTER_STATE.IDLE;
         }
         break;
 
       case FIGHTER_STATE.SPECIAL_1:
       case FIGHTER_STATE.SPECIAL_2:
-        if (this.stateTime > 0.1 && this.stateTime < 0.35) {
+        if (this.stateTime > 0.08 && this.stateTime < 0.3) {
           this.activeHitbox = new Box(x + (f * 35), y - 80, 110, 60, 'hitbox');
           this.activeHitbox.damage = 140;
           this.activeHitbox.knockback = 16;
@@ -550,15 +578,17 @@ export class Fighter {
           this.activeHitbox.isHeavy = true;
           this.activeHitbox.attackerPower = this.attackPower;
 
-          if (particles && Math.random() < 0.6) {
+          if (particles && Math.random() < 0.5) {
             particles.emitElectricArc(x + (f * 20), y - 70, x + (f * 120), y - 70, this.charData.themeColor);
           }
         }
-        if (this.stateTime >= 0.5) this.state = FIGHTER_STATE.IDLE;
+        if (this.stateTime >= 0.45) {
+          this.state = FIGHTER_STATE.IDLE;
+        }
         break;
 
       case FIGHTER_STATE.SUPER_MOVE:
-        if (this.stateTime > 0.15 && this.stateTime < 0.65) {
+        if (this.stateTime > 0.12 && this.stateTime < 0.55) {
           this.activeHitbox = new Box(x + (f * 20), y - 110, 160, 90, 'hitbox');
           this.activeHitbox.damage = 280;
           this.activeHitbox.knockback = 22;
@@ -567,18 +597,19 @@ export class Fighter {
           this.activeHitbox.attackerPower = this.attackPower;
 
           if (particles) {
-            particles.emitShockwave(x + (f * 80), y - 60, 100, this.charData.themeColor);
+            particles.emitShockwave(x + (f * 80), y - 60, 90, this.charData.themeColor);
             particles.emitElectricArc(x, y - 60, x + (f * 160), y - 60, this.charData.energyColor, 2);
           }
         }
-        if (this.stateTime >= 0.85) {
+        if (this.stateTime >= 0.75) {
           this.isInvulnerable = false;
           this.state = FIGHTER_STATE.IDLE;
         }
         break;
 
       case FIGHTER_STATE.KNOCKDOWN:
-        if (this.isGrounded && this.stateTime >= 0.7) {
+        // Transição automática para levantar ou derrota sem travar
+        if (this.stateTime >= 0.65) {
           if (this.isDead) {
             this.state = FIGHTER_STATE.DEFEAT;
           } else {
@@ -590,7 +621,7 @@ export class Fighter {
         break;
 
       case FIGHTER_STATE.GET_UP:
-        if (this.stateTime >= 0.35) {
+        if (this.stateTime >= 0.3) {
           this.isInvulnerable = false;
           this.state = FIGHTER_STATE.IDLE;
         }
@@ -598,14 +629,11 @@ export class Fighter {
     }
   }
 
-  // --- ANIMAÇÃO ESQUELÉTICA DINÂMICA ---
-
   updateSkeletalPose() {
     const t = this.stateTime;
     const f = this.facing;
     const p = this.pose;
 
-    // Reset base pose
     p.head = { x: 0, y: -115 };
     p.chest = { x: 0, y: -80 };
     p.pelvis = { x: 0, y: -50 };
@@ -667,7 +695,7 @@ export class Fighter {
       }
 
       case FIGHTER_STATE.LIGHT_PUNCH: {
-        const ext = Math.sin(Math.min(1, t / 0.24) * Math.PI);
+        const ext = Math.sin(Math.min(1, t / 0.22) * Math.PI);
         p.rightShoulder = { x: 10 * f, y: -85 };
         p.rightElbow = { x: (20 + ext * 30) * f, y: -85 };
         p.rightHand = { x: (25 + ext * 55) * f, y: -90 };
@@ -675,7 +703,7 @@ export class Fighter {
       }
 
       case FIGHTER_STATE.HEAVY_PUNCH: {
-        const ext = Math.sin(Math.min(1, t / 0.42) * Math.PI);
+        const ext = Math.sin(Math.min(1, t / 0.38) * Math.PI);
         p.chest.x = (ext * 15) * f;
         p.rightShoulder = { x: 12 * f, y: -85 };
         p.rightElbow = { x: (25 + ext * 40) * f, y: -88 };
@@ -684,14 +712,14 @@ export class Fighter {
       }
 
       case FIGHTER_STATE.LIGHT_KICK: {
-        const ext = Math.sin(Math.min(1, t / 0.26) * Math.PI);
+        const ext = Math.sin(Math.min(1, t / 0.24) * Math.PI);
         p.rightKnee = { x: (15 + ext * 25) * f, y: -55 };
         p.rightFoot = { x: (20 + ext * 60) * f, y: -65 };
         break;
       }
 
       case FIGHTER_STATE.HEAVY_KICK: {
-        const ext = Math.sin(Math.min(1, t / 0.48) * Math.PI);
+        const ext = Math.sin(Math.min(1, t / 0.42) * Math.PI);
         p.head.y = -105;
         p.pelvis.y = -60;
         p.rightKnee = { x: (20 + ext * 35) * f, y: -75 };
@@ -730,8 +758,6 @@ export class Fighter {
     }
   }
 
-  // --- RENDERIZAÇÃO ESTILO ELECTRICMAN / STREET FIGHTER ---
-
   draw(ctx, showHitboxes = false) {
     const x = this.position.x;
     const y = this.position.y;
@@ -740,7 +766,7 @@ export class Fighter {
 
     ctx.save();
 
-    // 1. Sombra projetada no chão
+    // Sombra no chão
     const shadowDist = Math.max(0, this.groundY - y);
     const shadowScale = Math.max(0.3, 1 - shadowDist / 300);
     ctx.save();
@@ -750,11 +776,11 @@ export class Fighter {
     ctx.fill();
     ctx.restore();
 
-    // 2. Aura de Energia / Eletricidade ao redor do corpo
+    // Aura de Energia
     if (this.energy > 30 || this.state === FIGHTER_STATE.SUPER_MOVE) {
       ctx.save();
       ctx.shadowColor = glowColor;
-      ctx.shadowBlur = 20;
+      ctx.shadowBlur = 16;
       ctx.strokeStyle = energyColor;
       ctx.lineWidth = 2;
       ctx.globalAlpha = 0.4 + 0.3 * Math.sin(this.stateTime * 15);
@@ -764,12 +790,12 @@ export class Fighter {
       ctx.restore();
     }
 
-    // 3. Desenho dos Membros com Efeito Neon Articulado
+    // Desenho dos Membros Articulados
     ctx.save();
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.shadowColor = glowColor;
-    ctx.shadowBlur = 12;
+    ctx.shadowBlur = 10;
 
     const drawLimb = (from, to, width = 6, color = secondaryColor) => {
       ctx.beginPath();
@@ -779,7 +805,6 @@ export class Fighter {
       ctx.lineWidth = width;
       ctx.stroke();
 
-      // Núcleo brilhante
       ctx.beginPath();
       ctx.moveTo(x + from.x, y + from.y);
       ctx.lineTo(x + to.x, y + to.y);
@@ -788,16 +813,13 @@ export class Fighter {
       ctx.stroke();
     };
 
-    // Pernas (Traseira e Dianteira)
     drawLimb(p.pelvis, p.leftKnee, 7, secondaryColor);
     drawLimb(p.leftKnee, p.leftFoot, 6, secondaryColor);
     drawLimb(p.pelvis, p.rightKnee, 8, themeColor);
     drawLimb(p.rightKnee, p.rightFoot, 7, themeColor);
 
-    // Tronco / Coluna
     drawLimb(p.pelvis, p.chest, 10, themeColor);
 
-    // Braços (Traseiro e Dianteiro)
     drawLimb(p.chest, p.leftShoulder, 7, secondaryColor);
     drawLimb(p.leftShoulder, p.leftElbow, 6, secondaryColor);
     drawLimb(p.leftElbow, p.leftHand, 5, secondaryColor);
@@ -806,13 +828,13 @@ export class Fighter {
     drawLimb(p.rightShoulder, p.rightElbow, 7, themeColor);
     drawLimb(p.rightElbow, p.rightHand, 6, themeColor);
 
-    // Cabeça estilo Electricman com Núcleo Brilhante
+    // Cabeça
     ctx.beginPath();
     ctx.arc(x + p.head.x, y + p.head.y, 14, 0, Math.PI * 2);
     ctx.fillStyle = themeColor;
     ctx.fill();
 
-    // Centro Branco / Olhos
+    // Centro / Olhos
     ctx.beginPath();
     ctx.arc(x + p.head.x + (this.facing * 4), y + p.head.y - 2, 4, 0, Math.PI * 2);
     ctx.fillStyle = '#ffffff';
@@ -820,17 +842,14 @@ export class Fighter {
 
     ctx.restore();
 
-    // 4. Modo Debug de Hitboxes e Hurtboxes
     if (showHitboxes) {
       ctx.save();
-      // Hurtboxes (Verde)
       ctx.strokeStyle = '#22c55e';
       ctx.lineWidth = 1.5;
       for (const box of this.getHurtboxes()) {
         ctx.strokeRect(box.x, box.y, box.width, box.height);
       }
 
-      // Hitbox Ativa (Vermelho)
       if (this.activeHitbox) {
         ctx.strokeStyle = '#ef4444';
         ctx.lineWidth = 2.5;

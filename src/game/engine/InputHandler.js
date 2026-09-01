@@ -1,17 +1,15 @@
 /**
- * Sistema de Entrada de Teclado, Gamepad e Histórico de Comandos
+ * Sistema de Entrada de Teclado, Gamepad e Ações Disparadas
  */
 
 export class InputHandler {
   constructor() {
     this.keysDown = {};
     this.keyPressTime = {};
-    this.p1History = [];
-    this.p2History = [];
 
-    // Mapeamento Padrão Teclado Jogador 1 (WASD + F/G/R/T/E/Space)
+    // Mapeamento Jogador 1 (WASD / Espaço para Pular / Enter para Especial)
     this.p1Binds = {
-      up: ['KeyW'],
+      up: ['KeyW', 'Space'],
       down: ['KeyS'],
       left: ['KeyA'],
       right: ['KeyD'],
@@ -21,10 +19,10 @@ export class InputHandler {
       lightKick: ['KeyG', 'KeyK'],
       heavyKick: ['KeyT', 'KeyI'],
       special1: ['KeyQ', 'KeyO'],
-      superMove: ['Space'],
+      superMove: ['Enter'],
     };
 
-    // Mapeamento Padrão Teclado Jogador 2 (Setas + Teclado Numérico ou B/N/H/M/L/Enter)
+    // Mapeamento Jogador 2 (Setas + Teclado Numérico ou B/N/H/M/L)
     this.p2Binds = {
       up: ['ArrowUp'],
       down: ['ArrowDown'],
@@ -36,7 +34,7 @@ export class InputHandler {
       lightKick: ['Numpad5', 'KeyN'],
       heavyKick: ['Numpad8', 'KeyM'],
       special1: ['Numpad9', 'KeyL'],
-      superMove: ['NumpadEnter', 'Enter'],
+      superMove: ['NumpadEnter'],
     };
 
     this.onKeyDown = this.onKeyDown.bind(this);
@@ -55,7 +53,7 @@ export class InputHandler {
   }
 
   onKeyDown(e) {
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'Enter'].includes(e.code)) {
       e.preventDefault();
     }
     this.keysDown[e.code] = true;
@@ -67,6 +65,7 @@ export class InputHandler {
   }
 
   isPressed(codeList) {
+    if (!codeList) return false;
     return codeList.some(code => this.keysDown[code]);
   }
 
@@ -88,12 +87,12 @@ export class InputHandler {
       right: dpadRight || stickX > 0.4,
       up: dpadUp || stickY < -0.5,
       down: dpadDown || stickY > 0.5,
-      lightPunch: gp.buttons[2] && gp.buttons[2].pressed, // X (Xbox) / Square (PS)
-      heavyPunch: gp.buttons[3] && gp.buttons[3].pressed, // Y / Triangle
-      lightKick: gp.buttons[0] && gp.buttons[0].pressed,  // A / Cross
-      heavyKick: gp.buttons[1] && gp.buttons[1].pressed,  // B / Circle
-      block: (gp.buttons[4] && gp.buttons[4].pressed) || (gp.buttons[6] && gp.buttons[6].pressed), // LB/LT
-      special1: (gp.buttons[5] && gp.buttons[5].pressed) || (gp.buttons[7] && gp.buttons[7].pressed), // RB/RT
+      lightPunch: gp.buttons[2] && gp.buttons[2].pressed,
+      heavyPunch: gp.buttons[3] && gp.buttons[3].pressed,
+      lightKick: gp.buttons[0] && gp.buttons[0].pressed,
+      heavyKick: gp.buttons[1] && gp.buttons[1].pressed,
+      block: (gp.buttons[4] && gp.buttons[4].pressed) || (gp.buttons[6] && gp.buttons[6].pressed),
+      special1: (gp.buttons[5] && gp.buttons[5].pressed) || (gp.buttons[7] && gp.buttons[7].pressed),
       superMove: (gp.buttons[8] && gp.buttons[8].pressed) || (gp.buttons[9] && gp.buttons[9].pressed),
     };
   }
@@ -104,7 +103,6 @@ export class InputHandler {
 
     const left = this.isPressed(binds.left) || (gp && gp.left);
     const right = this.isPressed(binds.right) || (gp && gp.right);
-    const up = this.isPressed(binds.up) || (gp && gp.up);
     const down = this.isPressed(binds.down) || (gp && gp.down);
     const block = this.isPressed(binds.block) || (gp && gp.block);
 
@@ -114,7 +112,7 @@ export class InputHandler {
     // Bloqueio
     fighter.block(block);
 
-    // Movimentação
+    // Movimentação horizontal
     if (!down && !block) {
       if (left && !right) {
         fighter.move(-1);
@@ -125,13 +123,13 @@ export class InputHandler {
       }
     }
 
-    // Pulo
-    if (up && fighter.isGrounded) {
+    // Pulo (Disparo Único por clique, sem loop de repetição)
+    if (justPressed.jump || (gp && gp.up)) {
       const dirX = left ? -1 : (right ? 1 : 0);
       fighter.jump(dirX);
     }
 
-    // Golpes (Com checagem de evento de disparo único/justPressed)
+    // Golpes (Disparo Único)
     if (justPressed.superMove) fighter.superMove();
     else if (justPressed.special1) fighter.special1();
     else if (justPressed.heavyPunch) fighter.heavyPunch();

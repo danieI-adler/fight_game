@@ -79,6 +79,7 @@ export class GameEngine {
       if (this.status !== GAME_STATUS.FIGHTING && this.status !== GAME_STATUS.INTRO) return;
 
       // P1 Just Pressed
+      if (this.inputHandler.p1Binds.up.includes(e.code)) this.justPressedP1.jump = true;
       if (this.inputHandler.p1Binds.lightPunch.includes(e.code)) this.justPressedP1.lightPunch = true;
       if (this.inputHandler.p1Binds.heavyPunch.includes(e.code)) this.justPressedP1.heavyPunch = true;
       if (this.inputHandler.p1Binds.lightKick.includes(e.code)) this.justPressedP1.lightKick = true;
@@ -87,6 +88,7 @@ export class GameEngine {
       if (this.inputHandler.p1Binds.superMove.includes(e.code)) this.justPressedP1.superMove = true;
 
       // P2 Just Pressed
+      if (this.inputHandler.p2Binds.up.includes(e.code)) this.justPressedP2.jump = true;
       if (this.inputHandler.p2Binds.lightPunch.includes(e.code)) this.justPressedP2.lightPunch = true;
       if (this.inputHandler.p2Binds.heavyPunch.includes(e.code)) this.justPressedP2.heavyPunch = true;
       if (this.inputHandler.p2Binds.lightKick.includes(e.code)) this.justPressedP2.lightKick = true;
