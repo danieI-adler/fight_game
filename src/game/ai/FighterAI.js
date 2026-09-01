@@ -27,7 +27,6 @@ export class FighterAI {
       return;
     }
 
-    // Intervalo de decisão baseado na dificuldade
     const decisionInterval = {
       easy: 0.35,
       medium: 0.18,
@@ -37,7 +36,11 @@ export class FighterAI {
 
     if (this.decisionTimer >= decisionInterval) {
       this.decisionTimer = 0;
-      this.makeDecision(fighter, opponent);
+      try {
+        this.makeDecision(fighter, opponent);
+      } catch (err) {
+        console.error('AI error prevented:', err);
+      }
     }
   }
 
@@ -46,7 +49,7 @@ export class FighterAI {
     const isOpponentAttacking = opponent.activeHitbox !== null;
     const rng = Math.random();
 
-    // 1. Reação a Ataques do Oponente (Defesa Inteligente)
+    // 1. Reação a Ataques do Oponente (Defesa)
     if (isOpponentAttacking && dist < 160) {
       const blockChance = {
         easy: 0.2,
@@ -66,15 +69,15 @@ export class FighterAI {
       fighter.block(false);
     }
 
-    // 2. Se o oponente estiver no ar e perto (Anti-Air)
+    // 2. Anti-Air
     if (!opponent.isGrounded && dist < 120 && (this.difficulty === 'hard' || this.difficulty === 'boss')) {
       if (rng < 0.7) {
-        fighter.heavyPunch(); // Uppercut
+        fighter.heavyPunch();
         return;
       }
     }
 
-    // 3. Super Move quando energia estiver cheia
+    // 3. Super Move
     if (fighter.energy >= 100 && dist < 220) {
       const superChance = {
         easy: 0.3,
@@ -97,7 +100,7 @@ export class FighterAI {
       }
     }
 
-    // 5. Combate Corpo a Corpo (Curta Distância: < 95px)
+    // 5. Curta Distância (< 95px)
     if (dist < 95) {
       const attackType = Math.random();
       if (attackType < 0.3) {
@@ -106,10 +109,9 @@ export class FighterAI {
         fighter.heavyPunch();
       } else if (attackType < 0.8) {
         fighter.lightKick();
-      } else if (attackType < 0.95) {
+      } else if (attackType < 0.92) {
         fighter.heavyKick();
       } else {
-        fighter.crouch(true);
         fighter.crouchKick();
       }
       return;
@@ -119,15 +121,12 @@ export class FighterAI {
     if (dist >= 95 && dist <= 260) {
       const moveChoice = Math.random();
       if (moveChoice < 0.6) {
-        // Avançar em direção ao oponente
         const dir = opponent.position.x > fighter.position.x ? 1 : -1;
         fighter.move(dir);
       } else if (moveChoice < 0.75) {
-        // Pulo para frente
         const dir = opponent.position.x > fighter.position.x ? 1 : -1;
         fighter.jump(dir);
       } else if (moveChoice < 0.88) {
-        // Dash
         const dir = opponent.position.x > fighter.position.x ? 1 : -1;
         fighter.dash(dir);
       } else {

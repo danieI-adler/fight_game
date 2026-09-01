@@ -217,6 +217,26 @@ export class Fighter {
     sounds.playWhoosh();
   }
 
+  crouchPunch() {
+    if (!this.canAct() || !this.isGrounded) return;
+    this.isCrouching = true;
+    this.velocity.x = 0;
+    this.state = FIGHTER_STATE.CROUCH_PUNCH;
+    this.stateTime = 0;
+    this.hasHitCurrentAttack = false;
+    sounds.playWhoosh();
+  }
+
+  crouchKick() {
+    if (!this.canAct() || !this.isGrounded) return;
+    this.isCrouching = true;
+    this.velocity.x = 0;
+    this.state = FIGHTER_STATE.CROUCH_KICK;
+    this.stateTime = 0;
+    this.hasHitCurrentAttack = false;
+    sounds.playWhoosh();
+  }
+
   special1() {
     if (!this.canAct() || this.energy < 25) return;
     this.energy -= 25;
