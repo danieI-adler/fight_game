@@ -1,12 +1,21 @@
 # Fight Game
 
-Jogo de luta 2D para navegador com 20 personagens.
+Jogo de luta 2D para navegador com 20 personagens e multiplayer online P2P.
+
+---
+
+## 🌐 Modos de Jogo
+
+- **Modo Arcade**: Enfrente o computador com IA em 4 níveis de dificuldade.
+- **Versus Local**: 2 jogadores no mesmo teclado ou controles USB.
+- **Jogar Online (Salas P2P)**: Crie uma sala com código ou compartilhe o link direto para jogar remotamente com qualquer pessoa via WebRTC.
+- **Modo Treino**: Prática de combos com visualizador de hitboxes.
 
 ---
 
 ## 🎮 Controles
 
-### Jogador 1 (P1)
+### Jogador 1 (P1) / Jogador Local Online
 - **Mover**: `A` / `D`
 - **Pulo**: `Espaço` ou `W`
 - **Agachar**: `S`
@@ -16,7 +25,7 @@ Jogo de luta 2D para navegador com 20 personagens.
 - **Habilidade Especial**: `Q`
 - **Super Golpe**: `Enter`
 
-### Jogador 2 (P2)
+### Jogador 2 (P2) - Versus Local
 - **Mover**: `←` / `→`
 - **Pulo**: `↑`
 - **Agachar**: `↓`
@@ -30,26 +39,7 @@ Jogo de luta 2D para navegador com 20 personagens.
 
 ## 👥 Personagens (1 a 20)
 
-- Personagem 1
-- Personagem 2
-- Personagem 3
-- Personagem 4
-- Personagem 5
-- Personagem 6
-- Personagem 7
-- Personagem 8
-- Personagem 9
-- Personagem 10
-- Personagem 11
-- Personagem 12
-- Personagem 13
-- Personagem 14
-- Personagem 15
-- Personagem 16
-- Personagem 17
-- Personagem 18
-- Personagem 19
-- Personagem 20
+- Personagem 1 ao Personagem 20
 
 ---
 

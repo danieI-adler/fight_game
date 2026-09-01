@@ -4,6 +4,7 @@ import { getCharacterById } from './game/characters/characterData';
 import { sounds } from './game/audio/soundManager';
 import { MainMenu } from './components/menu/MainMenu';
 import { CharacterSelect } from './components/select/CharacterSelect';
+import { OnlineLobby } from './components/online/OnlineLobby';
 import { FightHUD } from './components/hud/FightHUD';
 import { PauseMenu } from './components/menu/PauseMenu';
 import { VictoryScreen } from './components/menu/VictoryScreen';
@@ -11,18 +12,20 @@ import { ControlsGuide } from './components/menu/ControlsGuide';
 import { TrainingOverlay } from './components/training/TrainingOverlay';
 
 export function App() {
-  const [screen, setScreen] = useState('MAIN_MENU'); // 'MAIN_MENU', 'SELECT', 'FIGHT'
-  const [mode, setMode] = useState('ARCADE'); // 'ARCADE', 'VERSUS', 'TRAINING'
+  const [screen, setScreen] = useState('MAIN_MENU'); // 'MAIN_MENU', 'SELECT', 'ONLINE_LOBBY', 'FIGHT'
+  const [mode, setMode] = useState('ARCADE'); // 'ARCADE', 'VERSUS', 'TRAINING', 'ONLINE'
   const [showControls, setShowControls] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [initialOnlineRoom, setInitialOnlineRoom] = useState('');
 
-  // Dados da Partida Ativa
+  // Dados da Partida
   const [matchConfig, setMatchConfig] = useState({
     p1Id: 1,
     p2Id: 2,
     stageId: 'cyber_arena',
     difficulty: 'medium',
+    isHost: true,
   });
   const [gameState, setGameState] = useState(null);
   const [showHitboxes, setShowHitboxes] = useState(false);
@@ -31,9 +34,30 @@ export function App() {
   const canvasRef = useRef(null);
   const engineRef = useRef(null);
 
-  // Iniciar partida
+  // Checar se o link de entrada contém `?room=XXXX`
+  useEffect(() => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const roomParam = urlParams.get('room');
+      if (roomParam) {
+        setInitialOnlineRoom(roomParam.toUpperCase());
+        setMode('ONLINE');
+        setScreen('ONLINE_LOBBY');
+      }
+    } catch (e) {}
+  }, []);
+
+  // Iniciar partida offline
   const handleStartMatch = (config) => {
+    setMatchConfig({ ...config, isHost: true });
+    setScreen('FIGHT');
+    setIsPaused(false);
+  };
+
+  // Iniciar partida online
+  const handleStartOnlineMatch = (config) => {
     setMatchConfig(config);
+    setMode('ONLINE');
     setScreen('FIGHT');
     setIsPaused(false);
   };
@@ -56,7 +80,8 @@ export function App() {
       matchConfig.p2Id,
       mode,
       matchConfig.difficulty,
-      matchConfig.stageId
+      matchConfig.stageId,
+      matchConfig.isHost !== undefined ? matchConfig.isHost : true
     );
 
     return () => {
@@ -67,7 +92,7 @@ export function App() {
 
   // Controles de Pausa
   const togglePause = () => {
-    if (!engineRef.current) return;
+    if (!engineRef.current || mode === 'ONLINE') return; // Não pausa partida online
     const nextPaused = !isPaused;
     setIsPaused(nextPaused);
     if (nextPaused) {
@@ -81,7 +106,6 @@ export function App() {
     }
   };
 
-  // Toggle Som
   const toggleMute = () => {
     const muted = sounds.toggleMute();
     setIsMuted(muted);
@@ -94,13 +118,14 @@ export function App() {
         matchConfig.p2Id,
         mode,
         matchConfig.difficulty,
-        matchConfig.stageId
+        matchConfig.stageId,
+        matchConfig.isHost !== undefined ? matchConfig.isHost : true
       );
     }
   };
 
   const handleRestartRound = () => {
-    if (engineRef.current) {
+    if (engineRef.current && mode !== 'ONLINE') {
       engineRef.current.resetRound();
       setIsPaused(false);
       engineRef.current.isRunning = true;
@@ -132,12 +157,16 @@ export function App() {
 
   return (
     <div className="relative w-full h-full flex items-center justify-center bg-black overflow-hidden font-sans">
-      {/* 1. Tela de Menu Principal */}
+      {/* 1. Menu Principal */}
       {screen === 'MAIN_MENU' && (
         <MainMenu
           onSelectMode={(selectedMode) => {
             setMode(selectedMode);
-            setScreen('SELECT');
+            if (selectedMode === 'ONLINE') {
+              setScreen('ONLINE_LOBBY');
+            } else {
+              setScreen('SELECT');
+            }
           }}
           onOpenControls={() => setShowControls(true)}
           isMuted={isMuted}
@@ -145,7 +174,7 @@ export function App() {
         />
       )}
 
-      {/* 2. Tela de Seleção de Personagens */}
+      {/* 2. Seleção de Personagens Offline */}
       {screen === 'SELECT' && (
         <CharacterSelect
           mode={mode}
@@ -154,16 +183,26 @@ export function App() {
         />
       )}
 
-      {/* 3. Tela de Combate (Canvas + HUD) */}
+      {/* 3. Sala / Lobby Online P2P */}
+      {screen === 'ONLINE_LOBBY' && (
+        <OnlineLobby
+          initialRoomCode={initialOnlineRoom}
+          onStartOnlineMatch={handleStartOnlineMatch}
+          onBackToMenu={() => {
+            setInitialOnlineRoom('');
+            setScreen('MAIN_MENU');
+          }}
+        />
+      )}
+
+      {/* 4. Tela de Combate (Canvas + HUD) */}
       {screen === 'FIGHT' && (
         <div className="relative w-full h-full flex items-center justify-center">
-          {/* Canvas de Alta Performance */}
           <canvas
             ref={canvasRef}
             className="w-full h-full max-w-[1920px] max-h-[1080px] object-contain shadow-2xl"
           />
 
-          {/* HUD de Combate */}
           <FightHUD
             gameState={gameState}
             char1={char1}
@@ -174,7 +213,6 @@ export function App() {
             onToggleMute={toggleMute}
           />
 
-          {/* Modo Treino Overlay */}
           {mode === 'TRAINING' && (
             <TrainingOverlay
               showHitboxes={showHitboxes}
@@ -185,7 +223,6 @@ export function App() {
             />
           )}
 
-          {/* Menu de Pausa */}
           {isPaused && (
             <PauseMenu
               onResume={togglePause}
@@ -195,13 +232,15 @@ export function App() {
             />
           )}
 
-          {/* Tela de Vitória / K.O. Final */}
           {isMatchOver && winner && (
             <VictoryScreen
               winner={winner}
               loser={loser}
               onRematch={handleRematch}
-              onSelectCharacter={() => setScreen('SELECT')}
+              onSelectCharacter={() => {
+                if (mode === 'ONLINE') setScreen('ONLINE_LOBBY');
+                else setScreen('SELECT');
+              }}
               onMainMenu={() => setScreen('MAIN_MENU')}
             />
           )}

@@ -48,6 +48,14 @@ export const MainMenu = ({ onSelectMode, onOpenControls, isMuted, onToggleMute }
           </button>
 
           <button
+            onClick={() => handleSelect('ONLINE')}
+            className="w-full py-3 px-4 rounded bg-blue-700 hover:bg-blue-600 border border-blue-500 text-white font-bold text-sm uppercase tracking-wider transition-colors cursor-pointer text-left flex justify-between items-center"
+          >
+            <span>Jogar Online</span>
+            <span className="text-xs text-blue-200 font-normal">Salas P2P</span>
+          </button>
+
+          <button
             onClick={() => handleSelect('TRAINING')}
             className="w-full py-3 px-4 rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold text-sm uppercase tracking-wider transition-colors cursor-pointer text-left flex justify-between items-center"
           >
