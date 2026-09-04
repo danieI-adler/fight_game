@@ -1,6 +1,19 @@
 # Fight Game
 
-Jogo de luta 2D para navegador com 20 personagens e multiplayer online P2P.
+Jogo de luta 2D/3D para navegador com 20 personagens, 4 modos gráficos selecionáveis e multiplayer online P2P via WebRTC.
+
+---
+
+## 🎨 4 Modos Gráficos Selecionáveis
+
+1. **Modo 1: Boneco Palito** (*2D Retrô Clássico*):
+   - Visual geométrico minimalista e nostálgico.
+2. **Modo 2: 2D Belle Époque** (*Ilustrado & Encorpado*):
+   - Sobretudos esvoaçantes, máscaras de porcelana venezianas, tricornes, física de tecidos e pinceladas de tinta luminosa inspiradas em *Clair Obscur: Expedition 33*.
+3. **Modo 3: 2.5D** (*Lutadores 3D + Cenário 2D*):
+   - Personagens renderizados em **Three.js / WebGL 3D** com materiais PBR projetados sobre o cenário 2D.
+4. **Modo 4: Tudo 3D Next-Gen** (*Arena 3D Completa*):
+   - Arena tridimensional com piso reflexivo, iluminação dinâmica dramática com sombras em tempo real, névoa volumétrica e câmera cinematográfica.
 
 ---
 
@@ -20,10 +33,10 @@ Jogo de luta 2D para navegador com 20 personagens e multiplayer online P2P.
 - **Pulo**: `Espaço` ou `W`
 - **Agachar**: `S`
 - **Bloqueio (Defesa)**: `E` ou `Shift Esquerdo`
-- **Soco Fraco / Forte**: `F` / `R` (ou `J` / `U`)
-- **Chute Fraco / Forte**: `G` / `T` (ou `K` / `I`)
+- **Socos (Fraco/Forte)**: `F` / `R` (ou `J` / `U`)
+- **Chutes (Fraco/Forte)**: `G` / `T` (ou `K` / `I`)
 - **Habilidade Especial**: `Q`
-- **Super Golpe**: `Enter`
+- **Super Golpe**: `Enter` (ao atingir 100% de energia)
 
 ### Jogador 2 (P2) - Versus Local
 - **Mover**: `←` / `→`
@@ -37,9 +50,17 @@ Jogo de luta 2D para navegador com 20 personagens e multiplayer online P2P.
 
 ---
 
-## 👥 Personagens (1 a 20)
+## ⚡ Regras de Energia
+- **+5%** ao desferir golpe com sucesso no adversário.
+- **+2,5%** ao levar golpe sem defender.
+- **0%** ao bloquear (defender não dá energia).
+- **0%** passivo por tempo.
 
-- Personagem 1 ao Personagem 20
+---
+
+## 👥 20 Personagens Belle Époque
+
+- Personagem 1 ao Personagem 20 (cada um com trajes, máscaras e auras exclusivas).
 
 ---
 

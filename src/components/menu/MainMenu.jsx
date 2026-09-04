@@ -2,7 +2,7 @@ import React from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import { sounds } from '../../game/audio/soundManager';
 
-export const MainMenu = ({ onSelectMode, onOpenControls, isMuted, onToggleMute }) => {
+export const MainMenu = ({ onSelectMode, onOpenControls, onOpenGraphics, graphicsMode, isMuted, onToggleMute }) => {
   const handleSelect = (mode) => {
     sounds.playPunch(false);
     onSelectMode(mode);
@@ -65,9 +65,25 @@ export const MainMenu = ({ onSelectMode, onOpenControls, isMuted, onToggleMute }
 
           <button
             onClick={onOpenControls}
-            className="w-full py-2.5 px-4 rounded bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-400 hover:text-slate-200 font-medium text-xs uppercase tracking-wider transition-colors cursor-pointer text-center mt-2"
+            className="w-full py-2 px-4 rounded bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-400 hover:text-slate-200 font-medium text-xs uppercase tracking-wider transition-colors cursor-pointer text-center mt-2"
           >
             Controles & Golpes
+          </button>
+
+          <button
+            onClick={onOpenGraphics}
+            className="w-full py-2 px-4 rounded bg-slate-900 hover:bg-slate-850 border border-slate-800 text-amber-400 hover:text-amber-300 font-medium text-xs uppercase tracking-wider transition-colors cursor-pointer text-center flex items-center justify-between"
+          >
+            <span>Modo Gráfico:</span>
+            <span className="font-bold text-[11px] bg-slate-800 px-2 py-0.5 rounded text-white">
+              {graphicsMode === 'STICK_2D'
+                ? '1. Palito 2D'
+                : graphicsMode === 'BELLE_EPOQUE_2D'
+                ? '2. Belle Époque 2D'
+                : graphicsMode === 'MODE_2_5D'
+                ? '3. Modo 2.5D'
+                : '4. Tudo 3D'}
+            </span>
           </button>
         </div>
       </div>

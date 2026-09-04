@@ -10,10 +10,19 @@ import { PauseMenu } from './components/menu/PauseMenu';
 import { VictoryScreen } from './components/menu/VictoryScreen';
 import { ControlsGuide } from './components/menu/ControlsGuide';
 import { TrainingOverlay } from './components/training/TrainingOverlay';
+import { GraphicsSelectorModal, GRAPHICS_MODES } from './components/menu/GraphicsSelectorModal';
 
 export function App() {
   const [screen, setScreen] = useState('MAIN_MENU'); // 'MAIN_MENU', 'SELECT', 'ONLINE_LOBBY', 'FIGHT'
   const [mode, setMode] = useState('ARCADE'); // 'ARCADE', 'VERSUS', 'TRAINING', 'ONLINE'
+  const [graphicsMode, setGraphicsMode] = useState(() => {
+    try {
+      return localStorage.getItem('fight_graphics_mode') || GRAPHICS_MODES.BELLE_EPOQUE_2D;
+    } catch (e) {
+      return GRAPHICS_MODES.BELLE_EPOQUE_2D;
+    }
+  });
+  const [showGraphicsModal, setShowGraphicsModal] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -81,18 +90,19 @@ export function App() {
       mode,
       matchConfig.difficulty,
       matchConfig.stageId,
-      matchConfig.isHost !== undefined ? matchConfig.isHost : true
+      matchConfig.isHost !== undefined ? matchConfig.isHost : true,
+      graphicsMode
     );
 
     return () => {
       engine.destroy();
       engineRef.current = null;
     };
-  }, [screen, matchConfig, mode]);
+  }, [screen, matchConfig, mode, graphicsMode]);
 
   // Controles de Pausa
   const togglePause = () => {
-    if (!engineRef.current || mode === 'ONLINE') return; // Não pausa partida online
+    if (!engineRef.current || mode === 'ONLINE') return;
     const nextPaused = !isPaused;
     setIsPaused(nextPaused);
     if (nextPaused) {
@@ -119,7 +129,8 @@ export function App() {
         mode,
         matchConfig.difficulty,
         matchConfig.stageId,
-        matchConfig.isHost !== undefined ? matchConfig.isHost : true
+        matchConfig.isHost !== undefined ? matchConfig.isHost : true,
+        graphicsMode
       );
     }
   };
@@ -169,6 +180,8 @@ export function App() {
             }
           }}
           onOpenControls={() => setShowControls(true)}
+          onOpenGraphics={() => setShowGraphicsModal(true)}
+          graphicsMode={graphicsMode}
           isMuted={isMuted}
           onToggleMute={toggleMute}
         />
@@ -178,6 +191,7 @@ export function App() {
       {screen === 'SELECT' && (
         <CharacterSelect
           mode={mode}
+          graphicsMode={graphicsMode}
           onStartMatch={handleStartMatch}
           onBackToMenu={() => setScreen('MAIN_MENU')}
         />
@@ -187,6 +201,7 @@ export function App() {
       {screen === 'ONLINE_LOBBY' && (
         <OnlineLobby
           initialRoomCode={initialOnlineRoom}
+          graphicsMode={graphicsMode}
           onStartOnlineMatch={handleStartOnlineMatch}
           onBackToMenu={() => {
             setInitialOnlineRoom('');
@@ -195,9 +210,9 @@ export function App() {
         />
       )}
 
-      {/* 4. Tela de Combate (Canvas + HUD) */}
+      {/* 4. Tela de Combate (Canvas 2D + WebGL 3D Container + HUD) */}
       {screen === 'FIGHT' && (
-        <div className="relative w-full h-full flex items-center justify-center">
+        <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
           <canvas
             ref={canvasRef}
             className="w-full h-full max-w-[1920px] max-h-[1080px] object-contain shadow-2xl"
@@ -249,6 +264,15 @@ export function App() {
 
       {/* Guia de Controles Modal */}
       {showControls && <ControlsGuide onClose={() => setShowControls(false)} />}
+
+      {/* Seletor de Modo Gráfico Modal */}
+      {showGraphicsModal && (
+        <GraphicsSelectorModal
+          currentMode={graphicsMode}
+          onSelectMode={(selected) => setGraphicsMode(selected)}
+          onClose={() => setShowGraphicsModal(false)}
+        />
+      )}
     </div>
   );
 }

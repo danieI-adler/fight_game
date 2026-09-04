@@ -6,7 +6,7 @@ import { Fighter } from '../../game/engine/Fighter';
 import { sounds } from '../../game/audio/soundManager';
 import { Copy, Check, Wifi, ArrowLeft } from 'lucide-react';
 
-export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu }) => {
+export const OnlineLobby = ({ initialRoomCode, graphicsMode = 'BELLE_EPOQUE_2D', onStartOnlineMatch, onBackToMenu }) => {
   const [tab, setTab] = useState(initialRoomCode ? 'JOIN' : 'CREATE');
   const [roomCodeInput, setRoomCodeInput] = useState(initialRoomCode || '');
   const [activeRoomCode, setActiveRoomCode] = useState('');
@@ -132,15 +132,15 @@ export const OnlineLobby = ({ initialRoomCode, onStartOnlineMatch, onBackToMenu 
       f2.charData = char2;
       f1.update(0.016);
       f2.update(0.016);
-      f1.draw(ctx);
-      f2.draw(ctx);
+      f1.draw(ctx, false, graphicsMode);
+      f2.draw(ctx, false, graphicsMode);
 
       animId = requestAnimationFrame(renderLoop);
     };
 
     animId = requestAnimationFrame(renderLoop);
     return () => cancelAnimationFrame(animId);
-  }, [p1CharId, p2CharId]);
+  }, [p1CharId, p2CharId, graphicsMode]);
 
   // Criar Sala
   const handleCreateRoom = async () => {

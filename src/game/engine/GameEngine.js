@@ -8,6 +8,7 @@ import { FighterAI } from '../ai/FighterAI';
 import { sounds } from '../audio/soundManager';
 import { getCharacterById } from '../characters/characterData';
 import { network, MSG_TYPE } from '../network/NetworkManager';
+import { GameEngine3D } from '../engine3d/GameEngine3D';
 
 export const GAME_STATUS = {
   INTRO: 'INTRO',
@@ -35,6 +36,8 @@ export class GameEngine {
 
     // Estado da Partida
     this.mode = 'VERSUS'; // 'VERSUS', 'ARCADE', 'TRAINING', 'ONLINE'
+    this.graphicsMode = 'BELLE_EPOQUE_2D'; // 'STICK_2D', 'BELLE_EPOQUE_2D', 'MODE_2_5D', 'FULL_3D'
+    this.engine3D = null;
     this.isOnlineHost = true;
     this.status = GAME_STATUS.INTRO;
     this.roundTime = 99;
@@ -119,8 +122,9 @@ export class GameEngine {
     });
   }
 
-  startFight(char1Id, char2Id, mode = 'VERSUS', difficulty = 'medium', stageId = 'cyber_arena', isHost = true) {
+  startFight(char1Id, char2Id, mode = 'VERSUS', difficulty = 'medium', stageId = 'cyber_arena', isHost = true, graphicsMode = 'BELLE_EPOQUE_2D') {
     this.mode = mode;
+    this.graphicsMode = graphicsMode;
     this.isOnlineHost = isHost;
     this.isTraining = mode === 'TRAINING';
     this.stage.setStage(stageId);
@@ -133,6 +137,23 @@ export class GameEngine {
     this.p2 = new Fighter(c2, true, this.stage.groundY);
     this.p1.setOpponent(this.p2);
     this.p2.setOpponent(this.p1);
+
+    if (this.engine3D) {
+      this.engine3D.destroy();
+      this.engine3D = null;
+    }
+
+    if (this.graphicsMode === 'MODE_2_5D' || this.graphicsMode === 'FULL_3D') {
+      try {
+        const parent = this.canvas.parentElement || document.body;
+        this.engine3D = new GameEngine3D(parent, this.graphicsMode === 'FULL_3D');
+        this.engine3D.setFighters(c1, c2);
+        parent.appendChild(this.engine3D.domElement);
+      } catch (err) {
+        console.error('Failed to init 3D engine, fallback to 2D:', err);
+        this.graphicsMode = 'BELLE_EPOQUE_2D';
+      }
+    }
 
     this.currentRound = 1;
     this.p1Wins = 0;
@@ -171,6 +192,10 @@ export class GameEngine {
     if (this.networkUnsub) {
       this.networkUnsub();
       this.networkUnsub = null;
+    }
+    if (this.engine3D) {
+      this.engine3D.destroy();
+      this.engine3D = null;
     }
   }
 
@@ -482,11 +507,27 @@ export class GameEngine {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.width, this.height);
 
-    this.camera.applyTransform(ctx);
-    this.stage.draw(ctx, this.camera);
-    this.p1.draw(ctx, this.showHitboxes);
-    this.p2.draw(ctx, this.showHitboxes);
-    this.particles.draw(ctx);
-    this.camera.restoreTransform(ctx);
+    if (this.graphicsMode === 'FULL_3D') {
+      if (this.engine3D) {
+        this.engine3D.update(this.p1, this.p2);
+      }
+    } else if (this.graphicsMode === 'MODE_2_5D') {
+      this.camera.applyTransform(ctx);
+      this.stage.draw(ctx, this.camera);
+      this.particles.draw(ctx);
+      this.camera.restoreTransform(ctx);
+
+      if (this.engine3D) {
+        this.engine3D.update(this.p1, this.p2);
+      }
+    } else {
+      // Modos 2D: STICK_2D ou BELLE_EPOQUE_2D
+      this.camera.applyTransform(ctx);
+      this.stage.draw(ctx, this.camera);
+      this.p1.draw(ctx, this.showHitboxes, this.graphicsMode);
+      this.p2.draw(ctx, this.showHitboxes, this.graphicsMode);
+      this.particles.draw(ctx);
+      this.camera.restoreTransform(ctx);
+    }
   }
 }

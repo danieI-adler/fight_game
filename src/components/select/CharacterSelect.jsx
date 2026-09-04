@@ -4,7 +4,7 @@ import { STAGES } from '../../game/engine/Stage';
 import { Fighter } from '../../game/engine/Fighter';
 import { sounds } from '../../game/audio/soundManager';
 
-export const CharacterSelect = ({ mode, onStartMatch, onBackToMenu }) => {
+export const CharacterSelect = ({ mode, graphicsMode = 'BELLE_EPOQUE_2D', onStartMatch, onBackToMenu }) => {
   const [p1Index, setP1Index] = useState(0);
   const [p2Index, setP2Index] = useState(1);
   const [selectedStage, setSelectedStage] = useState('cyber_arena');
@@ -40,15 +40,15 @@ export const CharacterSelect = ({ mode, onStartMatch, onBackToMenu }) => {
       f2.charData = selectedCharP2;
       f1.update(0.016);
       f2.update(0.016);
-      f1.draw(ctx);
-      f2.draw(ctx);
+      f1.draw(ctx, false, graphicsMode);
+      f2.draw(ctx, false, graphicsMode);
 
       animId = requestAnimationFrame(renderLoop);
     };
 
     animId = requestAnimationFrame(renderLoop);
     return () => cancelAnimationFrame(animId);
-  }, [selectedCharP1, selectedCharP2]);
+  }, [selectedCharP1, selectedCharP2, graphicsMode]);
 
   const handleSelectP1 = (index) => {
     setP1Index(index);

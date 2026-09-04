@@ -2,6 +2,7 @@ import { Vector2D } from './Vector2D';
 import { Box } from './Collision';
 import { sounds } from '../audio/soundManager';
 import { FighterRenderer } from './FighterRenderer';
+import { StickRenderer } from './StickRenderer';
 
 export const FIGHTER_STATE = {
   IDLE: 'IDLE',
@@ -784,7 +785,11 @@ export class Fighter {
     }
   }
 
-  draw(ctx, showHitboxes = false) {
-    FighterRenderer.draw(ctx, this, showHitboxes);
+  draw(ctx, showHitboxes = false, graphicsMode = 'BELLE_EPOQUE_2D') {
+    if (graphicsMode === 'STICK_2D') {
+      StickRenderer.draw(ctx, this, showHitboxes);
+    } else {
+      FighterRenderer.draw(ctx, this, showHitboxes);
+    }
   }
 }
