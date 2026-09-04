@@ -44,7 +44,7 @@ export class Fighter {
     // Atributos
     this.maxHealth = charData.stats.health || 1000;
     this.health = this.maxHealth;
-    this.energy = 20;
+    this.energy = 0;
     this.maxEnergy = 100;
     this.speed = charData.stats.speed || 7.0;
     this.jumpForce = 13.8;
@@ -96,12 +96,21 @@ export class Fighter {
     this.opponent = opponent;
   }
 
+  createHitbox(offsetX, offsetY, width, height) {
+    const boxX = this.facing === 1 ? this.position.x + offsetX : this.position.x - offsetX - width;
+    return new Box(boxX, this.position.y - offsetY, width, height, 'hitbox');
+  }
+
+  gainAttackEnergy(amount = 5) {
+    this.energy = Math.min(this.maxEnergy, this.energy + amount);
+  }
+
   reset(startX) {
     this.position.x = startX !== undefined ? startX : (this.isPlayer2 ? 1400 : 600);
     this.position.y = this.groundY;
     this.velocity.set(0, 0);
     this.health = this.maxHealth;
-    this.energy = 20;
+    this.energy = 0;
     this.state = FIGHTER_STATE.IDLE;
     this.stateTime = 0;
     this.isDead = false;
@@ -308,13 +317,14 @@ export class Fighter {
         particles.emitFloatingText('DEFESA!', hitPoint.x, hitPoint.y - 30, '#38bdf8');
       }
 
-      this.energy = Math.min(this.maxEnergy, this.energy + 4);
+      this.energy = Math.min(this.maxEnergy, this.energy + 1.25);
       return false;
     }
 
     const actualDamage = Math.round(attackData.damage * (attackData.attackerPower || 1.0) / this.defense);
     this.health = Math.max(0, this.health - actualDamage);
-    this.energy = Math.min(this.maxEnergy, this.energy + 8);
+    // Ganha 2,5% de energia ao receber pancada
+    this.energy = Math.min(this.maxEnergy, this.energy + 2.5);
 
     if (attackData.isHeavy) {
       sounds.playPunch(true);
@@ -430,15 +440,10 @@ export class Fighter {
       }
     }
 
-    // 5. Energia
-    if (this.energy < this.maxEnergy) {
-      this.energy = Math.min(this.maxEnergy, this.energy + (this.charData.stats.energyRegen || 1.0) * dt * 2.5);
-    }
-
-    // 6. Atualização de Ataques
+    // 5. Atualização de Ataques
     this.updateAttackStates(dt, particles);
 
-    // 7. Watchdog de Segurança Anti-Travamento (Se ficar preso num estado de golpe por > 0.8s, reseta)
+    // 6. Watchdog de Segurança Anti-Travamento (Se ficar preso num estado de golpe por > 0.8s, reseta)
     const attackStates = [
       FIGHTER_STATE.LIGHT_PUNCH,
       FIGHTER_STATE.HEAVY_PUNCH,
@@ -459,21 +464,17 @@ export class Fighter {
       this.isInvulnerable = false;
     }
 
-    // 8. Pose Esquelética
+    // 7. Pose Esquelética
     this.updateSkeletalPose();
   }
 
   updateAttackStates(dt, particles) {
-    const x = this.position.x;
-    const y = this.position.y;
-    const f = this.facing;
-
     this.activeHitbox = null;
 
     switch (this.state) {
       case FIGHTER_STATE.LIGHT_PUNCH:
         if (this.stateTime > 0.05 && this.stateTime < 0.18) {
-          this.activeHitbox = new Box(x + (f * 20), y - 95, 65, 30, 'hitbox');
+          this.activeHitbox = this.createHitbox(15, 95, 60, 30);
           this.activeHitbox.damage = 40;
           this.activeHitbox.knockback = 5;
           this.activeHitbox.isHeavy = false;
@@ -486,14 +487,15 @@ export class Fighter {
 
       case FIGHTER_STATE.HEAVY_PUNCH:
         if (this.stateTime > 0.1 && this.stateTime < 0.26) {
-          this.activeHitbox = new Box(x + (f * 25), y - 100, 80, 40, 'hitbox');
+          this.activeHitbox = this.createHitbox(20, 100, 75, 35);
           this.activeHitbox.damage = 95;
           this.activeHitbox.knockback = 12;
           this.activeHitbox.isHeavy = true;
           this.activeHitbox.attackerPower = this.attackPower;
 
           if (particles && Math.random() < 0.3) {
-            particles.emitSparks(x + (f * 70), y - 85, this.charData.themeColor, 3, 3);
+            const sparkX = this.facing === 1 ? this.position.x + 65 : this.position.x - 65;
+            particles.emitSparks(sparkX, this.position.y - 85, this.charData.themeColor, 3, 3);
           }
         }
         if (this.stateTime >= 0.38) {
@@ -503,7 +505,7 @@ export class Fighter {
 
       case FIGHTER_STATE.LIGHT_KICK:
         if (this.stateTime > 0.05 && this.stateTime < 0.18) {
-          this.activeHitbox = new Box(x + (f * 25), y - 65, 70, 35, 'hitbox');
+          this.activeHitbox = this.createHitbox(20, 65, 65, 35);
           this.activeHitbox.damage = 50;
           this.activeHitbox.knockback = 6;
           this.activeHitbox.isHeavy = false;
@@ -516,7 +518,7 @@ export class Fighter {
 
       case FIGHTER_STATE.HEAVY_KICK:
         if (this.stateTime > 0.1 && this.stateTime < 0.28) {
-          this.activeHitbox = new Box(x + (f * 30), y - 90, 85, 45, 'hitbox');
+          this.activeHitbox = this.createHitbox(25, 90, 80, 40);
           this.activeHitbox.damage = 110;
           this.activeHitbox.knockback = 14;
           this.activeHitbox.knockdown = true;
@@ -530,7 +532,7 @@ export class Fighter {
 
       case FIGHTER_STATE.CROUCH_PUNCH:
         if (this.stateTime > 0.05 && this.stateTime < 0.18) {
-          this.activeHitbox = new Box(x + (f * 20), y - 45, 60, 25, 'hitbox');
+          this.activeHitbox = this.createHitbox(15, 45, 55, 25);
           this.activeHitbox.damage = 35;
           this.activeHitbox.knockback = 4;
           this.activeHitbox.isHeavy = false;
@@ -543,7 +545,7 @@ export class Fighter {
 
       case FIGHTER_STATE.CROUCH_KICK:
         if (this.stateTime > 0.07 && this.stateTime < 0.22) {
-          this.activeHitbox = new Box(x + (f * 25), y - 25, 75, 25, 'hitbox');
+          this.activeHitbox = this.createHitbox(20, 25, 70, 25);
           this.activeHitbox.damage = 65;
           this.activeHitbox.knockback = 9;
           this.activeHitbox.knockdown = true;
@@ -557,7 +559,7 @@ export class Fighter {
 
       case FIGHTER_STATE.JUMP_PUNCH:
         if (this.stateTime > 0.05 && this.stateTime < 0.22) {
-          this.activeHitbox = new Box(x + (f * 20), y - 70, 60, 35, 'hitbox');
+          this.activeHitbox = this.createHitbox(15, 70, 55, 30);
           this.activeHitbox.damage = 60;
           this.activeHitbox.knockback = 7;
           this.activeHitbox.isHeavy = false;
@@ -570,7 +572,7 @@ export class Fighter {
 
       case FIGHTER_STATE.JUMP_KICK:
         if (this.stateTime > 0.05 && this.stateTime < 0.26) {
-          this.activeHitbox = new Box(x + (f * 25), y - 50, 75, 45, 'hitbox');
+          this.activeHitbox = this.createHitbox(20, 50, 70, 40);
           this.activeHitbox.damage = 85;
           this.activeHitbox.knockback = 11;
           this.activeHitbox.isHeavy = true;
@@ -591,7 +593,7 @@ export class Fighter {
       case FIGHTER_STATE.SPECIAL_1:
       case FIGHTER_STATE.SPECIAL_2:
         if (this.stateTime > 0.08 && this.stateTime < 0.3) {
-          this.activeHitbox = new Box(x + (f * 35), y - 80, 110, 60, 'hitbox');
+          this.activeHitbox = this.createHitbox(25, 80, 100, 55);
           this.activeHitbox.damage = 140;
           this.activeHitbox.knockback = 16;
           this.activeHitbox.knockdown = true;
@@ -599,7 +601,9 @@ export class Fighter {
           this.activeHitbox.attackerPower = this.attackPower;
 
           if (particles && Math.random() < 0.5) {
-            particles.emitElectricArc(x + (f * 20), y - 70, x + (f * 120), y - 70, this.charData.themeColor);
+            const startX = this.position.x + (this.facing * 15);
+            const endX = this.position.x + (this.facing * 110);
+            particles.emitElectricArc(startX, this.position.y - 70, endX, this.position.y - 70, this.charData.themeColor);
           }
         }
         if (this.stateTime >= 0.45) {
@@ -609,7 +613,7 @@ export class Fighter {
 
       case FIGHTER_STATE.SUPER_MOVE:
         if (this.stateTime > 0.12 && this.stateTime < 0.55) {
-          this.activeHitbox = new Box(x + (f * 20), y - 110, 160, 90, 'hitbox');
+          this.activeHitbox = this.createHitbox(20, 100, 140, 80);
           this.activeHitbox.damage = 280;
           this.activeHitbox.knockback = 22;
           this.activeHitbox.knockdown = true;
@@ -617,8 +621,9 @@ export class Fighter {
           this.activeHitbox.attackerPower = this.attackPower;
 
           if (particles) {
-            particles.emitShockwave(x + (f * 80), y - 60, 90, this.charData.themeColor);
-            particles.emitElectricArc(x, y - 60, x + (f * 160), y - 60, this.charData.energyColor, 2);
+            const shockX = this.position.x + (this.facing * 70);
+            particles.emitShockwave(shockX, this.position.y - 60, 90, this.charData.themeColor);
+            particles.emitElectricArc(this.position.x, this.position.y - 60, shockX + (this.facing * 70), this.position.y - 60, this.charData.energyColor, 2);
           }
         }
         if (this.stateTime >= 0.75) {

@@ -411,6 +411,8 @@ export class GameEngine {
       if (hitResult) {
         this.p1.hasHitCurrentAttack = true;
         this.p1.comboCount++;
+        // Ganha 5% ao bater
+        this.p1.gainAttackEnergy(5);
         this.p2.receiveHit(this.p1.activeHitbox, hitResult.point, this.particles);
 
         if (this.p1.activeHitbox.isHeavy) {
@@ -428,6 +430,8 @@ export class GameEngine {
       if (hitResult) {
         this.p2.hasHitCurrentAttack = true;
         this.p2.comboCount++;
+        // Ganha 5% ao bater
+        this.p2.gainAttackEnergy(5);
         this.p1.receiveHit(this.p2.activeHitbox, hitResult.point, this.particles);
 
         if (this.p2.activeHitbox.isHeavy) {
