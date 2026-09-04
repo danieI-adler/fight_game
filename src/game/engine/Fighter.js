@@ -1,6 +1,7 @@
 import { Vector2D } from './Vector2D';
 import { Box } from './Collision';
 import { sounds } from '../audio/soundManager';
+import { FighterRenderer } from './FighterRenderer';
 
 export const FIGHTER_STATE = {
   IDLE: 'IDLE',
@@ -317,7 +318,7 @@ export class Fighter {
         particles.emitFloatingText('DEFESA!', hitPoint.x, hitPoint.y - 30, '#38bdf8');
       }
 
-      this.energy = Math.min(this.maxEnergy, this.energy + 1.25);
+      // Defender não dá energia
       return false;
     }
 
@@ -784,107 +785,6 @@ export class Fighter {
   }
 
   draw(ctx, showHitboxes = false) {
-    const x = this.position.x;
-    const y = this.position.y;
-    const { themeColor, secondaryColor, glowColor, energyColor } = this.charData;
-    const p = this.pose;
-
-    ctx.save();
-
-    // Sombra no chão
-    const shadowDist = Math.max(0, this.groundY - y);
-    const shadowScale = Math.max(0.3, 1 - shadowDist / 300);
-    ctx.save();
-    ctx.beginPath();
-    ctx.ellipse(x, this.groundY, 35 * shadowScale, 8 * shadowScale, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-    ctx.fill();
-    ctx.restore();
-
-    // Aura de Energia
-    if (this.energy > 30 || this.state === FIGHTER_STATE.SUPER_MOVE) {
-      ctx.save();
-      ctx.shadowColor = glowColor;
-      ctx.shadowBlur = 16;
-      ctx.strokeStyle = energyColor;
-      ctx.lineWidth = 2;
-      ctx.globalAlpha = 0.4 + 0.3 * Math.sin(this.stateTime * 15);
-      ctx.beginPath();
-      ctx.arc(x + p.chest.x, y + p.chest.y, 45, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    // Desenho dos Membros Articulados
-    ctx.save();
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.shadowColor = glowColor;
-    ctx.shadowBlur = 10;
-
-    const drawLimb = (from, to, width = 6, color = secondaryColor) => {
-      ctx.beginPath();
-      ctx.moveTo(x + from.x, y + from.y);
-      ctx.lineTo(x + to.x, y + to.y);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = width;
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(x + from.x, y + from.y);
-      ctx.lineTo(x + to.x, y + to.y);
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = width * 0.35;
-      ctx.stroke();
-    };
-
-    drawLimb(p.pelvis, p.leftKnee, 7, secondaryColor);
-    drawLimb(p.leftKnee, p.leftFoot, 6, secondaryColor);
-    drawLimb(p.pelvis, p.rightKnee, 8, themeColor);
-    drawLimb(p.rightKnee, p.rightFoot, 7, themeColor);
-
-    drawLimb(p.pelvis, p.chest, 10, themeColor);
-
-    drawLimb(p.chest, p.leftShoulder, 7, secondaryColor);
-    drawLimb(p.leftShoulder, p.leftElbow, 6, secondaryColor);
-    drawLimb(p.leftElbow, p.leftHand, 5, secondaryColor);
-
-    drawLimb(p.chest, p.rightShoulder, 8, themeColor);
-    drawLimb(p.rightShoulder, p.rightElbow, 7, themeColor);
-    drawLimb(p.rightElbow, p.rightHand, 6, themeColor);
-
-    // Cabeça
-    ctx.beginPath();
-    ctx.arc(x + p.head.x, y + p.head.y, 14, 0, Math.PI * 2);
-    ctx.fillStyle = themeColor;
-    ctx.fill();
-
-    // Centro / Olhos
-    ctx.beginPath();
-    ctx.arc(x + p.head.x + (this.facing * 4), y + p.head.y - 2, 4, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-
-    ctx.restore();
-
-    if (showHitboxes) {
-      ctx.save();
-      ctx.strokeStyle = '#22c55e';
-      ctx.lineWidth = 1.5;
-      for (const box of this.getHurtboxes()) {
-        ctx.strokeRect(box.x, box.y, box.width, box.height);
-      }
-
-      if (this.activeHitbox) {
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 2.5;
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
-        ctx.fillRect(this.activeHitbox.x, this.activeHitbox.y, this.activeHitbox.width, this.activeHitbox.height);
-        ctx.strokeRect(this.activeHitbox.x, this.activeHitbox.y, this.activeHitbox.width, this.activeHitbox.height);
-      }
-      ctx.restore();
-    }
-
-    ctx.restore();
+    FighterRenderer.draw(ctx, this, showHitboxes);
   }
 }
