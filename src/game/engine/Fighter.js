@@ -3,6 +3,7 @@ import { Box } from './Collision';
 import { sounds } from '../audio/soundManager';
 import { FighterRenderer } from './FighterRenderer';
 import { StickRenderer } from './StickRenderer';
+import { ExpeditionRenderer } from './ExpeditionRenderer';
 
 export const FIGHTER_STATE = {
   IDLE: 'IDLE',
@@ -785,8 +786,10 @@ export class Fighter {
     }
   }
 
-  draw(ctx, showHitboxes = false, graphicsMode = 'BELLE_EPOQUE_2D') {
-    if (graphicsMode === 'STICK_2D') {
+  draw(ctx, showHitboxes = false, graphicsMode = 'BELLE_EPOQUE_2D', isExpedition = false) {
+    if (isExpedition) {
+      ExpeditionRenderer.draw(ctx, this, showHitboxes);
+    } else if (graphicsMode === 'STICK_2D') {
       StickRenderer.draw(ctx, this, showHitboxes);
     } else {
       FighterRenderer.draw(ctx, this, showHitboxes);

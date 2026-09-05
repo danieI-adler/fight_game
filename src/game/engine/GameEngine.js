@@ -7,8 +7,10 @@ import { InputHandler } from './InputHandler';
 import { FighterAI } from '../ai/FighterAI';
 import { sounds } from '../audio/soundManager';
 import { getCharacterById } from '../characters/characterData';
+import { getExpeditionCharacterById } from '../characters/expedition33Characters';
 import { network, MSG_TYPE } from '../network/NetworkManager';
 import { GameEngine3D } from '../engine3d/GameEngine3D';
+import { ExpeditionStageRenderer } from './ExpeditionStages';
 
 export const GAME_STATUS = {
   INTRO: 'INTRO',
@@ -122,16 +124,18 @@ export class GameEngine {
     });
   }
 
-  startFight(char1Id, char2Id, mode = 'VERSUS', difficulty = 'medium', stageId = 'cyber_arena', isHost = true, graphicsMode = 'BELLE_EPOQUE_2D') {
+  startFight(char1Id, char2Id, mode = 'VERSUS', difficulty = 'medium', stageId = 'cyber_arena', isHost = true, graphicsMode = 'BELLE_EPOQUE_2D', isExpedition = false) {
     this.mode = mode;
     this.graphicsMode = graphicsMode;
+    this.isExpedition = isExpedition;
+    this.stageId = stageId;
     this.isOnlineHost = isHost;
     this.isTraining = mode === 'TRAINING';
     this.stage.setStage(stageId);
     this.ai.setDifficulty(this.isTraining ? 'dummy' : difficulty);
 
-    const c1 = getCharacterById(char1Id);
-    const c2 = getCharacterById(char2Id);
+    const c1 = this.isExpedition ? getExpeditionCharacterById(char1Id) : getCharacterById(char1Id);
+    const c2 = this.isExpedition ? getExpeditionCharacterById(char2Id) : getCharacterById(char2Id);
 
     this.p1 = new Fighter(c1, false, this.stage.groundY);
     this.p2 = new Fighter(c2, true, this.stage.groundY);
@@ -513,7 +517,11 @@ export class GameEngine {
       }
     } else if (this.graphicsMode === 'MODE_2_5D') {
       this.camera.applyTransform(ctx);
-      this.stage.draw(ctx, this.camera);
+      if (this.isExpedition) {
+        ExpeditionStageRenderer.draw(ctx, this.stageId || 'monolith_33', this.camera);
+      } else {
+        this.stage.draw(ctx, this.camera);
+      }
       this.particles.draw(ctx);
       this.camera.restoreTransform(ctx);
 
@@ -523,9 +531,13 @@ export class GameEngine {
     } else {
       // Modos 2D: STICK_2D ou BELLE_EPOQUE_2D
       this.camera.applyTransform(ctx);
-      this.stage.draw(ctx, this.camera);
-      this.p1.draw(ctx, this.showHitboxes, this.graphicsMode);
-      this.p2.draw(ctx, this.showHitboxes, this.graphicsMode);
+      if (this.isExpedition) {
+        ExpeditionStageRenderer.draw(ctx, this.stageId || 'monolith_33', this.camera);
+      } else {
+        this.stage.draw(ctx, this.camera);
+      }
+      this.p1.draw(ctx, this.showHitboxes, this.graphicsMode, this.isExpedition);
+      this.p2.draw(ctx, this.showHitboxes, this.graphicsMode, this.isExpedition);
       this.particles.draw(ctx);
       this.camera.restoreTransform(ctx);
     }

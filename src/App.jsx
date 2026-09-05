@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GameEngine, GAME_STATUS } from './game/engine/GameEngine';
 import { getCharacterById } from './game/characters/characterData';
+import { getExpeditionCharacterById } from './game/characters/expedition33Characters';
 import { sounds } from './game/audio/soundManager';
 import { MainMenu } from './components/menu/MainMenu';
 import { CharacterSelect } from './components/select/CharacterSelect';
@@ -22,6 +23,13 @@ export function App() {
       return GRAPHICS_MODES.BELLE_EPOQUE_2D;
     }
   });
+  const [isExpedition, setIsExpedition] = useState(() => {
+    try {
+      return localStorage.getItem('fight_expedition_mode') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
   const [showGraphicsModal, setShowGraphicsModal] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -35,6 +43,7 @@ export function App() {
     stageId: 'cyber_arena',
     difficulty: 'medium',
     isHost: true,
+    isExpedition: false,
   });
   const [gameState, setGameState] = useState(null);
   const [showHitboxes, setShowHitboxes] = useState(false);
@@ -58,14 +67,14 @@ export function App() {
 
   // Iniciar partida offline
   const handleStartMatch = (config) => {
-    setMatchConfig({ ...config, isHost: true });
+    setMatchConfig({ ...config, isHost: true, isExpedition });
     setScreen('FIGHT');
     setIsPaused(false);
   };
 
   // Iniciar partida online
   const handleStartOnlineMatch = (config) => {
-    setMatchConfig(config);
+    setMatchConfig({ ...config, isExpedition: config.isExpedition !== undefined ? config.isExpedition : isExpedition });
     setMode('ONLINE');
     setScreen('FIGHT');
     setIsPaused(false);
@@ -91,7 +100,8 @@ export function App() {
       matchConfig.difficulty,
       matchConfig.stageId,
       matchConfig.isHost !== undefined ? matchConfig.isHost : true,
-      graphicsMode
+      graphicsMode,
+      matchConfig.isExpedition !== undefined ? matchConfig.isExpedition : isExpedition
     );
 
     return () => {
@@ -130,7 +140,8 @@ export function App() {
         matchConfig.difficulty,
         matchConfig.stageId,
         matchConfig.isHost !== undefined ? matchConfig.isHost : true,
-        graphicsMode
+        graphicsMode,
+        matchConfig.isExpedition !== undefined ? matchConfig.isExpedition : isExpedition
       );
     }
   };
@@ -160,8 +171,9 @@ export function App() {
     }
   };
 
-  const char1 = getCharacterById(matchConfig.p1Id);
-  const char2 = getCharacterById(matchConfig.p2Id);
+  const getChar = (matchConfig.isExpedition || isExpedition) ? getExpeditionCharacterById : getCharacterById;
+  const char1 = getChar(matchConfig.p1Id) || ((matchConfig.isExpedition || isExpedition) ? getExpeditionCharacterById(101) : getCharacterById(1));
+  const char2 = getChar(matchConfig.p2Id) || ((matchConfig.isExpedition || isExpedition) ? getExpeditionCharacterById(102) : getCharacterById(2));
   const isMatchOver = gameState && gameState.status === GAME_STATUS.MATCH_OVER;
   const winner = gameState && (gameState.p1Wins >= 2 ? char1 : char2);
   const loser = gameState && (gameState.p1Wins >= 2 ? char2 : char1);
@@ -182,6 +194,16 @@ export function App() {
           onOpenControls={() => setShowControls(true)}
           onOpenGraphics={() => setShowGraphicsModal(true)}
           graphicsMode={graphicsMode}
+          isExpedition={isExpedition}
+          onToggleExpedition={() => {
+            setIsExpedition((prev) => {
+              const next = !prev;
+              try {
+                localStorage.setItem('fight_expedition_mode', String(next));
+              } catch (e) {}
+              return next;
+            });
+          }}
           isMuted={isMuted}
           onToggleMute={toggleMute}
         />
@@ -192,6 +214,7 @@ export function App() {
         <CharacterSelect
           mode={mode}
           graphicsMode={graphicsMode}
+          isExpedition={isExpedition}
           onStartMatch={handleStartMatch}
           onBackToMenu={() => setScreen('MAIN_MENU')}
         />

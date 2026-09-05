@@ -1,0 +1,249 @@
+/**
+ * Personagens Oficiais de Clair Obscur: Expedition 33
+ * Elenco completo da expedição e a entidade do Monólito.
+ */
+
+export const EXPEDITION_33_CHARACTERS = [
+  {
+    id: 101,
+    name: 'Gustave',
+    title: 'Engenheiro Chefe da Expedição',
+    themeColor: '#0ea5e9',
+    secondaryColor: '#0369a1',
+    glowColor: 'rgba(14, 165, 233, 0.85)',
+    energyColor: '#7dd3fc',
+    style: 'Braço Mecânico & Sobrecarga',
+    stats: { health: 1050, speed: 7.0, jumpForce: 13.8, attackPower: 1.15, defense: 1.05 },
+    visual: {
+      coatType: 'trenchcoat',
+      headgear: 'none',
+      maskStyle: 'none',
+      maskColor: '#f1f5f9',
+      coatColor: '#0b1d30',
+      accentColor: '#d4af37',
+      vestColor: '#1e293b',
+      pantColor: '#0f172a',
+      bootColor: '#1c1917',
+      gloveColor: '#d4af37', // Braço mecânico dourado com engrenagens
+      paintTrailColor: '#38bdf8',
+      weaponType: 'mechanical_arm',
+      hasMechanicalArm: true
+    },
+    description: 'Líder da Expedição 33. Luta com seu braço protético mecânico capaz de descarregar impactos cinéticos e sobrecargas elétricas.'
+  },
+  {
+    id: 102,
+    name: 'Maelle',
+    title: 'A Duelista do Florete',
+    themeColor: '#38bdf8',
+    secondaryColor: '#0284c7',
+    glowColor: 'rgba(56, 189, 248, 0.85)',
+    energyColor: '#bae6fd',
+    style: 'Esgrima Belle Époque & Florete',
+    stats: { health: 920, speed: 8.5, jumpForce: 14.5, attackPower: 0.98, defense: 0.9 },
+    visual: {
+      coatType: 'capelet',
+      headgear: 'none',
+      maskStyle: 'porcelain_half',
+      maskColor: '#ffffff',
+      coatColor: '#0c4a6e',
+      accentColor: '#f8fafc',
+      vestColor: '#f8fafc',
+      pantColor: '#0284c7',
+      bootColor: '#0f172a',
+      gloveColor: '#ffffff',
+      paintTrailColor: '#38bdf8',
+      weaponType: 'rapier'
+    },
+    description: 'Irmã adotiva de Gustave. Especialista em estocadas relâmpago com seu florete de duelo e esquivas acrobáticas.'
+  },
+  {
+    id: 103,
+    name: 'Lune',
+    title: 'A Erudita dos Astros',
+    themeColor: '#a855f7',
+    secondaryColor: '#6b21a8',
+    glowColor: 'rgba(168, 85, 247, 0.85)',
+    energyColor: '#e9d5ff',
+    style: 'Magia Astral & Runas de Tinta',
+    stats: { health: 940, speed: 7.4, jumpForce: 14.0, attackPower: 1.1, defense: 0.92 },
+    visual: {
+      coatType: 'mantle',
+      headgear: 'none',
+      maskStyle: 'none',
+      maskColor: '#faf5ff',
+      coatColor: '#2e1065',
+      accentColor: '#c084fc',
+      vestColor: '#1e1b4b',
+      pantColor: '#090312',
+      bootColor: '#1e1b4b',
+      gloveColor: '#9333ea',
+      paintTrailColor: '#c084fc',
+      weaponType: 'astral_orbs'
+    },
+    description: 'Pesquisadora dedicada a desvendar a maldição da Pintora. Canaliza orbes astrais, feitiços de luz estelar e prismas de tinta.'
+  },
+  {
+    id: 104,
+    name: 'Sciel',
+    title: 'A Guerreira das Máscaras',
+    themeColor: '#f59e0b',
+    secondaryColor: '#b45309',
+    glowColor: 'rgba(245, 158, 11, 0.85)',
+    energyColor: '#fef3c7',
+    style: 'Lâminas Duplas & Dança Marcial',
+    stats: { health: 980, speed: 8.0, jumpForce: 14.2, attackPower: 1.05, defense: 0.95 },
+    visual: {
+      coatType: 'duster',
+      headgear: 'feather_cap',
+      maskStyle: 'gilded_plate',
+      maskColor: '#fffbeb',
+      coatColor: '#451a03',
+      accentColor: '#fbbf24',
+      vestColor: '#291b07',
+      pantColor: '#1c1917',
+      bootColor: '#18181b',
+      gloveColor: '#d97706',
+      paintTrailColor: '#fbbf24',
+      weaponType: 'dual_curved_blades'
+    },
+    description: 'Guerreira errante e serena. Empunha lâminas duplas curvas com precisão fluida e alterna máscaras teatrais para alterar o ritmo de combate.'
+  },
+  {
+    id: 105,
+    name: 'Renoir',
+    title: 'O Veterano de Ferro',
+    themeColor: '#78716c',
+    secondaryColor: '#44403c',
+    glowColor: 'rgba(120, 113, 108, 0.85)',
+    energyColor: '#e7e5e4',
+    style: 'Armadura Pesada & Impacto de Pólvora',
+    stats: { health: 1200, speed: 5.8, jumpForce: 12.6, attackPower: 1.25, defense: 1.2 },
+    visual: {
+      coatType: 'overcoat',
+      headgear: 'gilded_visor',
+      maskStyle: 'runic_plate',
+      maskColor: '#a8a29e',
+      coatColor: '#1c1917',
+      accentColor: '#d6d3d1',
+      vestColor: '#0c0a09',
+      pantColor: '#090808',
+      bootColor: '#1c1917',
+      gloveColor: '#57534e',
+      paintTrailColor: '#f59e0b',
+      weaponType: 'heavy_gauntlets'
+    },
+    description: 'Veterano marcado por expedições passadas. Traje reforçado com placas de metal e manoplas pesadas com detonações de impacto.'
+  },
+  {
+    id: 106,
+    name: 'Verso',
+    title: 'O Rastreador das Sombras',
+    themeColor: '#6366f1',
+    secondaryColor: '#4338ca',
+    glowColor: 'rgba(99, 102, 241, 0.85)',
+    energyColor: '#c7d2fe',
+    style: 'Adagas Sombrias & Distorção',
+    stats: { health: 950, speed: 8.3, jumpForce: 14.4, attackPower: 1.02, defense: 0.92 },
+    visual: {
+      coatType: 'trenchcoat',
+      headgear: 'hood',
+      maskStyle: 'shadow_veil',
+      maskColor: '#1e1b4b',
+      coatColor: '#09090b',
+      accentColor: '#818cf8',
+      vestColor: '#18181b',
+      pantColor: '#09090b',
+      bootColor: '#18181b',
+      gloveColor: '#4f46e5',
+      paintTrailColor: '#818cf8',
+      weaponType: 'dual_daggers'
+    },
+    description: 'O misterioso companheiro encapuzado. Ataca com adagas espectrais velozes e passos que desaparecem em névoa de tinta preta.'
+  },
+  {
+    id: 107,
+    name: 'Monoco',
+    title: 'O Colosso Nobre',
+    themeColor: '#d97706',
+    secondaryColor: '#78350f',
+    glowColor: 'rgba(217, 119, 6, 0.85)',
+    energyColor: '#fef3c7',
+    style: 'Impacto Sísmico & Garras Colossais',
+    stats: { health: 1280, speed: 5.4, jumpForce: 12.2, attackPower: 1.32, defense: 1.25 },
+    visual: {
+      coatType: 'overcoat',
+      headgear: 'none',
+      maskStyle: 'none',
+      maskColor: '#fef3c7',
+      coatColor: '#451a03',
+      accentColor: '#f59e0b',
+      vestColor: '#291b07',
+      pantColor: '#1c1917',
+      bootColor: '#18181b',
+      gloveColor: '#b45309',
+      paintTrailColor: '#f59e0b',
+      weaponType: 'beast_claws',
+      isMonoco: true
+    },
+    description: 'O guardião colosso da expedição. Corpo robusto com chifres nobres, sobretudo de pele reforçado e golpes sísmicos devastadores.'
+  },
+  {
+    id: 108,
+    name: 'Esquie',
+    title: 'A Criatura dos Céus',
+    themeColor: '#10b981',
+    secondaryColor: '#047857',
+    glowColor: 'rgba(16, 185, 129, 0.85)',
+    energyColor: '#a7f3d0',
+    style: 'Voos Rasantes & Giros Aéreos',
+    stats: { health: 890, speed: 9.0, jumpForce: 15.5, attackPower: 0.94, defense: 0.85 },
+    visual: {
+      coatType: 'capelet',
+      headgear: 'none',
+      maskStyle: 'none',
+      maskColor: '#d1fae5',
+      coatColor: '#064e3b',
+      accentColor: '#34d399',
+      vestColor: '#022c22',
+      pantColor: '#0f172a',
+      bootColor: '#1c1917',
+      gloveColor: '#059669',
+      paintTrailColor: '#34d399',
+      weaponType: 'winged_talons',
+      isEsquie: true
+    },
+    description: 'A veloz criatura alada companheira da expedição. Realiza voos rasantes, giros acrobáticos no ar e ataques com penas e garras mágicas.'
+  },
+  {
+    id: 109,
+    name: 'La Peintresse',
+    title: 'A Pintora do Monólito',
+    themeColor: '#fbbf24',
+    secondaryColor: '#d97706',
+    glowColor: 'rgba(251, 191, 36, 0.95)',
+    energyColor: '#ffffff',
+    style: 'Pincel Divino & Tinta da Morte',
+    stats: { health: 1350, speed: 6.5, jumpForce: 13.5, attackPower: 1.35, defense: 1.15 },
+    visual: {
+      coatType: 'mantle',
+      headgear: 'gilded_visor',
+      maskStyle: 'full_porcelain',
+      maskColor: '#ffffff',
+      coatColor: '#09090b',
+      accentColor: '#fbbf24',
+      vestColor: '#18181b',
+      pantColor: '#09090b',
+      bootColor: '#09090b',
+      gloveColor: '#fbbf24',
+      paintTrailColor: '#fbbf24',
+      weaponType: 'colossal_brush',
+      isPaintress: true
+    },
+    description: 'A deusa misteriosa que acorda a cada ano para pintar um número no Monólito e apagar toda uma geração. Luta com um pincel monumental e arcos de tinta viva.'
+  }
+];
+
+export function getExpeditionCharacterById(id) {
+  return EXPEDITION_33_CHARACTERS.find((c) => c.id === Number(id)) || EXPEDITION_33_CHARACTERS[0];
+}
