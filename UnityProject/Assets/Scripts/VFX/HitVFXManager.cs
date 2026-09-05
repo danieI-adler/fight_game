@@ -47,22 +47,56 @@ namespace FightGame.VFX
             Destroy(flashObj, 0.15f);
         }
 
-        private IEnumerator AnimateSpark(GameObject spark, Vector3 velocity)
+        public void SpawnGunProjectile(Vector3 spawnPos, int direction, Color color, AttackData attack, FighterController owner)
+        {
+            // Muzzle Flash
+            SpawnHitSpark(spawnPos, true, Color.cyan);
+
+            // Projétil de Energia / Bala do Gustave
+            GameObject bullet = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            bullet.name = "Gustave_EnergyBullet";
+            bullet.transform.position = spawnPos;
+            bullet.transform.localScale = new Vector3(0.25f, 0.25f, 0.5f);
+            bullet.transform.rotation = Quaternion.Euler(0, direction == 1 ? 90 : -90, 0);
+            Destroy(bullet.GetComponent<Collider>());
+
+            Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+            mat.color = Color.cyan;
+            mat.EnableKeyword("_EMISSION");
+            mat.SetColor("_EmissionColor", Color.cyan * 3.5f);
+            bullet.GetComponent<MeshRenderer>().material = mat;
+
+            StartCoroutine(AnimateProjectile(bullet, direction, attack, owner));
+        }
+
+        private IEnumerator AnimateProjectile(GameObject bullet, int direction, AttackData attack, FighterController owner)
         {
             float timer = 0f;
-            float lifeTime = 0.22f;
-            Vector3 startScale = spark.transform.localScale;
+            float maxLife = 1.2f;
+            float speed = 22f;
 
-            while (timer < lifeTime)
+            while (timer < maxLife && bullet != null)
             {
                 timer += Time.deltaTime;
-                spark.transform.position += velocity * Time.deltaTime;
-                velocity.y -= 25f * Time.deltaTime; // Gravidade
-                spark.transform.localScale = Vector3.Lerp(startScale, Vector3.zero, timer / lifeTime);
+                bullet.transform.position += Vector3.right * (direction * speed * Time.deltaTime);
+
+                // Colisão com oponente
+                if (owner != null && owner.opponent != null)
+                {
+                    float dist = Vector3.Distance(bullet.transform.position, owner.opponent.transform.position + Vector3.up * 1.0f);
+                    if (dist < 0.9f)
+                    {
+                        owner.opponent.OnReceiveHit(attack, owner);
+                        SpawnHitSpark(bullet.transform.position, true, Color.cyan);
+                        Destroy(bullet);
+                        yield break;
+                    }
+                }
+
                 yield return null;
             }
 
-            Destroy(spark);
+            if (bullet != null) Destroy(bullet);
         }
     }
 }
