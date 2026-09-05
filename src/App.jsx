@@ -194,6 +194,12 @@ export function App() {
           onOpenControls={() => setShowControls(true)}
           onOpenGraphics={() => setShowGraphicsModal(true)}
           graphicsMode={graphicsMode}
+          onSelectGraphicsMode={(mode) => {
+            setGraphicsMode(mode);
+            try {
+              localStorage.setItem('fight_graphics_mode', mode);
+            } catch (e) {}
+          }}
           isExpedition={isExpedition}
           onToggleExpedition={() => {
             setIsExpedition((prev) => {
@@ -201,6 +207,12 @@ export function App() {
               try {
                 localStorage.setItem('fight_expedition_mode', String(next));
               } catch (e) {}
+              if (next && (graphicsMode === GRAPHICS_MODES.STICK_2D || graphicsMode === GRAPHICS_MODES.BELLE_EPOQUE_2D)) {
+                setGraphicsMode(GRAPHICS_MODES.EXPEDITION_HD_SPRITES);
+                try {
+                  localStorage.setItem('fight_graphics_mode', GRAPHICS_MODES.EXPEDITION_HD_SPRITES);
+                } catch (e) {}
+              }
               return next;
             });
           }}
@@ -215,6 +227,7 @@ export function App() {
           mode={mode}
           graphicsMode={graphicsMode}
           isExpedition={isExpedition}
+          onOpenGraphics={() => setShowGraphicsModal(true)}
           onStartMatch={handleStartMatch}
           onBackToMenu={() => setScreen('MAIN_MENU')}
         />
@@ -292,7 +305,14 @@ export function App() {
       {showGraphicsModal && (
         <GraphicsSelectorModal
           currentMode={graphicsMode}
+          isExpedition={isExpedition}
           onSelectMode={(selected) => setGraphicsMode(selected)}
+          onSetExpedition={(exp) => {
+            setIsExpedition(exp);
+            try {
+              localStorage.setItem('fight_expedition_mode', String(exp));
+            } catch (e) {}
+          }}
           onClose={() => setShowGraphicsModal(false)}
         />
       )}

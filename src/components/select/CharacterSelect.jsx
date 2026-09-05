@@ -10,6 +10,7 @@ export const CharacterSelect = ({
   mode,
   graphicsMode = 'BELLE_EPOQUE_2D',
   isExpedition = false,
+  onOpenGraphics,
   onStartMatch,
   onBackToMenu
 }) => {
@@ -108,8 +109,31 @@ export const CharacterSelect = ({
           </h1>
         </div>
 
-        {/* Stage & Difficulty Selectors */}
-        <div className="flex items-center gap-4 text-xs">
+        {/* Stage, Difficulty & Graphics Selectors */}
+        <div className="flex items-center gap-3 text-xs">
+          {onOpenGraphics && (
+            <button
+              onClick={onOpenGraphics}
+              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 px-3 py-1 rounded border border-amber-800/60 text-amber-300 cursor-pointer font-serif transition-colors"
+              title="Mudar Modo Gráfico"
+            >
+              <span className="text-slate-400">Modo:</span>
+              <span className="font-bold text-[11px] bg-slate-800 px-1.5 py-0.5 rounded text-white">
+                {graphicsMode === 'EXPEDITION_HD_SPRITES'
+                  ? '🌟 2D HD Sprites'
+                  : graphicsMode === 'EXPEDITION_PBR_3D'
+                  ? '✨ 3D PBR Realista'
+                  : graphicsMode === 'STICK_2D'
+                  ? 'Palito 2D'
+                  : graphicsMode === 'BELLE_EPOQUE_2D'
+                  ? '2D Belle Époque'
+                  : graphicsMode === 'MODE_2_5D'
+                  ? 'Modo 2.5D'
+                  : 'Tudo 3D'}
+              </span>
+            </button>
+          )}
+
           <div className="flex items-center gap-2 bg-slate-900 px-3 py-1 rounded border border-slate-800">
             <span className="text-slate-400">Cenário:</span>
             <select
