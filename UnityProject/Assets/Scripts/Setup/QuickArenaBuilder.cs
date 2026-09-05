@@ -7,8 +7,19 @@ using FightGame.UI;
 
 namespace FightGame.Setup
 {
+    public enum ArenaStageType
+    {
+        LumiereDestroyedTower, // Anexo 1: Cidade submersa, Torre Eiffel partida flutuante, nuvens volumétricas e escombros
+        MonolithWaterfall,     // Anexo 2: Monólito sagrado com cachoeira mística e pétalas de rosa flutuantes
+        CemeteryOfSwords,      // Anexo 3: Campo desolado ao pôr do sol com centenas de espadas cravadas e eclipse lunar
+        SunkenFerrisWheel      // Anexo 4: Costa rochosa de basalto, roda gigante Belle Époque caída e névoa marítima
+    }
+
     public class QuickArenaBuilder : MonoBehaviour
     {
+        [Header("Seleção de Cenário Clair Obscur")]
+        public ArenaStageType stageType = ArenaStageType.LumiereDestroyedTower;
+
         private void Start()
         {
             BuildCinematicCombatEnvironment();
@@ -16,8 +27,7 @@ namespace FightGame.Setup
 
         private void CleanStrayObjects()
         {
-            // Remover qualquer objeto residual ou duplicado criado na viewport
-            string[] toClean = new string[] { "Player1", "Player2", "Gustave", "Gustave(Clone)", "Maelle", "Maelle(Clone)", "MechanicalArm_Gold", "Rapier_Blade" };
+            string[] toClean = new string[] { "Player1", "Player2", "Gustave", "Gustave(Clone)", "Maelle", "Maelle(Clone)", "MechanicalArm_Gold", "Rapier_Blade", "ArenaStageRoot" };
             foreach (var name in toClean)
             {
                 var objs = GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
@@ -35,59 +45,265 @@ namespace FightGame.Setup
         public void BuildCinematicCombatEnvironment()
         {
             CleanStrayObjects();
-            // 1. Gerenciadores de Efeitos (Hitstop e Faíscas)
+
+            // 1. Gerenciadores
             if (gameObject.GetComponent<HitstopManager>() == null) gameObject.AddComponent<HitstopManager>();
             if (gameObject.GetComponent<HitVFXManager>() == null) gameObject.AddComponent<HitVFXManager>();
 
-            // 2. Piso de Mármore Negro Polido com Reflexo
-            GameObject floor = GameObject.Find("Arena Ground (Piso de Mármore)");
-            if (floor != null)
+            // 2. Construir Cenário Temático Selecionado
+            GameObject stageRoot = new GameObject("ArenaStageRoot");
+            switch (stageType)
             {
-                Material floorMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-                floorMat.color = new Color(0.05f, 0.07f, 0.11f);
-                floorMat.SetFloat("_Smoothness", 0.85f);
-                floorMat.SetFloat("_Metallic", 0.6f);
-                floor.GetComponent<MeshRenderer>().material = floorMat;
+                case ArenaStageType.LumiereDestroyedTower:
+                    BuildStage_LumiereTower(stageRoot);
+                    break;
+                case ArenaStageType.MonolithWaterfall:
+                    BuildStage_MonolithWaterfall(stageRoot);
+                    break;
+                case ArenaStageType.CemeteryOfSwords:
+                    BuildStage_CemeteryOfSwords(stageRoot);
+                    break;
+                case ArenaStageType.SunkenFerrisWheel:
+                    BuildStage_SunkenFerrisWheel(stageRoot);
+                    break;
+            }
+        }
+
+        // --- ANEXO 1: CIDADE DE LUMIÈRE E TORRE PARTIDA FLUTUANTE ---
+        private void BuildStage_LumiereTower(GameObject root)
+        {
+            RenderSettings.fog = true;
+            RenderSettings.fogColor = new Color(0.24f, 0.28f, 0.35f);
+            RenderSettings.fogDensity = 0.015f;
+
+            // Piso de Ponte / Cais de Pedra Submerso
+            GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            floor.name = "Floor_LumiereBridge";
+            floor.transform.SetParent(root.transform);
+            floor.transform.position = new Vector3(0, -0.5f, 0);
+            floor.transform.localScale = new Vector3(32f, 1f, 8f);
+            Material bridgeMat = CreatePBRMat(new Color(0.12f, 0.14f, 0.16f), 0.3f, 0.85f);
+            floor.GetComponent<MeshRenderer>().material = bridgeMat;
+
+            // Água Submersa com Reflexo
+            GameObject water = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            water.name = "Water_SunkenLumiere";
+            water.transform.SetParent(root.transform);
+            water.transform.position = new Vector3(0, -0.7f, 4f);
+            water.transform.localScale = new Vector3(80f, 0.4f, 40f);
+            DestroyImmediate(water.GetComponent<Collider>());
+            Material waterMat = CreatePBRMat(new Color(0.04f, 0.08f, 0.12f, 0.9f), 0.1f, 0.98f);
+            water.GetComponent<MeshRenderer>().material = waterMat;
+
+            // Torre de Ferro Partida e Retorcida ao Fundo
+            GameObject towerBase = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            towerBase.name = "Lumiere_Tower_Base";
+            towerBase.transform.SetParent(root.transform);
+            towerBase.transform.position = new Vector3(2f, 8f, 22f);
+            towerBase.transform.localScale = new Vector3(4f, 14f, 4f);
+            towerBase.transform.rotation = Quaternion.Euler(15f, 0, -12f);
+            Material ironMat = CreatePBRMat(new Color(0.18f, 0.22f, 0.24f), 0.85f, 0.45f);
+            towerBase.GetComponent<MeshRenderer>().material = ironMat;
+
+            // Escombros Flutuantes (Antigravidade de Clair Obscur)
+            for (int i = -5; i <= 5; i++)
+            {
+                GameObject chunk = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                chunk.name = $"Floating_Debris_{i}";
+                chunk.transform.SetParent(root.transform);
+                float rx = i * 4.2f + Random.Range(-1.5f, 1.5f);
+                float ry = Random.Range(6f, 16f);
+                float rz = Random.Range(12f, 25f);
+                chunk.transform.position = new Vector3(rx, ry, rz);
+                chunk.transform.localScale = new Vector3(Random.Range(1.5f, 4f), Random.Range(2f, 5f), Random.Range(1.5f, 3f));
+                chunk.transform.rotation = Random.rotation;
+                chunk.GetComponent<MeshRenderer>().material = ironMat;
             }
 
-            // 3. Pilares Belle Époque de Fundo
-            for (int i = -4; i <= 4; i++)
+            // Iluminação Chiaroscuro Dourada entre Nuvens Tempestuosas
+            SetupLighting(new Color(1f, 0.92f, 0.80f), 2.2f, new Vector3(35f, -25f, 0), new Color(0.15f, 0.45f, 0.75f));
+        }
+
+        // --- ANEXO 2: MONÓLITO SAGRADO COM CACHOEIRA MÍSTICA E PÉTALAS ---
+        private void BuildStage_MonolithWaterfall(GameObject root)
+        {
+            RenderSettings.fog = true;
+            RenderSettings.fogColor = new Color(0.18f, 0.16f, 0.22f);
+            RenderSettings.fogDensity = 0.012f;
+
+            // Piso de Rocha com Grama Mística e Pétalas
+            GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            floor.name = "Floor_SacredRock";
+            floor.transform.SetParent(root.transform);
+            floor.transform.position = new Vector3(0, -0.5f, 0);
+            floor.transform.localScale = new Vector3(30f, 1f, 8f);
+            Material rockMat = CreatePBRMat(new Color(0.14f, 0.12f, 0.10f), 0.1f, 0.85f);
+            floor.GetComponent<MeshRenderer>().material = rockMat;
+
+            // O Grande Monólito Central
+            GameObject monolith = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            monolith.name = "Sacred_Monolith";
+            monolith.transform.SetParent(root.transform);
+            monolith.transform.position = new Vector3(0, 15f, 24f);
+            monolith.transform.localScale = new Vector3(14f, 35f, 8f);
+            Material monolithMat = CreatePBRMat(new Color(0.08f, 0.08f, 0.10f), 0.4f, 0.6f);
+            monolith.GetComponent<MeshRenderer>().material = monolithMat;
+
+            // Cachoeira Mística Luminosa
+            GameObject waterfall = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            waterfall.name = "Mystic_Waterfall";
+            waterfall.transform.SetParent(monolith.transform);
+            waterfall.transform.localPosition = new Vector3(0, -0.1f, -0.55f);
+            waterfall.transform.localScale = new Vector3(0.45f, 0.85f, 0.2f);
+            DestroyImmediate(waterfall.GetComponent<Collider>());
+            Material fallMat = CreatePBRMat(new Color(0.85f, 0.95f, 1f, 0.95f), 0.1f, 0.98f);
+            fallMat.EnableKeyword("_EMISSION");
+            fallMat.SetColor("_EmissionColor", new Color(0.4f, 0.7f, 1f) * 1.8f);
+            waterfall.GetComponent<MeshRenderer>().material = fallMat;
+
+            // Luz Mística Traseira de Halo Solar
+            SetupLighting(new Color(1f, 0.88f, 0.55f), 2.8f, new Vector3(15f, 180f, 0), new Color(0.85f, 0.25f, 0.35f));
+        }
+
+        // --- ANEXO 3: CEMITÉRIO DE ESPADAS E ECLIPSE LUNAR ---
+        private void BuildStage_CemeteryOfSwords(GameObject root)
+        {
+            RenderSettings.fog = true;
+            RenderSettings.fogColor = new Color(0.32f, 0.18f, 0.15f);
+            RenderSettings.fogDensity = 0.018f;
+
+            // Solo Desolado com Cinzas Carmesins
+            GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            floor.name = "Floor_AshenWasteland";
+            floor.transform.SetParent(root.transform);
+            floor.transform.position = new Vector3(0, -0.5f, 0);
+            floor.transform.localScale = new Vector3(32f, 1f, 8f);
+            Material ashMat = CreatePBRMat(new Color(0.09f, 0.06f, 0.06f), 0.1f, 0.92f);
+            floor.GetComponent<MeshRenderer>().material = ashMat;
+
+            // Dezenas de Espadas Cravadas no Chão
+            Material bladeMat = CreatePBRMat(new Color(0.7f, 0.72f, 0.76f), 0.95f, 0.18f);
+            for (int i = -8; i <= 8; i++)
             {
-                if (GameObject.Find($"Pillar_{i}") == null)
+                for (int j = 1; j <= 3; j++)
                 {
-                    GameObject pillar = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                    pillar.name = $"Pillar_{i}";
-                    pillar.transform.position = new Vector3(i * 4.5f, 4f, 4.5f);
-                    pillar.transform.localScale = new Vector3(0.7f, 4.5f, 0.7f);
-
-                    Material pillarMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-                    pillarMat.color = new Color(0.12f, 0.15f, 0.22f);
-                    pillarMat.SetFloat("_Smoothness", 0.4f);
-                    pillar.GetComponent<MeshRenderer>().material = pillarMat;
-
-                    // Luz rúnica azul/dourada em cada pilar
-                    GameObject pLightObj = new GameObject($"PillarLight_{i}");
-                    pLightObj.transform.SetParent(pillar.transform);
-                    pLightObj.transform.localPosition = new Vector3(0, 0.5f, -0.6f);
-                    Light pLight = pLightObj.AddComponent<Light>();
-                    pLight.type = LightType.Point;
-                    pLight.color = (i % 2 == 0) ? new Color(0.2f, 0.7f, 1.0f) : new Color(1.0f, 0.8f, 0.3f);
-                    pLight.range = 7f;
-                    pLight.intensity = 1.6f;
+                    GameObject sword = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                    sword.name = $"Buried_Sword_{i}_{j}";
+                    sword.transform.SetParent(root.transform);
+                    float sx = i * 2.2f + Random.Range(-0.8f, 0.8f);
+                    float sz = j * 3.5f + Random.Range(-1f, 1.5f);
+                    float h = Random.Range(1.8f, 3.8f);
+                    sword.transform.position = new Vector3(sx, h * 0.4f, sz);
+                    sword.transform.localScale = new Vector3(0.04f, h, 0.04f);
+                    sword.transform.rotation = Quaternion.Euler(Random.Range(-18f, 18f), Random.Range(0, 360), Random.Range(-15f, 15f));
+                    DestroyImmediate(sword.GetComponent<Collider>());
+                    sword.GetComponent<MeshRenderer>().material = bladeMat;
                 }
             }
 
-            // 4. Luz de Recorte Traseira (Rim Light Chiaroscuro)
-            if (GameObject.Find("RimLight_Back") == null)
+            // Eclipse Lunar Crescente Escarlate
+            GameObject eclipse = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            eclipse.name = "Eclipse_Moon";
+            eclipse.transform.SetParent(root.transform);
+            eclipse.transform.position = new Vector3(-6f, 16f, 35f);
+            eclipse.transform.localScale = new Vector3(8f, 8f, 0.5f);
+            DestroyImmediate(eclipse.GetComponent<Collider>());
+            Material moonMat = CreatePBRMat(new Color(1f, 0.85f, 0.7f), 0.0f, 0.1f);
+            moonMat.EnableKeyword("_EMISSION");
+            moonMat.SetColor("_EmissionColor", new Color(1f, 0.45f, 0.25f) * 4f);
+            eclipse.GetComponent<MeshRenderer>().material = moonMat;
+
+            // Iluminação Sépia / Crepúsculo Dramático
+            SetupLighting(new Color(0.95f, 0.48f, 0.32f), 2.2f, new Vector3(22f, -40f, 0), new Color(0.85f, 0.15f, 0.15f));
+        }
+
+        // --- ANEXO 4: COSTA ROCHOSA DE BASALTO E RODA GIGANTE SUBMERSA ---
+        private void BuildStage_SunkenFerrisWheel(GameObject root)
+        {
+            RenderSettings.fog = true;
+            RenderSettings.fogColor = new Color(0.18f, 0.20f, 0.22f);
+            RenderSettings.fogDensity = 0.02f;
+
+            // Falésia Costeira de Colunas de Basalto Negro
+            GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            floor.name = "Floor_BasaltCliff";
+            floor.transform.SetParent(root.transform);
+            floor.transform.position = new Vector3(0, -0.5f, 0);
+            floor.transform.localScale = new Vector3(32f, 1f, 8f);
+            Material basaltMat = CreatePBRMat(new Color(0.06f, 0.07f, 0.08f), 0.35f, 0.65f);
+            floor.GetComponent<MeshRenderer>().material = basaltMat;
+
+            // Postes de Luz Belle Époque
+            for (int i = -1; i <= 1; i += 2)
             {
-                GameObject rimObj = new GameObject("RimLight_Back");
+                GameObject lamp = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                lamp.name = $"BelleEpoque_Lamp_{i}";
+                lamp.transform.SetParent(root.transform);
+                lamp.transform.position = new Vector3(i * 12f, 2.2f, 3.5f);
+                lamp.transform.localScale = new Vector3(0.12f, 2.2f, 0.12f);
+                Material ironLampMat = CreatePBRMat(new Color(0.08f, 0.09f, 0.1f), 0.9f, 0.2f);
+                lamp.GetComponent<MeshRenderer>().material = ironLampMat;
+
+                GameObject glow = new GameObject("LampGlow");
+                glow.transform.SetParent(lamp.transform);
+                glow.transform.localPosition = new Vector3(0, 1.1f, 0);
+                Light l = glow.AddComponent<Light>();
+                l.type = LightType.Point;
+                l.color = new Color(1f, 0.85f, 0.45f);
+                l.range = 8f;
+                l.intensity = 2.5f;
+            }
+
+            // A Roda Gigante Caída no Mar (Belle Époque Grande Roue)
+            GameObject wheelHub = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            wheelHub.name = "Sunken_FerrisWheel";
+            wheelHub.transform.SetParent(root.transform);
+            wheelHub.transform.position = new Vector3(-8f, 5f, 22f);
+            wheelHub.transform.localScale = new Vector3(18f, 0.4f, 18f);
+            wheelHub.transform.rotation = Quaternion.Euler(62f, 25f, -30f);
+            DestroyImmediate(wheelHub.GetComponent<Collider>());
+            Material wheelMat = CreatePBRMat(new Color(0.35f, 0.32f, 0.28f), 0.7f, 0.55f);
+            wheelHub.GetComponent<MeshRenderer>().material = wheelMat;
+
+            // Iluminação Melancólica de Tempestade Marítima
+            SetupLighting(new Color(0.75f, 0.82f, 0.92f), 1.8f, new Vector3(40f, -30f, 0), new Color(0.95f, 0.80f, 0.45f));
+        }
+
+        private Material CreatePBRMat(Color col, float metallic = 0.0f, float smoothness = 0.5f)
+        {
+            Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+            mat.color = col;
+            mat.SetFloat("_Metallic", metallic);
+            mat.SetFloat("_Smoothness", smoothness);
+            return mat;
+        }
+
+        private void SetupLighting(Color keyColor, float keyIntensity, Vector3 keyRot, Color rimColor)
+        {
+            // Luz Principal Direcional (Chiaroscuro)
+            GameObject keyObj = GameObject.Find("Directional Light (Chiaroscuro Key)");
+            if (keyObj != null)
+            {
+                Light l = keyObj.GetComponent<Light>();
+                l.color = keyColor;
+                l.intensity = keyIntensity;
+                keyObj.transform.rotation = Quaternion.Euler(keyRot);
+            }
+
+            // Luz de Recorte (Rim Light Traseira)
+            GameObject rimObj = GameObject.Find("RimLight_Back");
+            if (rimObj == null)
+            {
+                rimObj = new GameObject("RimLight_Back");
                 rimObj.transform.position = new Vector3(0, 4f, 5f);
                 Light rimLight = rimObj.AddComponent<Light>();
                 rimLight.type = LightType.Directional;
                 rimLight.transform.rotation = Quaternion.Euler(25f, 180f, 0);
-                rimLight.color = new Color(0.8f, 0.7f, 1.0f);
-                rimLight.intensity = 1.4f;
             }
+            Light rl = rimObj.GetComponent<Light>();
+            rl.color = rimColor;
+            rl.intensity = 1.6f;
+        }
 
             // 5. Criar Gustave (Player 1) com Modelo 3D Canônico
             GameObject p1Obj = GameObject.Find("Player1");
