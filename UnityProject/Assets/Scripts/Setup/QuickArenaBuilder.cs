@@ -76,54 +76,39 @@ namespace FightGame.Setup
         {
             RenderSettings.fog = true;
             RenderSettings.fogColor = new Color(0.24f, 0.28f, 0.35f);
-            RenderSettings.fogDensity = 0.015f;
+            RenderSettings.fogDensity = 0.012f;
 
-            // Piso de Ponte / Cais de Pedra Submerso
+            // 1. Chão Firme e Estável (Ponte de Pedra Belle Époque)
             GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
             floor.name = "Floor_LumiereBridge";
             floor.transform.SetParent(root.transform);
             floor.transform.position = new Vector3(0, -0.5f, 0);
-            floor.transform.localScale = new Vector3(32f, 1f, 8f);
-            Material bridgeMat = CreatePBRMat(new Color(0.12f, 0.14f, 0.16f), 0.3f, 0.85f);
+            floor.transform.localScale = new Vector3(36f, 1f, 8f);
+            Material bridgeMat = CreatePBRMat(new Color(0.16f, 0.18f, 0.20f), 0.2f, 0.85f);
             floor.GetComponent<MeshRenderer>().material = bridgeMat;
 
-            // Água Submersa com Reflexo
+            // 2. Modelo 3D Detalhado da Torre / Ruínas de Lumière
+            GameObject modelPrefab = Resources.Load<GameObject>("Models/Stages/Stage_Lumiere");
+            if (modelPrefab != null)
+            {
+                GameObject stageModel = Instantiate(modelPrefab, root.transform);
+                stageModel.name = "Lumiere_Stage_Mesh";
+                stageModel.transform.position = new Vector3(0, 0, 15f);
+                stageModel.transform.localScale = Vector3.one * 1.5f;
+            }
+
+            // 3. Reflexo da Água Submersa de Paris
             GameObject water = GameObject.CreatePrimitive(PrimitiveType.Cube);
             water.name = "Water_SunkenLumiere";
             water.transform.SetParent(root.transform);
-            water.transform.position = new Vector3(0, -0.7f, 4f);
-            water.transform.localScale = new Vector3(80f, 0.4f, 40f);
+            water.transform.position = new Vector3(0, -0.7f, 6f);
+            water.transform.localScale = new Vector3(90f, 0.4f, 45f);
             DestroyImmediate(water.GetComponent<Collider>());
-            Material waterMat = CreatePBRMat(new Color(0.04f, 0.08f, 0.12f, 0.9f), 0.1f, 0.98f);
+            Material waterMat = CreatePBRMat(new Color(0.05f, 0.09f, 0.14f, 0.95f), 0.1f, 0.98f);
             water.GetComponent<MeshRenderer>().material = waterMat;
 
-            // Torre de Ferro Partida e Retorcida ao Fundo
-            GameObject towerBase = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            towerBase.name = "Lumiere_Tower_Base";
-            towerBase.transform.SetParent(root.transform);
-            towerBase.transform.position = new Vector3(2f, 8f, 22f);
-            towerBase.transform.localScale = new Vector3(4f, 14f, 4f);
-            towerBase.transform.rotation = Quaternion.Euler(15f, 0, -12f);
-            Material ironMat = CreatePBRMat(new Color(0.18f, 0.22f, 0.24f), 0.85f, 0.45f);
-            towerBase.GetComponent<MeshRenderer>().material = ironMat;
-
-            // Escombros Flutuantes (Antigravidade de Clair Obscur)
-            for (int i = -5; i <= 5; i++)
-            {
-                GameObject chunk = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                chunk.name = $"Floating_Debris_{i}";
-                chunk.transform.SetParent(root.transform);
-                float rx = i * 4.2f + Random.Range(-1.5f, 1.5f);
-                float ry = Random.Range(6f, 16f);
-                float rz = Random.Range(12f, 25f);
-                chunk.transform.position = new Vector3(rx, ry, rz);
-                chunk.transform.localScale = new Vector3(Random.Range(1.5f, 4f), Random.Range(2f, 5f), Random.Range(1.5f, 3f));
-                chunk.transform.rotation = Random.rotation;
-                chunk.GetComponent<MeshRenderer>().material = ironMat;
-            }
-
-            // Iluminação Chiaroscuro Dourada entre Nuvens Tempestuosas
-            SetupLighting(new Color(1f, 0.92f, 0.80f), 2.2f, new Vector3(35f, -25f, 0), new Color(0.15f, 0.45f, 0.75f));
+            // 4. Iluminação Chiaroscuro Dourada entre Nuvens Tempestuosas
+            SetupLighting(new Color(1f, 0.92f, 0.80f), 2.4f, new Vector3(35f, -25f, 0), new Color(0.15f, 0.45f, 0.75f));
         }
 
         // --- ANEXO 2: MONÓLITO SAGRADO COM CACHOEIRA MÍSTICA E PÉTALAS ---
@@ -131,39 +116,40 @@ namespace FightGame.Setup
         {
             RenderSettings.fog = true;
             RenderSettings.fogColor = new Color(0.18f, 0.16f, 0.22f);
-            RenderSettings.fogDensity = 0.012f;
+            RenderSettings.fogDensity = 0.010f;
 
-            // Piso de Rocha com Grama Mística e Pétalas
+            // 1. Chão Firme e Estável (Platô de Rocha Mística)
             GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
             floor.name = "Floor_SacredRock";
             floor.transform.SetParent(root.transform);
             floor.transform.position = new Vector3(0, -0.5f, 0);
-            floor.transform.localScale = new Vector3(30f, 1f, 8f);
-            Material rockMat = CreatePBRMat(new Color(0.14f, 0.12f, 0.10f), 0.1f, 0.85f);
+            floor.transform.localScale = new Vector3(36f, 1f, 8f);
+            Material rockMat = CreatePBRMat(new Color(0.15f, 0.14f, 0.12f), 0.1f, 0.85f);
             floor.GetComponent<MeshRenderer>().material = rockMat;
 
-            // O Grande Monólito Central
-            GameObject monolith = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            monolith.name = "Sacred_Monolith";
-            monolith.transform.SetParent(root.transform);
-            monolith.transform.position = new Vector3(0, 15f, 24f);
-            monolith.transform.localScale = new Vector3(14f, 35f, 8f);
-            Material monolithMat = CreatePBRMat(new Color(0.08f, 0.08f, 0.10f), 0.4f, 0.6f);
-            monolith.GetComponent<MeshRenderer>().material = monolithMat;
+            // 2. Modelo 3D Detalhado do Monólito Sagrado & Cachoeira
+            GameObject monolithPrefab = Resources.Load<GameObject>("Models/Stages/Stage_Monolith");
+            if (monolithPrefab != null)
+            {
+                GameObject stageModel = Instantiate(monolithPrefab, root.transform);
+                stageModel.name = "Monolith_Stage_Mesh";
+                stageModel.transform.position = new Vector3(0, -0.5f, 18f);
+                stageModel.transform.localScale = Vector3.one * 1.8f;
+            }
 
-            // Cachoeira Mística Luminosa
+            // 3. Cachoeira Mística Luminosa Ciano Emissiva
             GameObject waterfall = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            waterfall.name = "Mystic_Waterfall";
-            waterfall.transform.SetParent(monolith.transform);
-            waterfall.transform.localPosition = new Vector3(0, -0.1f, -0.55f);
-            waterfall.transform.localScale = new Vector3(0.45f, 0.85f, 0.2f);
+            waterfall.name = "Mystic_Waterfall_Glow";
+            waterfall.transform.SetParent(root.transform);
+            waterfall.transform.position = new Vector3(0, 10f, 17f);
+            waterfall.transform.localScale = new Vector3(4.5f, 12f, 1.2f);
             DestroyImmediate(waterfall.GetComponent<Collider>());
             Material fallMat = CreatePBRMat(new Color(0.85f, 0.95f, 1f, 0.95f), 0.1f, 0.98f);
             fallMat.EnableKeyword("_EMISSION");
-            fallMat.SetColor("_EmissionColor", new Color(0.4f, 0.7f, 1f) * 1.8f);
+            fallMat.SetColor("_EmissionColor", new Color(0.3f, 0.75f, 1f) * 2.5f);
             waterfall.GetComponent<MeshRenderer>().material = fallMat;
 
-            // Luz Mística Traseira de Halo Solar
+            // 4. Luz Mística Traseira de Halo Solar
             SetupLighting(new Color(1f, 0.88f, 0.55f), 2.8f, new Vector3(15f, 180f, 0), new Color(0.85f, 0.25f, 0.35f));
         }
 
@@ -172,38 +158,28 @@ namespace FightGame.Setup
         {
             RenderSettings.fog = true;
             RenderSettings.fogColor = new Color(0.32f, 0.18f, 0.15f);
-            RenderSettings.fogDensity = 0.018f;
+            RenderSettings.fogDensity = 0.015f;
 
-            // Solo Desolado com Cinzas Carmesins
+            // 1. Chão Firme e Estável (Solo de Cinzas e Terra Queimada)
             GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
             floor.name = "Floor_AshenWasteland";
             floor.transform.SetParent(root.transform);
             floor.transform.position = new Vector3(0, -0.5f, 0);
-            floor.transform.localScale = new Vector3(32f, 1f, 8f);
-            Material ashMat = CreatePBRMat(new Color(0.09f, 0.06f, 0.06f), 0.1f, 0.92f);
+            floor.transform.localScale = new Vector3(36f, 1f, 8f);
+            Material ashMat = CreatePBRMat(new Color(0.12f, 0.08f, 0.08f), 0.1f, 0.92f);
             floor.GetComponent<MeshRenderer>().material = ashMat;
 
-            // Dezenas de Espadas Cravadas no Chão
-            Material bladeMat = CreatePBRMat(new Color(0.7f, 0.72f, 0.76f), 0.95f, 0.18f);
-            for (int i = -8; i <= 8; i++)
+            // 2. Modelo 3D Detalhado do Eclipse e Solo de Espadas
+            GameObject eclipsePrefab = Resources.Load<GameObject>("Models/Stages/Stage_Eclipse");
+            if (eclipsePrefab != null)
             {
-                for (int j = 1; j <= 3; j++)
-                {
-                    GameObject sword = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                    sword.name = $"Buried_Sword_{i}_{j}";
-                    sword.transform.SetParent(root.transform);
-                    float sx = i * 2.2f + Random.Range(-0.8f, 0.8f);
-                    float sz = j * 3.5f + Random.Range(-1f, 1.5f);
-                    float h = Random.Range(1.8f, 3.8f);
-                    sword.transform.position = new Vector3(sx, h * 0.4f, sz);
-                    sword.transform.localScale = new Vector3(0.04f, h, 0.04f);
-                    sword.transform.rotation = Quaternion.Euler(Random.Range(-18f, 18f), Random.Range(0, 360), Random.Range(-15f, 15f));
-                    DestroyImmediate(sword.GetComponent<Collider>());
-                    sword.GetComponent<MeshRenderer>().material = bladeMat;
-                }
+                GameObject stageModel = Instantiate(eclipsePrefab, root.transform);
+                stageModel.name = "Eclipse_Stage_Mesh";
+                stageModel.transform.position = new Vector3(0, -0.5f, 16f);
+                stageModel.transform.localScale = Vector3.one * 1.6f;
             }
 
-            // Eclipse Lunar Crescente Escarlate
+            // 3. Eclipse Lunar Crescente Escarlate
             GameObject eclipse = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             eclipse.name = "Eclipse_Moon";
             eclipse.transform.SetParent(root.transform);
@@ -215,7 +191,7 @@ namespace FightGame.Setup
             moonMat.SetColor("_EmissionColor", new Color(1f, 0.45f, 0.25f) * 4f);
             eclipse.GetComponent<MeshRenderer>().material = moonMat;
 
-            // Iluminação Sépia / Crepúsculo Dramático
+            // 4. Iluminação Sépia / Crepúsculo Dramático
             SetupLighting(new Color(0.95f, 0.48f, 0.32f), 2.2f, new Vector3(22f, -40f, 0), new Color(0.85f, 0.15f, 0.15f));
         }
 
@@ -224,18 +200,28 @@ namespace FightGame.Setup
         {
             RenderSettings.fog = true;
             RenderSettings.fogColor = new Color(0.18f, 0.20f, 0.22f);
-            RenderSettings.fogDensity = 0.02f;
+            RenderSettings.fogDensity = 0.016f;
 
-            // Falésia Costeira de Colunas de Basalto Negro
+            // 1. Chão Firme e Estável (Falésia de Basalto)
             GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
             floor.name = "Floor_BasaltCliff";
             floor.transform.SetParent(root.transform);
             floor.transform.position = new Vector3(0, -0.5f, 0);
-            floor.transform.localScale = new Vector3(32f, 1f, 8f);
-            Material basaltMat = CreatePBRMat(new Color(0.06f, 0.07f, 0.08f), 0.35f, 0.65f);
+            floor.transform.localScale = new Vector3(36f, 1f, 8f);
+            Material basaltMat = CreatePBRMat(new Color(0.08f, 0.09f, 0.10f), 0.35f, 0.65f);
             floor.GetComponent<MeshRenderer>().material = basaltMat;
 
-            // Postes de Luz Belle Époque
+            // 2. Modelo 3D Detalhado da Roda Gigante e Colunas de Basalto
+            GameObject ferrisPrefab = Resources.Load<GameObject>("Models/Stages/Stage_FerrisWheel");
+            if (ferrisPrefab != null)
+            {
+                GameObject stageModel = Instantiate(ferrisPrefab, root.transform);
+                stageModel.name = "FerrisWheel_Stage_Mesh";
+                stageModel.transform.position = new Vector3(0, -0.5f, 16f);
+                stageModel.transform.localScale = Vector3.one * 1.4f;
+            }
+
+            // 3. Postes de Luz Belle Époque
             for (int i = -1; i <= 1; i += 2)
             {
                 GameObject lamp = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
@@ -256,18 +242,7 @@ namespace FightGame.Setup
                 l.intensity = 2.5f;
             }
 
-            // A Roda Gigante Caída no Mar (Belle Époque Grande Roue)
-            GameObject wheelHub = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            wheelHub.name = "Sunken_FerrisWheel";
-            wheelHub.transform.SetParent(root.transform);
-            wheelHub.transform.position = new Vector3(-8f, 5f, 22f);
-            wheelHub.transform.localScale = new Vector3(18f, 0.4f, 18f);
-            wheelHub.transform.rotation = Quaternion.Euler(62f, 25f, -30f);
-            DestroyImmediate(wheelHub.GetComponent<Collider>());
-            Material wheelMat = CreatePBRMat(new Color(0.35f, 0.32f, 0.28f), 0.7f, 0.55f);
-            wheelHub.GetComponent<MeshRenderer>().material = wheelMat;
-
-            // Iluminação Melancólica de Tempestade Marítima
+            // 4. Iluminação Melancólica de Tempestade Marítima
             SetupLighting(new Color(0.75f, 0.82f, 0.92f), 1.8f, new Vector3(40f, -30f, 0), new Color(0.95f, 0.80f, 0.45f));
         }
 

@@ -21,8 +21,9 @@ namespace FightGame.Combat
                 bool hk1 = Input.GetKeyDown(KeyCode.I);
                 bool sp1 = Input.GetKeyDown(KeyCode.O);
                 bool sup1 = Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space);
+                bool block1 = Input.GetKey(KeyCode.LeftShift);
 
-                player1.HandleInput(h1, crouch1, jump1, lp1, hp1, lk1, hk1, sp1, sup1);
+                player1.HandleInput(h1, crouch1, jump1, lp1, hp1, lk1, hk1, sp1, sup1, block1);
             }
 
             if (player2 != null && isVersusLocal)
@@ -39,8 +40,9 @@ namespace FightGame.Combat
                 bool hk2 = Input.GetKeyDown(KeyCode.Keypad5);
                 bool sp2 = Input.GetKeyDown(KeyCode.Keypad6);
                 bool sup2 = Input.GetKeyDown(KeyCode.KeypadEnter);
+                bool block2 = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.Keypad0);
 
-                player2.HandleInput(h2, crouch2, jump2, lp2, hp2, lk2, hk2, sp2, sup2);
+                player2.HandleInput(h2, crouch2, jump2, lp2, hp2, lk2, hk2, sp2, sup2, block2);
             }
         }
     }

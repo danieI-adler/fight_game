@@ -68,6 +68,12 @@ namespace FightGame.Combat
             isGrounded = controller.isGrounded;
             stateTimer += Time.deltaTime;
 
+            // 4. Ganho passivo de energia especial de 1% por segundo
+            if (currentEnergy < 100f)
+            {
+                currentEnergy = Mathf.Min(100f, currentEnergy + 1.0f * Time.deltaTime);
+            }
+
             if (hitstunTimer > 0)
             {
                 hitstunTimer -= Time.deltaTime;
@@ -207,7 +213,7 @@ namespace FightGame.Combat
             modelRoot.localRotation = Quaternion.Slerp(modelRoot.localRotation, initialModelLocalRot * Quaternion.Euler(targetEuler), Time.deltaTime * 20f);
         }
 
-        public void HandleInput(float horizontalInput, bool crouch, bool jump, bool lightPunch, bool heavyPunch, bool lightKick, bool heavyKick, bool special, bool superMove)
+        public void HandleInput(float horizontalInput, bool crouch, bool jump, bool lightPunch, bool heavyPunch, bool lightKick, bool heavyKick, bool special, bool superMove, bool block = false)
         {
             if (hitstunTimer > 0 || currentState == FighterState.Knockdown || currentState == FighterState.Defeat) return;
 
@@ -238,6 +244,14 @@ namespace FightGame.Combat
             if (heavyKick && !isAttacking) { ExecuteAttack(isGrounded ? FighterState.HeavyKick : FighterState.JumpKick); return; }
 
             if (isAttacking) return;
+
+            // Bloqueio manual (Shift)
+            if (block && isGrounded)
+            {
+                moveVelocity.x = 0;
+                ChangeState(crouch ? FighterState.CrouchBlock : FighterState.Block);
+                return;
+            }
 
             float speed = characterData != null ? characterData.moveSpeed : 7f;
 
@@ -389,17 +403,27 @@ namespace FightGame.Combat
 
         private void ApplyMovementAndGravity()
         {
-            if (isGrounded && moveVelocity.y < 0)
+            if (controller.isGrounded && moveVelocity.y < 0)
             {
-                moveVelocity.y = -2f;
+                moveVelocity.y = -6f; // Força de aderência firme ao chão
             }
             else
             {
                 moveVelocity.y += gravity * Time.deltaTime;
             }
 
-            controller.Move(moveVelocity * Time.deltaTime);
-            moveVelocity.x = Mathf.Lerp(moveVelocity.x, 0, Time.deltaTime * 8f);
+            Vector3 finalMove = moveVelocity;
+            controller.Move(finalMove * Time.deltaTime);
+
+            // Restringir sempre ao plano 2D Z=0
+            Vector3 currentPos = transform.position;
+            if (Mathf.Abs(currentPos.z) > 0.001f)
+            {
+                currentPos.z = 0f;
+                transform.position = currentPos;
+            }
+
+            moveVelocity.x = Mathf.Lerp(moveVelocity.x, 0, Time.deltaTime * 12f);
         }
 
         private void AutoFaceOpponent()
