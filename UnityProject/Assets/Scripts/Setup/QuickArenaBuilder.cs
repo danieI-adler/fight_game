@@ -67,6 +67,8 @@ namespace FightGame.Setup
                     BuildStage_SunkenFerrisWheel(stageRoot);
                     break;
             }
+
+            SetupPlayersAndGameSystems();
         }
 
         // --- ANEXO 1: CIDADE DE LUMIÈRE E TORRE PARTIDA FLUTUANTE ---
@@ -305,6 +307,8 @@ namespace FightGame.Setup
             rl.intensity = 1.6f;
         }
 
+        private void SetupPlayersAndGameSystems()
+        {
             // 5. Criar Gustave (Player 1) com Modelo 3D Canônico
             GameObject p1Obj = GameObject.Find("Player1");
             if (p1Obj != null)
