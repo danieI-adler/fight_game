@@ -14,9 +14,27 @@ namespace FightGame.Setup
             BuildCinematicCombatEnvironment();
         }
 
+        private void CleanStrayObjects()
+        {
+            // Remover qualquer objeto residual ou duplicado criado na viewport
+            string[] toClean = new string[] { "Player1", "Player2", "Gustave", "Gustave(Clone)", "Maelle", "Maelle(Clone)", "MechanicalArm_Gold", "Rapier_Blade" };
+            foreach (var name in toClean)
+            {
+                var objs = GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+                foreach (var obj in objs)
+                {
+                    if (obj != null && (obj.name == name || obj.name.StartsWith(name)))
+                    {
+                        DestroyImmediate(obj);
+                    }
+                }
+            }
+        }
+
         [ContextMenu("Construir Arena Cinematográfica Belle Époque")]
         public void BuildCinematicCombatEnvironment()
         {
+            CleanStrayObjects();
             // 1. Gerenciadores de Efeitos (Hitstop e Faíscas)
             if (gameObject.GetComponent<HitstopManager>() == null) gameObject.AddComponent<HitstopManager>();
             if (gameObject.GetComponent<HitVFXManager>() == null) gameObject.AddComponent<HitVFXManager>();
