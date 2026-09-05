@@ -99,5 +99,23 @@ namespace FightGame.VFX
 
             if (bullet != null) Destroy(bullet);
         }
+
+        private IEnumerator AnimateSpark(GameObject spark, Vector3 velocity)
+        {
+            float timer = 0f;
+            float lifeTime = 0.25f;
+            Vector3 startScale = spark.transform.localScale;
+
+            while (timer < lifeTime && spark != null)
+            {
+                timer += Time.deltaTime;
+                spark.transform.position += velocity * Time.deltaTime;
+                spark.transform.localScale = Vector3.Lerp(startScale, Vector3.zero, timer / lifeTime);
+                velocity += Vector3.down * (9.8f * Time.deltaTime);
+                yield return null;
+            }
+
+            if (spark != null) Destroy(spark);
+        }
     }
 }

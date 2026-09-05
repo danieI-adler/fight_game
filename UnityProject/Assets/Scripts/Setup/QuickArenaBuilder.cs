@@ -30,7 +30,7 @@ namespace FightGame.Setup
             string[] toClean = new string[] { "Player1", "Player2", "Gustave", "Gustave(Clone)", "Maelle", "Maelle(Clone)", "MechanicalArm_Gold", "Rapier_Blade", "ArenaStageRoot" };
             foreach (var name in toClean)
             {
-                var objs = GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+                var objs = GameObject.FindObjectsByType<GameObject>(FindObjectsInactive.Include);
                 foreach (var obj in objs)
                 {
                     if (obj != null && (obj.name == name || obj.name.StartsWith(name)))
