@@ -73,100 +73,105 @@ namespace FightGame.Setup
 
             // 5. Criar Gustave (Player 1) com Modelo 3D Canônico
             GameObject p1Obj = GameObject.Find("Player1");
-            if (p1Obj == null)
+            if (p1Obj != null)
             {
-                p1Obj = new GameObject("Player1");
-                p1Obj.transform.position = new Vector3(-3.5f, 0f, 0);
-
-                var charController1 = p1Obj.AddComponent<CharacterController>();
-                charController1.center = new Vector3(0, 0.95f, 0);
-                charController1.height = 1.9f;
-                charController1.radius = 0.45f;
-
-                var fighter1 = p1Obj.AddComponent<FighterController>();
-                fighter1.isPlayer2 = false;
-
-                // Carregar ou instanciar Modelo 3D do Gustave
-                GameObject gustavePrefab = Resources.Load<GameObject>("Models/Gustave");
-                GameObject visualModel = null;
-                if (gustavePrefab != null)
-                {
-                    visualModel = Instantiate(gustavePrefab, p1Obj.transform);
-                    visualModel.name = "Gustave_VisualModel";
-                    visualModel.transform.localPosition = Vector3.zero;
-                    visualModel.transform.localRotation = Quaternion.Euler(0, 0, 0);
-                }
-                else
-                {
-                    // Fallback visual
-                    visualModel = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                    visualModel.name = "Gustave_VisualModel";
-                    visualModel.transform.SetParent(p1Obj.transform);
-                    visualModel.transform.localPosition = new Vector3(0, 0.95f, 0);
-                    DestroyImmediate(visualModel.GetComponent<Collider>());
-                }
-
-                fighter1.modelRoot = visualModel.transform;
-
-                var hurtbox1 = p1Obj.AddComponent<Hurtbox>();
-                hurtbox1.owner = fighter1;
-
-                GameObject hb1Obj = new GameObject("Hitbox_P1");
-                hb1Obj.transform.SetParent(p1Obj.transform);
-                var hb1 = hb1Obj.AddComponent<Hitbox>();
-                hb1.owner = fighter1;
-                fighter1.activeHitbox = hb1;
+                DestroyImmediate(p1Obj);
             }
+
+            p1Obj = new GameObject("Player1");
+            p1Obj.transform.position = new Vector3(-3.5f, 0f, 0);
+
+            var charController1 = p1Obj.AddComponent<CharacterController>();
+            charController1.center = new Vector3(0, 0.95f, 0);
+            charController1.height = 1.9f;
+            charController1.radius = 0.45f;
+
+            var fighter1 = p1Obj.AddComponent<FighterController>();
+            fighter1.isPlayer2 = false;
+            fighter1.currentHealth = 1000f;
+
+            // Carregar ou instanciar Modelo 3D do Gustave
+            GameObject gustavePrefab = Resources.Load<GameObject>("Models/Gustave");
+            GameObject visualModel = null;
+            if (gustavePrefab != null)
+            {
+                visualModel = Instantiate(gustavePrefab, p1Obj.transform);
+                visualModel.name = "Gustave_VisualModel";
+                visualModel.transform.localPosition = Vector3.zero;
+                visualModel.transform.localRotation = Quaternion.Euler(0, 0, 0);
+            }
+            else
+            {
+                visualModel = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                visualModel.name = "Gustave_VisualModel";
+                visualModel.transform.SetParent(p1Obj.transform);
+                visualModel.transform.localPosition = new Vector3(0, 0.95f, 0);
+                DestroyImmediate(visualModel.GetComponent<Collider>());
+            }
+
+            fighter1.modelRoot = visualModel.transform;
+
+            var hurtbox1 = p1Obj.AddComponent<Hurtbox>();
+            hurtbox1.owner = fighter1;
+
+            GameObject hb1Obj = new GameObject("Hitbox_P1");
+            hb1Obj.transform.SetParent(p1Obj.transform);
+            var hb1 = hb1Obj.AddComponent<Hitbox>();
+            hb1.owner = fighter1;
+            fighter1.activeHitbox = hb1;
 
             // 6. Criar Maelle / Oponente (Player 2)
             GameObject p2Obj = GameObject.Find("Player2");
-            if (p2Obj == null)
+            if (p2Obj != null)
             {
-                p2Obj = new GameObject("Player2");
-                p2Obj.transform.position = new Vector3(3.5f, 0f, 0);
-
-                var charController2 = p2Obj.AddComponent<CharacterController>();
-                charController2.center = new Vector3(0, 0.95f, 0);
-                charController2.height = 1.9f;
-                charController2.radius = 0.45f;
-
-                var fighter2 = p2Obj.AddComponent<FighterController>();
-                fighter2.isPlayer2 = true;
-
-                // Carregar ou instanciar Modelo 3D de Maelle
-                GameObject maellePrefab = Resources.Load<GameObject>("Models/Maelle");
-                GameObject visualModel2 = null;
-                if (maellePrefab != null)
-                {
-                    visualModel2 = Instantiate(maellePrefab, p2Obj.transform);
-                    visualModel2.name = "Maelle_VisualModel";
-                    visualModel2.transform.localPosition = Vector3.zero;
-                    visualModel2.transform.localRotation = Quaternion.Euler(0, 0, 0);
-                }
-                else
-                {
-                    visualModel2 = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                    visualModel2.name = "Maelle_VisualModel";
-                    visualModel2.transform.SetParent(p2Obj.transform);
-                    visualModel2.transform.localPosition = new Vector3(0, 0.95f, 0);
-                    DestroyImmediate(visualModel2.GetComponent<Collider>());
-
-                    Material maelleMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-                    maelleMat.color = new Color(0.65f, 0.12f, 0.18f);
-                    visualModel2.GetComponent<MeshRenderer>().material = maelleMat;
-                }
-
-                fighter2.modelRoot = visualModel2.transform;
-
-                var hurtbox2 = p2Obj.AddComponent<Hurtbox>();
-                hurtbox2.owner = fighter2;
-
-                GameObject hb2Obj = new GameObject("Hitbox_P2");
-                hb2Obj.transform.SetParent(p2Obj.transform);
-                var hb2 = hb2Obj.AddComponent<Hitbox>();
-                hb2.owner = fighter2;
-                fighter2.activeHitbox = hb2;
+                DestroyImmediate(p2Obj);
             }
+
+            p2Obj = new GameObject("Player2");
+            p2Obj.transform.position = new Vector3(3.5f, 0f, 0);
+
+            var charController2 = p2Obj.AddComponent<CharacterController>();
+            charController2.center = new Vector3(0, 0.95f, 0);
+            charController2.height = 1.9f;
+            charController2.radius = 0.45f;
+
+            var fighter2 = p2Obj.AddComponent<FighterController>();
+            fighter2.isPlayer2 = true;
+            fighter2.currentHealth = 1000f;
+
+            // Carregar ou instanciar Modelo 3D de Maelle
+            GameObject maellePrefab = Resources.Load<GameObject>("Models/Maelle");
+            GameObject visualModel2 = null;
+            if (maellePrefab != null)
+            {
+                visualModel2 = Instantiate(maellePrefab, p2Obj.transform);
+                visualModel2.name = "Maelle_VisualModel";
+                visualModel2.transform.localPosition = Vector3.zero;
+                visualModel2.transform.localRotation = Quaternion.Euler(0, 0, 0);
+            }
+            else
+            {
+                visualModel2 = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                visualModel2.name = "Maelle_VisualModel";
+                visualModel2.transform.SetParent(p2Obj.transform);
+                visualModel2.transform.localPosition = new Vector3(0, 0.95f, 0);
+                DestroyImmediate(visualModel2.GetComponent<Collider>());
+
+                Material maelleMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+                maelleMat.color = new Color(0.65f, 0.12f, 0.18f);
+                visualModel2.GetComponent<MeshRenderer>().material = maelleMat;
+            }
+
+            fighter2.modelRoot = visualModel2.transform;
+
+            var hurtbox2 = p2Obj.AddComponent<Hurtbox>();
+            hurtbox2.owner = fighter2;
+
+            GameObject hb2Obj = new GameObject("Hitbox_P2");
+            hb2Obj.transform.SetParent(p2Obj.transform);
+            var hb2 = hb2Obj.AddComponent<Hitbox>();
+            hb2.owner = fighter2;
+            fighter2.activeHitbox = hb2;
 
             // Conectar oponentes
             var f1 = p1Obj.GetComponent<FighterController>();

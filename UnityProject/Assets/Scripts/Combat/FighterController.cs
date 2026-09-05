@@ -38,10 +38,7 @@ namespace FightGame.Combat
         private void Awake()
         {
             controller = GetComponent<CharacterController>();
-            if (characterData != null)
-            {
-                currentHealth = characterData.maxHealth;
-            }
+            currentHealth = characterData != null ? characterData.maxHealth : 1000f;
             currentEnergy = 0f;
         }
 
@@ -52,6 +49,10 @@ namespace FightGame.Combat
 
         private void Start()
         {
+            if (currentHealth <= 0)
+            {
+                currentHealth = characterData != null ? characterData.maxHealth : 1000f;
+            }
             facingDirection = isPlayer2 ? -1 : 1;
             UpdateFacingRotation();
 
@@ -93,43 +94,42 @@ namespace FightGame.Combat
             switch (currentState)
             {
                 case FighterState.Idle:
-                    // Respiração de combate suave e postura de guarda
                     float breath = Mathf.Sin(t) * 0.035f;
                     targetPos += new Vector3(0, breath, 0);
                     targetEuler = new Vector3(Mathf.Sin(t * 0.5f) * 2f, 0, Mathf.Cos(t * 0.5f) * 1.5f);
                     break;
 
                 case FighterState.WalkForward:
-                    // Inclinação dinâmica e passo à frente
                     float stepFwd = Mathf.Sin(Time.time * 9f) * 0.06f;
                     targetPos += new Vector3(0, Mathf.Abs(stepFwd), stepFwd * 0.5f);
                     targetEuler = new Vector3(6f, 0, Mathf.Sin(Time.time * 9f) * 4f);
                     break;
 
                 case FighterState.WalkBack:
-                    // Guarda recuada defensiva
                     float stepBack = Mathf.Sin(Time.time * 8f) * 0.04f;
                     targetPos += new Vector3(0, Mathf.Abs(stepBack), -stepBack * 0.3f);
                     targetEuler = new Vector3(-4f, 0, -Mathf.Sin(Time.time * 8f) * 3f);
                     break;
 
-                case FighterState.Crouch:
+                case FighterState.Block:
                 case FighterState.CrouchBlock:
-                    // Agachamento defensivo
-                    targetPos += new Vector3(0, -0.45f, 0);
-                    targetEuler = new Vector3(10f, 0, 0);
+                    targetPos += new Vector3(0, -0.1f, -0.15f);
+                    targetEuler = new Vector3(8f, 0, 0);
+                    break;
+
+                case FighterState.Crouch:
+                    targetPos += new Vector3(0, -0.35f, 0);
+                    targetEuler = new Vector3(8f, 0, 0);
                     break;
 
                 case FighterState.Jump:
                 case FighterState.JumpPunch:
                 case FighterState.JumpKick:
-                    // Postura aérea dinâmica
-                    targetEuler = new Vector3(-12f, 0, 0);
+                    targetEuler = new Vector3(-10f, 0, 0);
                     break;
 
                 case FighterState.LightPunch:
                 case FighterState.HeavyPunch:
-                    // Estocada com braço mecânico / punho frontal
                     float punchProg = Mathf.Sin(Mathf.Clamp01(stateTimer / 0.25f) * Mathf.PI);
                     targetPos += new Vector3(0, 0, punchProg * 0.45f);
                     targetEuler = new Vector3(punchProg * 12f, -punchProg * 15f, 0);
@@ -137,7 +137,6 @@ namespace FightGame.Combat
 
                 case FighterState.LightKick:
                 case FighterState.HeavyKick:
-                    // Chute estendido
                     float kickProg = Mathf.Sin(Mathf.Clamp01(stateTimer / 0.3f) * Mathf.PI);
                     targetPos += new Vector3(0, kickProg * 0.15f, kickProg * 0.4f);
                     targetEuler = new Vector3(-kickProg * 18f, 0, kickProg * 10f);
@@ -145,21 +144,19 @@ namespace FightGame.Combat
 
                 case FighterState.SpecialMove:
                 case FighterState.SuperMove:
-                    // Sobrecarga de energia cinética / ataque épico
                     float superProg = Mathf.Sin(Mathf.Clamp01(stateTimer / 0.6f) * Mathf.PI);
                     targetPos += new Vector3(0, superProg * 0.25f, superProg * 0.65f);
                     targetEuler = new Vector3(superProg * 25f, superProg * 20f, 0);
                     break;
 
                 case FighterState.Hurt:
-                    // Recuo por impacto
                     float hurtProg = Mathf.Sin(Mathf.Clamp01(stateTimer / 0.25f) * Mathf.PI);
                     targetPos += new Vector3(0, 0, -hurtProg * 0.35f);
                     targetEuler = new Vector3(-hurtProg * 22f, 0, 0);
                     break;
 
                 case FighterState.Knockdown:
-                    // Queda ao solo
+                case FighterState.Defeat:
                     targetPos += new Vector3(0, -0.85f, -0.4f);
                     targetEuler = new Vector3(-80f, 0, 0);
                     break;
@@ -173,15 +170,14 @@ namespace FightGame.Combat
         {
             if (hitstunTimer > 0 || currentState == FighterState.Knockdown || currentState == FighterState.Defeat) return;
 
-            // Bloqueio
-            bool isHoldingBack = (facingDirection == 1 && horizontalInput < -0.1f) || (facingDirection == -1 && horizontalInput > 0.1f);
-            if (isHoldingBack && isGrounded)
-            {
-                ChangeState(crouch ? FighterState.CrouchBlock : FighterState.Block);
-                return;
-            }
+            // Bloqueio apenas se estiver sendo atacado ou em estado neutro com oponente ativo
+            bool isAttacking = (currentState == FighterState.LightPunch || currentState == FighterState.HeavyPunch ||
+                                currentState == FighterState.LightKick || currentState == FighterState.HeavyKick ||
+                                currentState == FighterState.CrouchPunch || currentState == FighterState.CrouchKick ||
+                                currentState == FighterState.JumpPunch || currentState == FighterState.JumpKick ||
+                                currentState == FighterState.SpecialMove || currentState == FighterState.SuperMove);
 
-            // Ataques
+            // Ataques com prioridade máxima
             if (superMove && currentEnergy >= 100f)
             {
                 ExecuteAttack(FighterState.SuperMove);
@@ -196,27 +192,31 @@ namespace FightGame.Combat
                 return;
             }
 
-            if (lightPunch) { ExecuteAttack(crouch ? FighterState.CrouchPunch : (isGrounded ? FighterState.LightPunch : FighterState.JumpPunch)); return; }
-            if (heavyPunch) { ExecuteAttack(isGrounded ? FighterState.HeavyPunch : FighterState.JumpPunch); return; }
-            if (lightKick) { ExecuteAttack(crouch ? FighterState.CrouchKick : (isGrounded ? FighterState.LightKick : FighterState.JumpKick)); return; }
-            if (heavyKick) { ExecuteAttack(isGrounded ? FighterState.HeavyKick : FighterState.JumpKick); return; }
+            if (lightPunch && !isAttacking) { ExecuteAttack(crouch ? FighterState.CrouchPunch : (isGrounded ? FighterState.LightPunch : FighterState.JumpPunch)); return; }
+            if (heavyPunch && !isAttacking) { ExecuteAttack(isGrounded ? FighterState.HeavyPunch : FighterState.JumpPunch); return; }
+            if (lightKick && !isAttacking) { ExecuteAttack(crouch ? FighterState.CrouchKick : (isGrounded ? FighterState.LightKick : FighterState.JumpKick)); return; }
+            if (heavyKick && !isAttacking) { ExecuteAttack(isGrounded ? FighterState.HeavyKick : FighterState.JumpKick); return; }
 
-            // Movimento e Pulo
+            if (isAttacking) return;
+
+            float speed = characterData != null ? characterData.moveSpeed : 7f;
+
+            // Pulo e Movimento
             if (isGrounded)
             {
                 if (jump)
                 {
                     moveVelocity.y = characterData != null ? characterData.jumpForce : 14f;
+                    moveVelocity.x = horizontalInput * speed;
                     ChangeState(FighterState.Jump);
                 }
                 else if (crouch)
                 {
-                    ChangeState(FighterState.Crouch);
                     moveVelocity.x = 0;
+                    ChangeState(FighterState.Crouch);
                 }
-                else if (Mathf.Abs(horizontalInput) > 0.1f)
+                else if (Mathf.Abs(horizontalInput) > 0.05f)
                 {
-                    float speed = characterData != null ? characterData.moveSpeed : 7f;
                     moveVelocity.x = horizontalInput * speed;
                     bool movingForward = (facingDirection == 1 && horizontalInput > 0) || (facingDirection == -1 && horizontalInput < 0);
                     ChangeState(movingForward ? FighterState.WalkForward : FighterState.WalkBack);
@@ -227,6 +227,14 @@ namespace FightGame.Combat
                     ChangeState(FighterState.Idle);
                 }
             }
+            else
+            {
+                // Controle aéreo / pulo diagonal
+                if (Mathf.Abs(horizontalInput) > 0.05f)
+                {
+                    moveVelocity.x = horizontalInput * speed;
+                }
+            }
         }
 
         private void ExecuteAttack(FighterState state)
@@ -234,7 +242,7 @@ namespace FightGame.Combat
             AttackData attack = attacks.Find(a => a.targetState == state);
             if (attack == null)
             {
-                attack = new AttackData { targetState = state, damage = 50f, activeTime = 0.2f, startupTime = 0.08f };
+                attack = new AttackData { targetState = state, damage = 60f, activeTime = 0.22f, startupTime = 0.06f, recoveryTime = 0.15f };
             }
 
             StartCoroutine(AttackCoroutine(attack));
@@ -243,7 +251,7 @@ namespace FightGame.Combat
         private IEnumerator AttackCoroutine(AttackData attack)
         {
             ChangeState(attack.targetState);
-            moveVelocity.x = 0;
+            if (isGrounded) moveVelocity.x = 0;
 
             yield return new WaitForSeconds(attack.startupTime);
 
@@ -263,7 +271,7 @@ namespace FightGame.Combat
 
             if (currentState == attack.targetState)
             {
-                ChangeState(FighterState.Idle);
+                ChangeState(isGrounded ? FighterState.Idle : FighterState.Jump);
             }
         }
 
