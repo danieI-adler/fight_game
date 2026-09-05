@@ -15,10 +15,9 @@ export const VictoryScreen = ({ winner, loser, onRematch, onSelectCharacter, onM
           </div>
         )}
 
-        <h2 className="text-2xl font-black text-amber-200 uppercase mb-0.5 tracking-wider font-serif">
+        <h2 className="text-2xl font-black text-amber-200 uppercase mb-4 tracking-wider font-serif">
           {winner.name}
         </h2>
-        <span className="text-xs text-slate-400 mb-5">{winner.title}</span>
 
         <div className="flex flex-col gap-2.5 w-full">
           <button

@@ -198,24 +198,16 @@ export const CharacterSelect = ({
                         />
                       </div>
                     )}
-                    <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-0.5">
+                    <div className="flex-1 min-w-0 flex flex-col justify-center h-full py-0.5">
                       <div>
-                        <span className={`text-xs font-bold block truncate ${
+                        <span className={`text-sm font-bold block truncate ${
                           isExpedition ? 'text-amber-200 font-serif' : 'text-slate-200'
                         }`}>
                           {char.name}
                         </span>
-                        <span className="text-[10px] text-slate-400 block truncate">
-                          {char.title}
-                        </span>
-                        {char.style && (
-                          <span className="text-[9px] text-amber-400/80 block truncate mt-0.5 font-mono">
-                            {char.style}
-                          </span>
-                        )}
                       </div>
                       <div
-                        className="w-full h-1 rounded-full mt-1"
+                        className="w-full h-1 rounded-full mt-2"
                         style={{ backgroundColor: char.themeColor }}
                       />
                     </div>
@@ -247,8 +239,7 @@ export const CharacterSelect = ({
               )}
               <div className="min-w-0 flex-1">
                 <span className="font-bold text-blue-300 text-xs block truncate">{selectedCharP1.name}</span>
-                <span className="text-[9px] text-slate-400 block truncate">{selectedCharP1.title}</span>
-                <div className="text-[9px] text-slate-300 space-y-0.5 mt-0.5">
+                <div className="text-[9px] text-slate-300 space-y-0.5 mt-1">
                   <div>Atk: {Math.round(selectedCharP1.stats.attackPower * 100)}% | Def: {Math.round(selectedCharP1.stats.defense * 100)}%</div>
                   <div>Velocidade: {selectedCharP1.stats.speed}</div>
                 </div>
@@ -264,8 +255,7 @@ export const CharacterSelect = ({
               )}
               <div className="min-w-0 flex-1">
                 <span className="font-bold text-red-300 text-xs block truncate">{selectedCharP2.name}</span>
-                <span className="text-[9px] text-slate-400 block truncate">{selectedCharP2.title}</span>
-                <div className="text-[9px] text-slate-300 space-y-0.5 mt-0.5">
+                <div className="text-[9px] text-slate-300 space-y-0.5 mt-1">
                   <div>Atk: {Math.round(selectedCharP2.stats.attackPower * 100)}% | Def: {Math.round(selectedCharP2.stats.defense * 100)}%</div>
                   <div>Velocidade: {selectedCharP2.stats.speed}</div>
                 </div>

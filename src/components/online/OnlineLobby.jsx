@@ -395,12 +395,9 @@ export const OnlineLobby = ({ initialRoomCode, graphicsMode = 'BELLE_EPOQUE_2D',
                     <span className="text-xs font-bold text-slate-200 mt-2 block truncate">
                       {char.name}
                     </span>
-                    <span className="text-[10px] text-slate-400 block truncate w-full text-center">
-                      {char.title}
-                    </span>
 
                     <div
-                      className="w-full h-0.5 rounded-full mt-1"
+                      className="w-full h-0.5 rounded-full mt-2"
                       style={{ backgroundColor: char.themeColor }}
                     />
                   </div>

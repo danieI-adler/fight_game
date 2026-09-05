@@ -1,19 +1,17 @@
 /**
  * Personagens Oficiais de Clair Obscur: Expedition 33
- * Elenco completo da expedição e a entidade do Monólito.
+ * Elenco da expedição e a entidade do Monólito.
  */
 
 export const EXPEDITION_33_CHARACTERS = [
   {
     id: 101,
     name: 'Gustave',
-    title: 'Engenheiro Chefe da Expedição',
     image: './assets/expedition33/gustave.png',
     themeColor: '#0ea5e9',
     secondaryColor: '#0369a1',
     glowColor: 'rgba(14, 165, 233, 0.85)',
     energyColor: '#7dd3fc',
-    style: 'Braço Mecânico & Lanceram',
     stats: { health: 1050, speed: 7.0, jumpForce: 13.8, attackPower: 1.15, defense: 1.05 },
     visual: {
       coatType: 'trenchcoat',
@@ -38,13 +36,11 @@ export const EXPEDITION_33_CHARACTERS = [
   {
     id: 102,
     name: 'Maelle',
-    title: 'A Duelista do Florete',
     image: './assets/expedition33/maelle.png',
     themeColor: '#38bdf8',
     secondaryColor: '#0284c7',
     glowColor: 'rgba(56, 189, 248, 0.85)',
     energyColor: '#bae6fd',
-    style: 'Esgrima Belle Époque & Florete',
     stats: { health: 920, speed: 8.5, jumpForce: 14.5, attackPower: 0.98, defense: 0.9 },
     visual: {
       coatType: 'capelet',
@@ -67,13 +63,11 @@ export const EXPEDITION_33_CHARACTERS = [
   {
     id: 103,
     name: 'Lune',
-    title: 'A Erudita dos Astros',
     image: './assets/expedition33/lune.png',
     themeColor: '#a855f7',
     secondaryColor: '#6b21a8',
     glowColor: 'rgba(168, 85, 247, 0.85)',
     energyColor: '#e9d5ff',
-    style: 'Magia Astral & Runas de Tinta',
     stats: { health: 940, speed: 7.4, jumpForce: 14.0, attackPower: 1.1, defense: 0.92 },
     visual: {
       coatType: 'mantle',
@@ -98,13 +92,11 @@ export const EXPEDITION_33_CHARACTERS = [
   {
     id: 104,
     name: 'Sciel',
-    title: 'A Guerreira das Máscaras',
     image: './assets/expedition33/sciel.png',
     themeColor: '#f59e0b',
     secondaryColor: '#b45309',
     glowColor: 'rgba(245, 158, 11, 0.85)',
     energyColor: '#fef3c7',
-    style: 'Lâminas Duplas & Fitas Douradas',
     stats: { health: 980, speed: 8.0, jumpForce: 14.2, attackPower: 1.05, defense: 0.95 },
     visual: {
       coatType: 'duster',
@@ -129,13 +121,11 @@ export const EXPEDITION_33_CHARACTERS = [
   {
     id: 105,
     name: 'Renoir',
-    title: 'O Patriarca Implacável',
     image: './assets/expedition33/renoir.png',
     themeColor: '#78716c',
     secondaryColor: '#44403c',
     glowColor: 'rgba(120, 113, 108, 0.85)',
     energyColor: '#e7e5e4',
-    style: 'Traje de Gala, Bengala & Impacto Pesado',
     stats: { health: 1200, speed: 5.8, jumpForce: 12.6, attackPower: 1.25, defense: 1.2 },
     visual: {
       coatType: 'draped_overcoat',
@@ -159,13 +149,11 @@ export const EXPEDITION_33_CHARACTERS = [
   {
     id: 106,
     name: 'Verso',
-    title: 'O Andarilho da Primeira Expedição',
     image: './assets/expedition33/verso.png',
     themeColor: '#6366f1',
     secondaryColor: '#4338ca',
     glowColor: 'rgba(99, 102, 241, 0.85)',
     energyColor: '#c7d2fe',
-    style: 'Lâmina Dourada, Adagas & Névoa',
     stats: { health: 950, speed: 8.3, jumpForce: 14.4, attackPower: 1.02, defense: 0.92 },
     visual: {
       coatType: 'fur_collar_coat',
@@ -189,13 +177,11 @@ export const EXPEDITION_33_CHARACTERS = [
   {
     id: 107,
     name: 'Monoco',
-    title: 'O Gestral Ancestral',
     image: './assets/expedition33/monoco.png',
     themeColor: '#d97706',
     secondaryColor: '#78350f',
     glowColor: 'rgba(217, 119, 6, 0.85)',
     energyColor: '#fef3c7',
-    style: 'Corpo Pétreo, Monólito Facial & Cajado-Sino',
     stats: { health: 1280, speed: 5.4, jumpForce: 12.2, attackPower: 1.32, defense: 1.25 },
     visual: {
       coatType: 'stone_shell',
@@ -219,45 +205,13 @@ export const EXPEDITION_33_CHARACTERS = [
     description: 'Gestral guardião. Corpo pétreo coberto por pelos brancos, monólito gravado como rosto e cajado com sino de bronze.'
   },
   {
-    id: 108,
-    name: 'Esquie',
-    title: 'A Criatura dos Céus',
-    image: './assets/expedition33/esquie.png',
-    themeColor: '#10b981',
-    secondaryColor: '#047857',
-    glowColor: 'rgba(16, 185, 129, 0.85)',
-    energyColor: '#a7f3d0',
-    style: 'Voos Rasantes & Giros Aéreos',
-    stats: { health: 890, speed: 9.0, jumpForce: 15.5, attackPower: 0.94, defense: 0.85 },
-    visual: {
-      coatType: 'capelet',
-      headgear: 'none',
-      hairColor: '#047857',
-      hairStyle: 'avian_crest',
-      hasMustache: false,
-      maskStyle: 'porcelain_full',
-      coatColor: '#064e3b',
-      accentColor: '#34d399',
-      vestColor: '#022c22',
-      pantColor: '#0f172a',
-      bootColor: '#1c1917',
-      gloveColor: '#059669',
-      paintTrailColor: '#34d399',
-      weaponType: 'winged_talons',
-      isEsquie: true
-    },
-    description: 'A veloz criatura alada companheira da expedição. Realiza voos rasantes, giros acrobáticos no ar e ataques com penas e garras mágicas.'
-  },
-  {
     id: 109,
     name: 'La Peintresse',
-    title: 'A Pintora do Monólito',
     image: './assets/expedition33/la_peintresse.png',
     themeColor: '#fbbf24',
     secondaryColor: '#d97706',
     glowColor: 'rgba(251, 191, 36, 0.95)',
     energyColor: '#ffffff',
-    style: 'Pincel Divino & Tinta da Morte',
     stats: { health: 1350, speed: 6.5, jumpForce: 13.5, attackPower: 1.35, defense: 1.15 },
     visual: {
       coatType: 'baroque_gown',

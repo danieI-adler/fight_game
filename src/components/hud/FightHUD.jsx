@@ -42,9 +42,6 @@ export const FightHUD = ({
             <span className="font-bold text-base text-slate-100">
               {char1.name}
             </span>
-            <span className="text-[11px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
-              {char1.title}
-            </span>
             <div className="flex gap-1 ml-2">
               {[0, 1].map((idx) => (
                 <div
@@ -113,9 +110,6 @@ export const FightHUD = ({
                 />
               ))}
             </div>
-            <span className="text-[11px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
-              {char2.title}
-            </span>
             <span className="font-bold text-base text-slate-100">
               {char2.name}
             </span>
