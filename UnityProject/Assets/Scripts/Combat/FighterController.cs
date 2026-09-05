@@ -193,6 +193,18 @@ namespace FightGame.Combat
                 hitstunTimer = attack.hitstunDuration;
                 ApplyKnockback(attack.knockback, attacker.facingDirection);
                 ChangeState(attack.causesKnockdown ? FighterState.Knockdown : FighterState.Hurt);
+
+                // Efeitos Visuais & Impacto Cinematográfico (Hitstop & VFX)
+                if (FightGame.Combat.HitstopManager.Instance != null)
+                {
+                    FightGame.Combat.HitstopManager.Instance.TriggerHitstop(attack.isHeavy ? 0.08f : 0.04f, attack.isHeavy);
+                }
+
+                if (FightGame.VFX.HitVFXManager.Instance != null)
+                {
+                    Vector3 hitPos = (transform.position + attacker.transform.position) * 0.5f + Vector3.up * 1.2f;
+                    FightGame.VFX.HitVFXManager.Instance.SpawnHitSpark(hitPos, attack.isHeavy, attacker.characterData != null ? attacker.characterData.themeColor : Color.yellow);
+                }
             }
 
             if (currentHealth <= 0)
