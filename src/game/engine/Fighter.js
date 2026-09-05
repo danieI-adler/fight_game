@@ -4,6 +4,7 @@ import { sounds } from '../audio/soundManager';
 import { FighterRenderer } from './FighterRenderer';
 import { StickRenderer } from './StickRenderer';
 import { ExpeditionRenderer } from './ExpeditionRenderer';
+import { ExpeditionHDRenderer } from './ExpeditionHDRenderer';
 
 export const FIGHTER_STATE = {
   IDLE: 'IDLE',
@@ -787,7 +788,9 @@ export class Fighter {
   }
 
   draw(ctx, showHitboxes = false, graphicsMode = 'BELLE_EPOQUE_2D', isExpedition = false) {
-    if (isExpedition) {
+    if (graphicsMode === 'EXPEDITION_HD_SPRITES') {
+      ExpeditionHDRenderer.draw(ctx, this, showHitboxes);
+    } else if (isExpedition) {
       ExpeditionRenderer.draw(ctx, this, showHitboxes);
     } else if (graphicsMode === 'STICK_2D') {
       StickRenderer.draw(ctx, this, showHitboxes);

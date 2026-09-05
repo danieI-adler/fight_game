@@ -147,7 +147,7 @@ export class GameEngine {
       this.engine3D = null;
     }
 
-    if (this.graphicsMode === 'MODE_2_5D' || this.graphicsMode === 'FULL_3D') {
+    if (this.graphicsMode === 'MODE_2_5D' || this.graphicsMode === 'FULL_3D' || this.graphicsMode === 'EXPEDITION_PBR_3D') {
       try {
         const parent = this.canvas.parentElement || document.body;
         this.engine3D = new GameEngine3D(parent, this.graphicsMode === 'FULL_3D');
@@ -155,7 +155,7 @@ export class GameEngine {
         parent.appendChild(this.engine3D.domElement);
       } catch (err) {
         console.error('Failed to init 3D engine, fallback to 2D:', err);
-        this.graphicsMode = 'BELLE_EPOQUE_2D';
+        this.graphicsMode = 'EXPEDITION_HD_SPRITES';
       }
     }
 
@@ -515,7 +515,7 @@ export class GameEngine {
       if (this.engine3D) {
         this.engine3D.update(this.p1, this.p2);
       }
-    } else if (this.graphicsMode === 'MODE_2_5D') {
+    } else if (this.graphicsMode === 'MODE_2_5D' || this.graphicsMode === 'EXPEDITION_PBR_3D') {
       this.camera.applyTransform(ctx);
       if (this.isExpedition) {
         ExpeditionStageRenderer.draw(ctx, this.stageId || 'monolith_33', this.camera);
@@ -529,7 +529,7 @@ export class GameEngine {
         this.engine3D.update(this.p1, this.p2);
       }
     } else {
-      // Modos 2D: STICK_2D ou BELLE_EPOQUE_2D
+      // Modos 2D: STICK_2D, BELLE_EPOQUE_2D ou EXPEDITION_HD_SPRITES
       this.camera.applyTransform(ctx);
       if (this.isExpedition) {
         ExpeditionStageRenderer.draw(ctx, this.stageId || 'monolith_33', this.camera);
