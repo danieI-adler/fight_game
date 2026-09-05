@@ -3,6 +3,7 @@ using FightGame.Combat;
 using FightGame.CameraSystem;
 using FightGame.Managers;
 using FightGame.VFX;
+using FightGame.UI;
 
 namespace FightGame.Setup
 {
