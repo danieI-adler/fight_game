@@ -70,58 +70,42 @@ namespace FightGame.Setup
                 rimLight.intensity = 1.4f;
             }
 
-            // 5. Criar Gustave (Player 1) com visual detalhado
+            // 5. Criar Gustave (Player 1) com Modelo 3D Canônico
             GameObject p1Obj = GameObject.Find("Player1");
             if (p1Obj == null)
             {
-                p1Obj = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                p1Obj.name = "Player1";
-                p1Obj.transform.position = new Vector3(-3.5f, 1f, 0);
-
-                var col1 = p1Obj.GetComponent<CapsuleCollider>();
-                if (col1 != null) DestroyImmediate(col1);
+                p1Obj = new GameObject("Player1");
+                p1Obj.transform.position = new Vector3(-3.5f, 0f, 0);
 
                 var charController1 = p1Obj.AddComponent<CharacterController>();
-                charController1.center = Vector3.zero;
-                charController1.height = 2f;
-                charController1.radius = 0.5f;
+                charController1.center = new Vector3(0, 0.95f, 0);
+                charController1.height = 1.9f;
+                charController1.radius = 0.45f;
 
                 var fighter1 = p1Obj.AddComponent<FighterController>();
                 fighter1.isPlayer2 = false;
 
-                // Material Veludo Azul Belle Époque de Gustave
-                Material gustaveMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-                gustaveMat.color = new Color(0.08f, 0.22f, 0.38f);
-                gustaveMat.SetFloat("_Smoothness", 0.65f);
-                gustaveMat.SetFloat("_Metallic", 0.25f);
-                p1Obj.GetComponent<MeshRenderer>().material = gustaveMat;
+                // Carregar ou instanciar Modelo 3D do Gustave
+                GameObject gustavePrefab = Resources.Load<GameObject>("Models/Gustave");
+                GameObject visualModel = null;
+                if (gustavePrefab != null)
+                {
+                    visualModel = Instantiate(gustavePrefab, p1Obj.transform);
+                    visualModel.name = "Gustave_VisualModel";
+                    visualModel.transform.localPosition = Vector3.zero;
+                    visualModel.transform.localRotation = Quaternion.Euler(0, 0, 0);
+                }
+                else
+                {
+                    // Fallback visual
+                    visualModel = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                    visualModel.name = "Gustave_VisualModel";
+                    visualModel.transform.SetParent(p1Obj.transform);
+                    visualModel.transform.localPosition = new Vector3(0, 0.95f, 0);
+                    DestroyImmediate(visualModel.GetComponent<Collider>());
+                }
 
-                // Braço Mecânico Dourado de Gustave (Overcharge)
-                GameObject armObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                armObj.name = "MechanicalArm_Gold";
-                armObj.transform.SetParent(p1Obj.transform);
-                armObj.transform.localPosition = new Vector3(0.55f, 0.2f, 0.2f);
-                armObj.transform.localScale = new Vector3(0.25f, 0.5f, 0.25f);
-                armObj.transform.localRotation = Quaternion.Euler(30, 0, -20);
-                DestroyImmediate(armObj.GetComponent<Collider>());
-
-                Material goldMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-                goldMat.color = new Color(0.95f, 0.75f, 0.25f);
-                goldMat.SetFloat("_Metallic", 0.95f);
-                goldMat.SetFloat("_Smoothness", 0.85f);
-                armObj.GetComponent<MeshRenderer>().material = goldMat;
-
-                // Núcleo Elétrico Ciano
-                GameObject coreObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                coreObj.transform.SetParent(armObj.transform);
-                coreObj.transform.localPosition = new Vector3(0, 0, 0.4f);
-                coreObj.transform.localScale = new Vector3(0.6f, 0.3f, 0.6f);
-                DestroyImmediate(coreObj.GetComponent<Collider>());
-                Material coreMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-                coreMat.color = new Color(0.2f, 0.85f, 1.0f);
-                coreMat.EnableKeyword("_EMISSION");
-                coreMat.SetColor("_EmissionColor", new Color(0.2f, 0.85f, 1.0f) * 2f);
-                coreObj.GetComponent<MeshRenderer>().material = coreMat;
+                fighter1.modelRoot = visualModel.transform;
 
                 var hurtbox1 = p1Obj.AddComponent<Hurtbox>();
                 hurtbox1.owner = fighter1;
@@ -133,46 +117,45 @@ namespace FightGame.Setup
                 fighter1.activeHitbox = hb1;
             }
 
-            // 6. Criar Maelle (Player 2) com Florete de Duelo
+            // 6. Criar Maelle / Oponente (Player 2)
             GameObject p2Obj = GameObject.Find("Player2");
             if (p2Obj == null)
             {
-                p2Obj = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                p2Obj.name = "Player2";
-                p2Obj.transform.position = new Vector3(3.5f, 1f, 0);
-
-                var col2 = p2Obj.GetComponent<CapsuleCollider>();
-                if (col2 != null) DestroyImmediate(col2);
+                p2Obj = new GameObject("Player2");
+                p2Obj.transform.position = new Vector3(3.5f, 0f, 0);
 
                 var charController2 = p2Obj.AddComponent<CharacterController>();
-                charController2.center = Vector3.zero;
-                charController2.height = 2f;
-                charController2.radius = 0.5f;
+                charController2.center = new Vector3(0, 0.95f, 0);
+                charController2.height = 1.9f;
+                charController2.radius = 0.45f;
 
                 var fighter2 = p2Obj.AddComponent<FighterController>();
                 fighter2.isPlayer2 = true;
 
-                // Material Traje Nobre de Maelle
-                Material maelleMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-                maelleMat.color = new Color(0.55f, 0.12f, 0.15f);
-                maelleMat.SetFloat("_Smoothness", 0.7f);
-                maelleMat.SetFloat("_Metallic", 0.3f);
-                p2Obj.GetComponent<MeshRenderer>().material = maelleMat;
+                // Carregar ou instanciar Modelo 3D de Maelle
+                GameObject maellePrefab = Resources.Load<GameObject>("Models/Maelle");
+                GameObject visualModel2 = null;
+                if (maellePrefab != null)
+                {
+                    visualModel2 = Instantiate(maellePrefab, p2Obj.transform);
+                    visualModel2.name = "Maelle_VisualModel";
+                    visualModel2.transform.localPosition = Vector3.zero;
+                    visualModel2.transform.localRotation = Quaternion.Euler(0, 0, 0);
+                }
+                else
+                {
+                    visualModel2 = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                    visualModel2.name = "Maelle_VisualModel";
+                    visualModel2.transform.SetParent(p2Obj.transform);
+                    visualModel2.transform.localPosition = new Vector3(0, 0.95f, 0);
+                    DestroyImmediate(visualModel2.GetComponent<Collider>());
 
-                // Florete Prateado de Duelo
-                GameObject rapierObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                rapierObj.name = "Rapier_Blade";
-                rapierObj.transform.SetParent(p2Obj.transform);
-                rapierObj.transform.localPosition = new Vector3(-0.6f, -0.1f, 0.4f);
-                rapierObj.transform.localScale = new Vector3(0.04f, 0.8f, 0.04f);
-                rapierObj.transform.localRotation = Quaternion.Euler(75, 0, 0);
-                DestroyImmediate(rapierObj.GetComponent<Collider>());
+                    Material maelleMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+                    maelleMat.color = new Color(0.65f, 0.12f, 0.18f);
+                    visualModel2.GetComponent<MeshRenderer>().material = maelleMat;
+                }
 
-                Material steelMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-                steelMat.color = new Color(0.9f, 0.95f, 1.0f);
-                steelMat.SetFloat("_Metallic", 0.95f);
-                steelMat.SetFloat("_Smoothness", 0.95f);
-                rapierObj.GetComponent<MeshRenderer>().material = steelMat;
+                fighter2.modelRoot = visualModel2.transform;
 
                 var hurtbox2 = p2Obj.AddComponent<Hurtbox>();
                 hurtbox2.owner = fighter2;
@@ -192,6 +175,12 @@ namespace FightGame.Setup
                 f1.opponent = f2;
                 f2.opponent = f1;
             }
+
+            // Configurar HUD
+            var hud = gameObject.GetComponent<CombatHUD>();
+            if (hud == null) hud = gameObject.AddComponent<CombatHUD>();
+            hud.fighter1 = f1;
+            hud.fighter2 = f2;
 
             // Configurar Câmera
             Camera mainCam = Camera.main;
@@ -213,8 +202,9 @@ namespace FightGame.Setup
             if (gm == null) gm = gameObject.AddComponent<GameManager>();
             gm.player1 = f1;
             gm.player2 = f2;
+            gm.hud = hud;
 
-            Debug.Log("<color=#fbbf24>✦ Arena Cinematográfica Clair Obscur montada com sucesso!</color>");
+            Debug.Log("<color=#fbbf24>✦ Arena Cinematográfica Clair Obscur montada com Gustave AAA e HUD ativo!</color>");
         }
     }
 }

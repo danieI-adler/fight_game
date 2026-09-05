@@ -45,10 +45,21 @@ namespace FightGame.Combat
             currentEnergy = 0f;
         }
 
+        [Header("Hierarquia Visual")]
+        public Transform modelRoot;
+        private Vector3 initialModelLocalPos;
+        private Quaternion initialModelLocalRot;
+
         private void Start()
         {
             facingDirection = isPlayer2 ? -1 : 1;
             UpdateFacingRotation();
+
+            if (modelRoot != null)
+            {
+                initialModelLocalPos = modelRoot.localPosition;
+                initialModelLocalRot = modelRoot.localRotation;
+            }
         }
 
         private void Update()
@@ -68,6 +79,94 @@ namespace FightGame.Combat
             AutoFaceOpponent();
             ApplyMovementAndGravity();
             UpdateAnimator();
+            UpdateProceduralAnimation();
+        }
+
+        private void UpdateProceduralAnimation()
+        {
+            if (modelRoot == null) return;
+
+            float t = Time.time * 4.5f;
+            Vector3 targetPos = initialModelLocalPos;
+            Vector3 targetEuler = Vector3.zero;
+
+            switch (currentState)
+            {
+                case FighterState.Idle:
+                    // Respiração de combate suave e postura de guarda
+                    float breath = Mathf.Sin(t) * 0.035f;
+                    targetPos += new Vector3(0, breath, 0);
+                    targetEuler = new Vector3(Mathf.Sin(t * 0.5f) * 2f, 0, Mathf.Cos(t * 0.5f) * 1.5f);
+                    break;
+
+                case FighterState.WalkForward:
+                    // Inclinação dinâmica e passo à frente
+                    float stepFwd = Mathf.Sin(Time.time * 9f) * 0.06f;
+                    targetPos += new Vector3(0, Mathf.Abs(stepFwd), stepFwd * 0.5f);
+                    targetEuler = new Vector3(6f, 0, Mathf.Sin(Time.time * 9f) * 4f);
+                    break;
+
+                case FighterState.WalkBack:
+                    // Guarda recuada defensiva
+                    float stepBack = Mathf.Sin(Time.time * 8f) * 0.04f;
+                    targetPos += new Vector3(0, Mathf.Abs(stepBack), -stepBack * 0.3f);
+                    targetEuler = new Vector3(-4f, 0, -Mathf.Sin(Time.time * 8f) * 3f);
+                    break;
+
+                case FighterState.Crouch:
+                case FighterState.CrouchBlock:
+                    // Agachamento defensivo
+                    targetPos += new Vector3(0, -0.45f, 0);
+                    targetEuler = new Vector3(10f, 0, 0);
+                    break;
+
+                case FighterState.Jump:
+                case FighterState.JumpPunch:
+                case FighterState.JumpKick:
+                    // Postura aérea dinâmica
+                    targetEuler = new Vector3(-12f, 0, 0);
+                    break;
+
+                case FighterState.LightPunch:
+                case FighterState.HeavyPunch:
+                    // Estocada com braço mecânico / punho frontal
+                    float punchProg = Mathf.Sin(Mathf.Clamp01(stateTimer / 0.25f) * Mathf.PI);
+                    targetPos += new Vector3(0, 0, punchProg * 0.45f);
+                    targetEuler = new Vector3(punchProg * 12f, -punchProg * 15f, 0);
+                    break;
+
+                case FighterState.LightKick:
+                case FighterState.HeavyKick:
+                    // Chute estendido
+                    float kickProg = Mathf.Sin(Mathf.Clamp01(stateTimer / 0.3f) * Mathf.PI);
+                    targetPos += new Vector3(0, kickProg * 0.15f, kickProg * 0.4f);
+                    targetEuler = new Vector3(-kickProg * 18f, 0, kickProg * 10f);
+                    break;
+
+                case FighterState.SpecialMove:
+                case FighterState.SuperMove:
+                    // Sobrecarga de energia cinética / ataque épico
+                    float superProg = Mathf.Sin(Mathf.Clamp01(stateTimer / 0.6f) * Mathf.PI);
+                    targetPos += new Vector3(0, superProg * 0.25f, superProg * 0.65f);
+                    targetEuler = new Vector3(superProg * 25f, superProg * 20f, 0);
+                    break;
+
+                case FighterState.Hurt:
+                    // Recuo por impacto
+                    float hurtProg = Mathf.Sin(Mathf.Clamp01(stateTimer / 0.25f) * Mathf.PI);
+                    targetPos += new Vector3(0, 0, -hurtProg * 0.35f);
+                    targetEuler = new Vector3(-hurtProg * 22f, 0, 0);
+                    break;
+
+                case FighterState.Knockdown:
+                    // Queda ao solo
+                    targetPos += new Vector3(0, -0.85f, -0.4f);
+                    targetEuler = new Vector3(-80f, 0, 0);
+                    break;
+            }
+
+            modelRoot.localPosition = Vector3.Lerp(modelRoot.localPosition, targetPos, Time.deltaTime * 18f);
+            modelRoot.localRotation = Quaternion.Slerp(modelRoot.localRotation, initialModelLocalRot * Quaternion.Euler(targetEuler), Time.deltaTime * 18f);
         }
 
         public void HandleInput(float horizontalInput, bool crouch, bool jump, bool lightPunch, bool heavyPunch, bool lightKick, bool heavyKick, bool special, bool superMove)
