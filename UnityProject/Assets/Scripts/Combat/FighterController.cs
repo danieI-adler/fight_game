@@ -415,13 +415,14 @@ namespace FightGame.Combat
             Vector3 finalMove = moveVelocity;
             controller.Move(finalMove * Time.deltaTime);
 
-            // Restringir sempre ao plano 2D Z=0
+            // Restringir sempre ao plano 2D Z=0 e limites de borda da arena (Sem quedas!)
             Vector3 currentPos = transform.position;
+            currentPos.x = Mathf.Clamp(currentPos.x, -13.5f, 13.5f);
             if (Mathf.Abs(currentPos.z) > 0.001f)
             {
                 currentPos.z = 0f;
-                transform.position = currentPos;
             }
+            transform.position = currentPos;
 
             moveVelocity.x = Mathf.Lerp(moveVelocity.x, 0, Time.deltaTime * 12f);
         }
