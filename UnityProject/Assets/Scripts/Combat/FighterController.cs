@@ -143,17 +143,32 @@ namespace FightGame.Combat
                     break;
 
                 case FighterState.LightPunch:
-                    // SOCO / CORTE RÁPIDO COM A ESPADA: Golpe cortante horizontal rápido
-                    float slash1 = Mathf.Sin(Mathf.Clamp01(stateTimer / 0.22f) * Mathf.PI);
-                    targetPos += new Vector3(0, 0.05f, slash1 * 0.55f);
-                    targetEuler = new Vector3(slash1 * 18f, -slash1 * 35f, slash1 * 10f);
+                    // GOLPE DE ESPADA RÁPIDO (Corte Horizontal Belle Époque):
+                    // Fase 1: Windup (0% a 25%), Fase 2: Corte veloz (25% a 65%), Fase 3: Recuperação (65% a 100%)
+                    float p1 = Mathf.Clamp01(stateTimer / 0.24f);
+                    float slashArc1 = (p1 < 0.25f) 
+                        ? Mathf.Lerp(0f, -25f, p1 / 0.25f) // Preparação erguendo a espada para trás
+                        : (p1 < 0.65f)
+                            ? Mathf.Lerp(-25f, 65f, (p1 - 0.25f) / 0.40f) // Corte rápido em arco diagonal
+                            : Mathf.Lerp(65f, 0f, (p1 - 0.65f) / 0.35f); // Retorno à guarda
+
+                    float fwdLean1 = Mathf.Sin(p1 * Mathf.PI);
+                    targetPos += new Vector3(0, 0.08f * fwdLean1, fwdLean1 * 0.65f);
+                    targetEuler = new Vector3(slashArc1 * 0.4f, -slashArc1 * 0.85f, slashArc1 * 0.3f);
                     break;
 
                 case FighterState.HeavyPunch:
-                    // CORTE PESADO VERTICAL / ESTOCADA DE LÂMINA: Avanço poderoso com rotação total
-                    float slash2 = Mathf.Sin(Mathf.Clamp01(stateTimer / 0.32f) * Mathf.PI);
-                    targetPos += new Vector3(0, slash2 * 0.12f, slash2 * 0.75f);
-                    targetEuler = new Vector3(slash2 * 28f, -slash2 * 45f, slash2 * 15f);
+                    // CORTE PESADO VERTICAL / ESTOCADA DESTRUCTORA:
+                    float p2 = Mathf.Clamp01(stateTimer / 0.34f);
+                    float slashArc2 = (p2 < 0.30f)
+                        ? Mathf.Lerp(0f, -40f, p2 / 0.30f) // Grande recuo com a espada erguida acima da cabeça
+                        : (p2 < 0.70f)
+                            ? Mathf.Lerp(-40f, 90f, (p2 - 0.30f) / 0.40f) // Descida cortante potente com peso corporal
+                            : Mathf.Lerp(90f, 0f, (p2 - 0.70f) / 0.30f);
+
+                    float fwdLean2 = Mathf.Sin(p2 * Mathf.PI);
+                    targetPos += new Vector3(0, -0.05f + 0.14f * fwdLean2, fwdLean2 * 0.95f);
+                    targetEuler = new Vector3(slashArc2 * 0.75f, -slashArc2 * 0.5f, slashArc2 * 0.2f);
                     break;
 
                 case FighterState.LightKick:
