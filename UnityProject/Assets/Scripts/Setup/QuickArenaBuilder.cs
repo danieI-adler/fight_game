@@ -27,7 +27,11 @@ namespace FightGame.Setup
 
         private void CleanStrayObjects()
         {
-            string[] toClean = new string[] { "Player1", "Player2", "Gustave", "Gustave(Clone)", "Maelle", "Maelle(Clone)", "MechanicalArm_Gold", "Rapier_Blade", "ArenaStageRoot" };
+            string[] toClean = new string[] { 
+                "Player1", "Player2", "Gustave", "Gustave(Clone)", "Maelle", "Maelle(Clone)", 
+                "MechanicalArm_Gold", "Rapier_Blade", "ArenaStageRoot", "Arena Ground (Piso de Mármore)",
+                "Floor_CombatPlane", "Directional Light"
+            };
             foreach (var name in toClean)
             {
                 var objs = GameObject.FindObjectsByType<GameObject>(FindObjectsInactive.Include);
@@ -72,7 +76,7 @@ namespace FightGame.Setup
         }
 
         // --- MÉTODO AUXILIAR PARA CRIAR BACKDROP 2D CINEMATOGRÁFICO ---
-        private void CreateStageBackdrop(GameObject root, string textureName, float width = 50f, float height = 28f, float zPos = 20f, float yOffset = 10f)
+        private void CreateStageBackdrop(GameObject root, string textureName, float width = 85f, float height = 48f, float zPos = 18f, float yOffset = 15f)
         {
             GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
             quad.name = $"Backdrop_{textureName}";
@@ -92,14 +96,16 @@ namespace FightGame.Setup
 
         private void CreateCombatFloor(GameObject root)
         {
-            // Chão de combate estável e amplo (sem quedas)
+            // Chão de combate contínuo e sólido, invisível para não criar conflito visual/flickering com a arte de fundo
             GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
             floor.name = "Floor_CombatPlane";
             floor.transform.SetParent(root.transform);
             floor.transform.position = new Vector3(0, -0.5f, 0);
-            floor.transform.localScale = new Vector3(60f, 1f, 10f);
-            Material shadowCatcher = CreatePBRMat(new Color(0.08f, 0.08f, 0.09f), 0.1f, 0.8f);
-            floor.GetComponent<MeshRenderer>().material = shadowCatcher;
+            floor.transform.localScale = new Vector3(100f, 1f, 12f);
+            
+            // Material sutil que recebe sombras dos lutadores sobre o fundo
+            Material floorMat = CreatePBRMat(new Color(0.04f, 0.04f, 0.05f, 0.25f), 0f, 0.9f);
+            floor.GetComponent<MeshRenderer>().material = floorMat;
         }
 
         // --- ANEXO 1: CIDADE DE LUMIÈRE E TORRE PARTIDA FLUTUANTE ---
@@ -107,7 +113,7 @@ namespace FightGame.Setup
         {
             RenderSettings.fog = false;
             CreateCombatFloor(root);
-            CreateStageBackdrop(root, "Stage_Lumiere_BG", 52f, 29f, 22f, 11f);
+            CreateStageBackdrop(root, "Stage_Lumiere_BG", 85f, 48f, 18f, 15f);
             SetupLighting(new Color(1f, 0.94f, 0.85f), 1.8f, new Vector3(35f, -25f, 0), new Color(0.2f, 0.5f, 0.8f));
         }
 
@@ -116,7 +122,7 @@ namespace FightGame.Setup
         {
             RenderSettings.fog = false;
             CreateCombatFloor(root);
-            CreateStageBackdrop(root, "Stage_Monolith_BG", 52f, 29f, 22f, 11f);
+            CreateStageBackdrop(root, "Stage_Monolith_BG", 85f, 48f, 18f, 15f);
             SetupLighting(new Color(1f, 0.90f, 0.65f), 2.0f, new Vector3(20f, 180f, 0), new Color(0.85f, 0.35f, 0.45f));
         }
 
@@ -125,7 +131,7 @@ namespace FightGame.Setup
         {
             RenderSettings.fog = false;
             CreateCombatFloor(root);
-            CreateStageBackdrop(root, "Stage_Eclipse_BG", 52f, 29f, 22f, 11f);
+            CreateStageBackdrop(root, "Stage_Eclipse_BG", 85f, 48f, 18f, 15f);
             SetupLighting(new Color(0.95f, 0.52f, 0.35f), 1.8f, new Vector3(25f, -40f, 0), new Color(0.85f, 0.15f, 0.15f));
         }
 
@@ -134,7 +140,7 @@ namespace FightGame.Setup
         {
             RenderSettings.fog = false;
             CreateCombatFloor(root);
-            CreateStageBackdrop(root, "Stage_FerrisWheel_BG", 52f, 29f, 22f, 11f);
+            CreateStageBackdrop(root, "Stage_FerrisWheel_BG", 85f, 48f, 18f, 15f);
             SetupLighting(new Color(0.78f, 0.84f, 0.95f), 1.6f, new Vector3(40f, -30f, 0), new Color(0.95f, 0.80f, 0.45f));
         }
 
