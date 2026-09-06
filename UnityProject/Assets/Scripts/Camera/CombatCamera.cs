@@ -27,7 +27,8 @@ namespace FightGame.CameraSystem
             float distance = Mathf.Abs(player1.position.x - player2.position.x);
 
             float targetZ = -Mathf.Clamp(distance * zoomMultiplier, minDistance, maxDistance);
-            Vector3 targetPosition = new Vector3(midPoint.x, midPoint.y + yOffset, targetZ);
+            float targetY = Mathf.Max(1.5f, midPoint.y + yOffset);
+            Vector3 targetPosition = new Vector3(midPoint.x, targetY, targetZ);
 
             // Aplicação de Shake dinâmico
             if (shakeTime > 0)

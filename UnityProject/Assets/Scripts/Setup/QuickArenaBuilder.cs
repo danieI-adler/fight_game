@@ -76,7 +76,7 @@ namespace FightGame.Setup
         }
 
         // --- MÉTODO AUXILIAR PARA CRIAR BACKDROP 2D CINEMATOGRÁFICO ---
-        private void CreateStageBackdrop(GameObject root, string textureName, float width = 85f, float height = 48f, float zPos = 18f, float yOffset = 15f)
+        private void CreateStageBackdrop(GameObject root, string textureName, float width = 95f, float height = 55f, float zPos = 16f, float yOffset = 10f)
         {
             GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
             quad.name = $"Backdrop_{textureName}";
@@ -113,8 +113,8 @@ namespace FightGame.Setup
         {
             RenderSettings.fog = false;
             CreateCombatFloor(root);
-            CreateStageBackdrop(root, "Stage_Lumiere_BG", 85f, 48f, 18f, 15f);
-            SetupLighting(new Color(1f, 0.94f, 0.85f), 1.8f, new Vector3(35f, -25f, 0), new Color(0.2f, 0.5f, 0.8f));
+            CreateStageBackdrop(root, "Stage_Lumiere_BG", 95f, 55f, 16f, 10f);
+            SetupLighting(new Color(1f, 0.96f, 0.90f), 2.8f, new Vector3(35f, -25f, 0), new Color(0.3f, 0.6f, 0.9f));
         }
 
         // --- ANEXO 2: MONÓLITO SAGRADO COM CACHOEIRA MÍSTICA E PÉTALAS ---
@@ -122,8 +122,8 @@ namespace FightGame.Setup
         {
             RenderSettings.fog = false;
             CreateCombatFloor(root);
-            CreateStageBackdrop(root, "Stage_Monolith_BG", 85f, 48f, 18f, 15f);
-            SetupLighting(new Color(1f, 0.90f, 0.65f), 2.0f, new Vector3(20f, 180f, 0), new Color(0.85f, 0.35f, 0.45f));
+            CreateStageBackdrop(root, "Stage_Monolith_BG", 95f, 55f, 16f, 10f);
+            SetupLighting(new Color(1f, 0.92f, 0.75f), 3.0f, new Vector3(20f, 180f, 0), new Color(0.95f, 0.45f, 0.55f));
         }
 
         // --- ANEXO 3: CEMITÉRIO DE ESPADAS E ECLIPSE LUNAR ---
@@ -131,8 +131,8 @@ namespace FightGame.Setup
         {
             RenderSettings.fog = false;
             CreateCombatFloor(root);
-            CreateStageBackdrop(root, "Stage_Eclipse_BG", 85f, 48f, 18f, 15f);
-            SetupLighting(new Color(0.95f, 0.52f, 0.35f), 1.8f, new Vector3(25f, -40f, 0), new Color(0.85f, 0.15f, 0.15f));
+            CreateStageBackdrop(root, "Stage_Eclipse_BG", 95f, 55f, 16f, 10f);
+            SetupLighting(new Color(1.0f, 0.62f, 0.45f), 2.8f, new Vector3(25f, -40f, 0), new Color(0.95f, 0.25f, 0.25f));
         }
 
         // --- ANEXO 4: COSTA ROCHOSA DE BASALTO E RODA GIGANTE SUBMERSA ---
@@ -140,8 +140,8 @@ namespace FightGame.Setup
         {
             RenderSettings.fog = false;
             CreateCombatFloor(root);
-            CreateStageBackdrop(root, "Stage_FerrisWheel_BG", 85f, 48f, 18f, 15f);
-            SetupLighting(new Color(0.78f, 0.84f, 0.95f), 1.6f, new Vector3(40f, -30f, 0), new Color(0.95f, 0.80f, 0.45f));
+            CreateStageBackdrop(root, "Stage_FerrisWheel_BG", 95f, 55f, 16f, 10f);
+            SetupLighting(new Color(0.88f, 0.92f, 1.0f), 2.6f, new Vector3(40f, -30f, 0), new Color(1.0f, 0.85f, 0.55f));
         }
 
         private Material CreatePBRMat(Color col, float metallic = 0.0f, float smoothness = 0.5f)
@@ -155,15 +155,36 @@ namespace FightGame.Setup
 
         private void SetupLighting(Color keyColor, float keyIntensity, Vector3 keyRot, Color rimColor)
         {
+            // Luz Ambiente Global da Cena
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+            RenderSettings.ambientLight = new Color(0.35f, 0.35f, 0.4f);
+
             // Luz Principal Direcional (Chiaroscuro)
             GameObject keyObj = GameObject.Find("Directional Light (Chiaroscuro Key)");
-            if (keyObj != null)
+            if (keyObj == null)
             {
-                Light l = keyObj.GetComponent<Light>();
-                l.color = keyColor;
-                l.intensity = keyIntensity;
-                keyObj.transform.rotation = Quaternion.Euler(keyRot);
+                keyObj = new GameObject("Directional Light (Chiaroscuro Key)");
+                Light l = keyObj.AddComponent<Light>();
+                l.type = LightType.Directional;
             }
+            Light keyLight = keyObj.GetComponent<Light>();
+            keyLight.color = keyColor;
+            keyLight.intensity = keyIntensity;
+            keyObj.transform.rotation = Quaternion.Euler(keyRot);
+
+            // Luz Frontal de Preenchimento (Fill Light para destacar personagens)
+            GameObject fillObj = GameObject.Find("FillLight_Front");
+            if (fillObj == null)
+            {
+                fillObj = new GameObject("FillLight_Front");
+                fillObj.transform.position = new Vector3(0, 3f, -5f);
+                Light fillLight = fillObj.AddComponent<Light>();
+                fillLight.type = LightType.Directional;
+                fillLight.transform.rotation = Quaternion.Euler(15f, 0f, 0);
+            }
+            Light fl = fillObj.GetComponent<Light>();
+            fl.color = new Color(0.9f, 0.9f, 0.95f);
+            fl.intensity = 1.4f;
 
             // Luz de Recorte (Rim Light Traseira)
             GameObject rimObj = GameObject.Find("RimLight_Back");
@@ -177,7 +198,7 @@ namespace FightGame.Setup
             }
             Light rl = rimObj.GetComponent<Light>();
             rl.color = rimColor;
-            rl.intensity = 1.6f;
+            rl.intensity = 2.0f;
         }
 
         private void SetupPlayersAndGameSystems()
@@ -259,6 +280,9 @@ namespace FightGame.Setup
                 visualModel2.name = "Maelle_VisualModel";
                 visualModel2.transform.localPosition = Vector3.zero;
                 visualModel2.transform.localRotation = Quaternion.Euler(0, 0, 0);
+
+                // Aplicar texturas PBR originais aos materiais da Maelle
+                ApplyMaelleTextures(visualModel2);
             }
             else
             {
@@ -322,6 +346,44 @@ namespace FightGame.Setup
             gm.hud = hud;
 
             Debug.Log("<color=#fbbf24>✦ Arena Cinematográfica Clair Obscur montada com Gustave AAA e HUD ativo!</color>");
+        }
+
+        private void ApplyMaelleTextures(GameObject maelleObj)
+        {
+            var renderers = maelleObj.GetComponentsInChildren<Renderer>(true);
+            foreach (var r in renderers)
+            {
+                Material[] mats = r.sharedMaterials;
+                for (int i = 0; i < mats.Length; i++)
+                {
+                    if (mats[i] == null) continue;
+                    string matName = mats[i].name;
+
+                    string texName = null;
+                    if (matName.Contains("Coat")) texName = "Maelle_Coat_BaseColor";
+                    else if (matName.Contains("Scarf")) texName = "Lucien_s_Shoulder_Scarf_BaseColor_1001";
+                    else if (matName.Contains("Head") || matName.Contains("Face")) texName = "FaceBaseColor_Anim_1_Alan";
+                    else if (matName.Contains("Hair") || matName.Contains("WorldGridMaterial")) texName = "T_Hair_Maelle_V2_Color";
+                    else if (matName.Contains("Pants")) texName = "Maelle_Pants_BaseColor";
+                    else if (matName.Contains("Shoes")) texName = "Maelle_Shoes_BaseColor";
+                    else if (matName.Contains("Top")) texName = "Maelle_Top_BaseColor";
+                    else if (matName.Contains("ArmBand") || matName.Contains("Armband")) texName = "Armband_BaseColor";
+                    else if (matName.Contains("Body")) texName = "Maelle_Body_BaseColor";
+
+                    if (texName != null)
+                    {
+                        Texture2D tex = Resources.Load<Texture2D>($"Textures/Maelle/{texName}");
+                        if (tex != null)
+                        {
+                            Material newMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+                            newMat.mainTexture = tex;
+                            newMat.color = Color.white;
+                            mats[i] = newMat;
+                        }
+                    }
+                }
+                r.sharedMaterials = mats;
+            }
         }
     }
 }
