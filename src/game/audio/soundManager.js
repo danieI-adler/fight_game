@@ -186,6 +186,59 @@ class SoundManager {
     osc.stop(t + 0.22);
   }
 
+  playSuperCharge() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(120, t);
+    osc.frequency.exponentialRampToValueAtTime(880, t + 0.5);
+
+    gain.gain.setValueAtTime(0.5, t);
+    gain.gain.linearRampToValueAtTime(0.9, t + 0.45);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.52);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.52);
+    this.playNoise(0.5, 0.4, 1200);
+  }
+
+  playThunderSlam() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    // Impacto subsônico potente de impacto de terra
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(260, t);
+    osc.frequency.exponentialRampToValueAtTime(25, t + 0.8);
+
+    gain.gain.setValueAtTime(1.0, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.85);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.85);
+
+    // Explosão massiva de ruído de trovão
+    this.playNoise(0.65, 0.95, 350);
+    this.playNoise(0.3, 0.7, 3000);
+  }
+
   playSuper() {
     if (this.isMuted) return;
     this.init();

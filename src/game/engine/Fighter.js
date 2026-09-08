@@ -287,7 +287,8 @@ export class Fighter {
     this.stateTime = 0;
     this.hasHitCurrentAttack = false;
     this.isInvulnerable = true;
-    sounds.playSuper();
+    this.superPhase = 'CHARGE'; // 'CHARGE' (0-0.5s), 'LEAP' (0.5-0.85s), 'SLAM' (0.85-1.45s)
+    sounds.playSuperCharge();
     this.checkGustaveVoice();
   }
 
@@ -467,7 +468,7 @@ export class Fighter {
     // 5. Atualização de Ataques
     this.updateAttackStates(dt, particles);
 
-    // 6. Watchdog de Segurança Anti-Travamento (Se ficar preso num estado de golpe por > 0.8s, reseta)
+    // 6. Watchdog de Segurança Anti-Travamento (Golpes comuns 0.8s, Super Move 1.6s)
     const attackStates = [
       FIGHTER_STATE.LIGHT_PUNCH,
       FIGHTER_STATE.HEAVY_PUNCH,
@@ -481,11 +482,13 @@ export class Fighter {
       FIGHTER_STATE.DASH_FORWARD,
       FIGHTER_STATE.DASH_BACK
     ];
-    if (attackStates.includes(this.state) && this.stateTime > 0.8) {
+    const maxLockTime = this.state === FIGHTER_STATE.SUPER_MOVE ? 1.6 : 0.8;
+    if (attackStates.includes(this.state) && this.stateTime > maxLockTime) {
       this.state = this.isGrounded ? FIGHTER_STATE.IDLE : FIGHTER_STATE.JUMP;
       this.stateTime = 0;
       this.activeHitbox = null;
       this.isInvulnerable = false;
+      this.superPhase = null;
     }
 
     // 7. Pose Esquelética
@@ -636,22 +639,74 @@ export class Fighter {
         break;
 
       case FIGHTER_STATE.SUPER_MOVE:
-        if (this.stateTime > 0.12 && this.stateTime < 0.55) {
-          this.activeHitbox = this.createHitbox(20, 100, 140, 80);
-          this.activeHitbox.damage = 280;
-          this.activeHitbox.knockback = 22;
-          this.activeHitbox.knockdown = true;
-          this.activeHitbox.isHeavy = true;
-          this.activeHitbox.attackerPower = this.attackPower;
+        // --- SUPER MOVE / ULTIMATE DE GUSTAVE (3 FASES: CARGA 0.5s -> SALTO COM RAIOS -> IMPACTO AoE NO CHÃO) ---
+        if (this.stateTime < 0.5) {
+          // Fase 1: Carga (0.0s - 0.5s)
+          this.velocity.x = 0;
+          this.isInvulnerable = true;
+          if (particles && Math.random() < 0.65) {
+            const gx = this.position.x - this.facing * 30;
+            const gy = this.position.y - 45;
+            particles.emitElectricArc(gx + (Math.random() - 0.5) * 60, gy + (Math.random() - 0.5) * 60, gx, gy, '#ef4444', 2);
+            particles.emitSparks(gx, gy, '#ef4444', 4, 6);
+          }
+        } else if (this.stateTime >= 0.5 && this.stateTime < 0.85) {
+          // Fase 2: Pulo Eletrizante para o Alvo (0.5s - 0.85s)
+          if (this.superPhase === 'CHARGE') {
+            this.superPhase = 'LEAP';
+            const targetX = this.opponent ? this.opponent.position.x : this.position.x + this.facing * 320;
+            const dist = targetX - this.position.x;
+            this.facing = dist >= 0 ? 1 : -1;
+            this.velocity.y = -15; // Lança alto no ar
+            this.velocity.x = Math.max(-20, Math.min(20, dist / 0.35));
+            this.isGrounded = false;
+            sounds.playSuper();
+            if (particles) particles.emitDust(this.position.x, this.groundY, 14, '#ef4444');
+          }
 
-          if (particles) {
-            const shockX = this.position.x + (this.facing * 70);
-            particles.emitShockwave(shockX, this.position.y - 60, 90, this.charData.themeColor);
-            particles.emitElectricArc(this.position.x, this.position.y - 60, shockX + (this.facing * 70), this.position.y - 60, this.charData.energyColor, 2);
+          if (particles && Math.random() < 0.7) {
+            const hx = this.position.x + this.facing * 35;
+            const hy = this.position.y - 120;
+            particles.emitElectricArc(this.position.x, this.position.y - 60, hx, hy, '#ff0033', 2);
+            particles.emitSparks(hx, hy, '#ef4444', 5, 8);
+          }
+        } else if (this.stateTime >= 0.85 && this.stateTime < 1.45) {
+          // Fase 3: Esmagamento no Chão com Dano em Área (AoE)
+          if (this.superPhase === 'LEAP') {
+            this.superPhase = 'SLAM';
+            this.position.y = this.groundY;
+            this.velocity.y = 0;
+            this.velocity.x = 0;
+            this.isGrounded = true;
+            sounds.playThunderSlam();
+
+            if (particles) {
+              const impactX = this.position.x + this.facing * 30;
+              particles.emitShockwave(impactX, this.groundY, 260, '#ef4444');
+              particles.emitShockwave(impactX, this.groundY, 160, '#facc15');
+              particles.emitGroundLightningExplosion(impactX, this.groundY, 320, '#ef4444');
+              particles.emitSparks(impactX, this.groundY - 20, '#ff0033', 35, 14);
+              particles.emitFloatingText('OVERCHARGE CRUSH!', impactX, this.groundY - 140, '#ef4444', true);
+            }
+          }
+
+          // Hitbox massiva AoE de impacto no chão durante 0.85s - 1.15s
+          if (this.stateTime >= 0.85 && this.stateTime < 1.15) {
+            // Hitbox cobre uma área ampla de 320px de diâmetro no chão
+            const impactBoxX = this.facing === 1 ? -60 : -260;
+            this.activeHitbox = this.createHitbox(impactBoxX, 100, 320, 110);
+            this.activeHitbox.damage = 350;
+            this.activeHitbox.knockback = 26;
+            this.activeHitbox.knockdown = true;
+            this.activeHitbox.isHeavy = true;
+            this.activeHitbox.unblockable = false;
+            this.activeHitbox.attackerPower = this.attackPower;
           }
         }
-        if (this.stateTime >= 0.75) {
+
+        if (this.stateTime >= 1.45) {
           this.isInvulnerable = false;
+          this.superPhase = null;
           this.state = FIGHTER_STATE.IDLE;
         }
         break;
@@ -802,6 +857,51 @@ export class Fighter {
         p.rightHand = { x: -15 * f, y: -5 };
         p.leftFoot = { x: 30 * f, y: 0 };
         p.rightFoot = { x: 45 * f, y: 0 };
+        break;
+      }
+
+      case FIGHTER_STATE.SUPER_MOVE: {
+        if (t < 0.5) {
+          // Fase 1: Carga (0.0s - 0.5s) - Agachamento com manopla puxada para trás vibrando com energia
+          const chargeVibe = Math.sin(t * 50) * 2;
+          p.head.y = -85 + chargeVibe;
+          p.chest.y = -60 + chargeVibe;
+          p.pelvis.y = -35;
+          p.leftHand = { x: 5 * f, y: -65 };
+          p.rightShoulder = { x: -6 * f, y: -65 };
+          p.rightElbow = { x: -26 * f + chargeVibe, y: -50 };
+          p.rightHand = { x: -35 * f + chargeVibe, y: -40 };
+          p.leftKnee = { x: -18 * f, y: -20 };
+          p.leftFoot = { x: -22 * f, y: 0 };
+          p.rightKnee = { x: 22 * f, y: -20 };
+          p.rightFoot = { x: 28 * f, y: 0 };
+        } else if (t < 0.85) {
+          // Fase 2: Pulo no ar (0.5s - 0.85s) - Salto alto com manopla vermelha erguida ao céu
+          p.head.y = -115;
+          p.chest.y = -85;
+          p.pelvis.y = -55;
+          p.leftHand = { x: -12 * f, y: -55 };
+          p.rightShoulder = { x: 16 * f, y: -90 };
+          p.rightElbow = { x: 28 * f, y: -125 };
+          p.rightHand = { x: 36 * f, y: -155 };
+          p.leftKnee = { x: -12 * f, y: -35 };
+          p.leftFoot = { x: -16 * f, y: -15 };
+          p.rightKnee = { x: 16 * f, y: -30 };
+          p.rightFoot = { x: 22 * f, y: -10 };
+        } else {
+          // Fase 3: Esmagamento no chão (0.85s - 1.45s) - Manopla cravada no solo liberando ondas de choque
+          p.head.y = -70;
+          p.chest.y = -45;
+          p.pelvis.y = -30;
+          p.leftHand = { x: -24 * f, y: -55 };
+          p.rightShoulder = { x: 16 * f, y: -50 };
+          p.rightElbow = { x: 28 * f, y: -25 };
+          p.rightHand = { x: 36 * f, y: 0 };
+          p.leftKnee = { x: -22 * f, y: -15 };
+          p.leftFoot = { x: -28 * f, y: 0 };
+          p.rightKnee = { x: 18 * f, y: -15 };
+          p.rightFoot = { x: 24 * f, y: 0 };
+        }
         break;
       }
     }

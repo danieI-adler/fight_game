@@ -90,6 +90,29 @@ export class ParticleManager {
     });
   }
 
+  // --- EXPLOSÃO DE RAIOS EM ÁREA NO CHÃO (AoE) ---
+  emitGroundLightningExplosion(x, y, radius = 220, color = '#ef4444') {
+    // 1. Raios radialmente pelo chão (esquerda e direita)
+    const branches = 6;
+    for (let i = 0; i < branches; i++) {
+      const dir = (i % 2 === 0 ? 1 : -1);
+      const dist = (Math.random() * 0.5 + 0.5) * radius;
+      const targetX = x + dir * dist;
+      const targetY = y - (Math.random() * 25);
+      this.emitElectricArc(x, y - 10, targetX, targetY, color, 2);
+    }
+    // Raios verticais para cima
+    for (let i = 0; i < 3; i++) {
+      const topX = x + (Math.random() - 0.5) * 120;
+      const topY = y - Math.random() * 140 - 40;
+      this.emitElectricArc(x, y - 5, topX, topY, '#ff0033', 1);
+    }
+    // Detritos de terra e faíscas incandescentes
+    this.emitSparks(x, y - 15, color, 30, 14);
+    this.emitSparks(x, y - 15, '#ffaa00', 20, 10);
+    this.emitDust(x, y, 16, 'rgba(239, 68, 68, 0.4)');
+  }
+
   // --- TEXTO FLUTUANTE (DANO / CRÍTICO / BLOCK) ---
   emitFloatingText(text, x, y, color = '#ffffff', isCrit = false) {
     this.floatingTexts.push({

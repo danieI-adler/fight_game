@@ -184,21 +184,76 @@ export class ExpeditionHDRenderer {
     ctx.scale(f * stretchX * breathScale, stretchY * breathScale);
     ctx.rotate(tiltAngle);
 
-    // 4. Efeito de Aura Chiaroscuro / Luz de Recorte
-    const themeColor = char.themeColor || '#0ea5e9';
-    const glowColor = char.glowColor || 'rgba(14, 165, 233, 0.85)';
+    // 4. Efeito de Aura por Nível de Poder/Energia (Gustave: <33% sem aura, 33-66% Amarela, 66-100% Roxa, 100%/Ult Vermelha com Raios)
+    const energy = fighter.energy || 0;
+    const isGustave = Number(char.id) === 101 || Number(char.id) === 1 || (char.name || '').toLowerCase().includes('gustave') || vis.hasMechanicalArm;
 
-    // Aura volumétrica suave atrás do personagem
-    ctx.save();
-    const auraGrad = ctx.createRadialGradient(0, -60, 20, 0, -60, 110);
-    auraGrad.addColorStop(0, `rgba(${this.hexToRgb(themeColor)}, 0.28)`);
-    auraGrad.addColorStop(0.7, `rgba(${this.hexToRgb(themeColor)}, 0.08)`);
-    auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = auraGrad;
-    ctx.beginPath();
-    ctx.arc(0, -60, 110, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    let auraColor = null;
+    let auraGlow = null;
+    let auraRadius = 110;
+    let auraPulseSpeed = 8;
+    let isRedLightning = false;
+
+    if (isGustave) {
+      if (energy >= 100 || state === FIGHTER_STATE.SUPER_MOVE) {
+        auraColor = '#ef4444'; // Vermelho com raios
+        auraGlow = 'rgba(239, 68, 68, 0.95)';
+        auraRadius = 130;
+        auraPulseSpeed = 18;
+        isRedLightning = true;
+      } else if (energy >= 66) {
+        auraColor = '#a855f7'; // Roxo arcano
+        auraGlow = 'rgba(168, 85, 247, 0.9)';
+        auraRadius = 120;
+        auraPulseSpeed = 12;
+      } else if (energy >= 33) {
+        auraColor = '#eab308'; // Amarelo dourado
+        auraGlow = 'rgba(234, 179, 8, 0.85)';
+        auraRadius = 115;
+        auraPulseSpeed = 8;
+      }
+    } else {
+      if (energy >= 100 || state === FIGHTER_STATE.SUPER_MOVE) {
+        auraColor = char.themeColor || '#0ea5e9';
+        auraGlow = char.glowColor || 'rgba(14, 165, 233, 0.85)';
+      }
+    }
+
+    if (auraColor) {
+      // Aura volumétrica suave atrás do personagem
+      ctx.save();
+      const pulse = 1 + Math.sin(time * auraPulseSpeed) * 0.08;
+      const rad = auraRadius * pulse;
+      const auraGrad = ctx.createRadialGradient(0, -60, 20, 0, -60, rad);
+      auraGrad.addColorStop(0, `rgba(${this.hexToRgb(auraColor)}, 0.45)`);
+      auraGrad.addColorStop(0.6, `rgba(${this.hexToRgb(auraColor)}, 0.18)`);
+      auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = auraGrad;
+      ctx.beginPath();
+      ctx.arc(0, -60, rad, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Raios vermelhos estalando ao redor da aura a 100% de energia
+      if (isRedLightning) {
+        ctx.strokeStyle = '#fca5a5';
+        ctx.shadowColor = '#ef4444';
+        ctx.shadowBlur = 15;
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 4; i++) {
+          const arcAng = time * 8 + (i * Math.PI) / 2;
+          const sx = Math.cos(arcAng) * 50;
+          const sy = -60 + Math.sin(arcAng) * 50;
+          const ex = sx + (Math.random() - 0.5) * 45;
+          const ey = sy + (Math.random() - 0.5) * 45;
+          ctx.beginPath();
+          ctx.moveTo(sx, sy);
+          ctx.lineTo((sx + ex) / 2 + (Math.random() - 0.5) * 20, (sy + ey) / 2 + (Math.random() - 0.5) * 20);
+          ctx.lineTo(ex, ey);
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+    }
 
     // 5. Renderização do Retrato HD do Personagem
     const img = this.getImage(char.image);
@@ -211,17 +266,17 @@ export class ExpeditionHDRenderer {
       ctx.save();
 
       // Recorte com bordas suaves e moldura de silhueta
-      ctx.shadowColor = glowColor;
-      ctx.shadowBlur = (state === FIGHTER_STATE.SUPER_MOVE || state === FIGHTER_STATE.SPECIAL_1) ? 28 : 12;
+      ctx.shadowColor = auraGlow || glowColor;
+      ctx.shadowBlur = (state === FIGHTER_STATE.SUPER_MOVE || state === FIGHTER_STATE.SPECIAL_1 || energy >= 100) ? 30 : (auraColor ? 20 : 10);
 
       // Desenha imagem HD principal
       ctx.drawImage(img, spriteX, spriteY, spriteWidth, spriteHeight);
 
-      // Luz de Recorte (Rim Light) na borda do corpo
+      // Luz de Recorte (Rim Light) na borda do corpo com cor da aura
       ctx.globalCompositeOperation = 'source-atop';
       const rimGrad = ctx.createLinearGradient(-spriteWidth / 2, 0, spriteWidth / 2, 0);
-      rimGrad.addColorStop(0, `rgba(${this.hexToRgb(themeColor)}, 0.45)`);
-      rimGrad.addColorStop(0.3, 'rgba(255, 255, 255, 0.15)');
+      rimGrad.addColorStop(0, `rgba(${this.hexToRgb(auraColor || themeColor)}, 0.55)`);
+      rimGrad.addColorStop(0.3, 'rgba(255, 255, 255, 0.2)');
       rimGrad.addColorStop(0.7, 'rgba(0, 0, 0, 0.3)');
       rimGrad.addColorStop(1, 'rgba(0, 0, 0, 0.6)');
       ctx.fillStyle = rimGrad;
@@ -237,7 +292,7 @@ export class ExpeditionHDRenderer {
     }
 
     // 6. Efeitos Visuais & Armas Dinâmicas HD por Personagem
-    this.drawCharacterSpecifics(ctx, fighter, char, vis, time, state, stateTime);
+    this.drawCharacterSpecifics(ctx, fighter, char, vis, time, state, stateTime, energy);
 
     // 7. Efeito de Escudo ao Bloquear
     if (state === FIGHTER_STATE.BLOCK || state === FIGHTER_STATE.CROUCH_BLOCK) {
@@ -252,28 +307,66 @@ export class ExpeditionHDRenderer {
     }
   }
 
-  static drawCharacterSpecifics(ctx, fighter, char, vis, time, state, stateTime) {
+  static drawCharacterSpecifics(ctx, fighter, char, vis, time, state, stateTime, energy = 0) {
     const f = 1; // Já transformado pelo contexto
 
-    // A. Gustave: Núcleo Overcharge do Braço Dourado
+    // A. Gustave: Núcleo Overcharge e Manopla Mecânica com Aura Dinâmica
     if (vis.hasMechanicalArm) {
       ctx.save();
-      const pulse = Math.sin(time * 12) * 0.3 + 0.7;
-      ctx.fillStyle = '#38bdf8';
-      ctx.shadowColor = '#0284c7';
-      ctx.shadowBlur = 18;
+      const isSuper = state === FIGHTER_STATE.SUPER_MOVE;
+      let coreColor = '#38bdf8'; // < 33%: Azul sutil padrão
+      let coreGlow = '#0284c7';
+      let sparkColor = '#e0f2fe';
+      let arcCount = 1;
+      let coreSize = 5;
+
+      if (energy >= 100 || isSuper) {
+        coreColor = '#ef4444'; // 100%: Vermelho de raios
+        coreGlow = '#ff0033';
+        sparkColor = '#fca5a5';
+        arcCount = 4;
+        coreSize = 8;
+      } else if (energy >= 66) {
+        coreColor = '#a855f7'; // 66-100%: Roxo
+        coreGlow = '#c084fc';
+        sparkColor = '#f3e8ff';
+        arcCount = 2;
+        coreSize = 6.5;
+      } else if (energy >= 33) {
+        coreColor = '#facc15'; // 33-66%: Amarelo
+        coreGlow = '#eab308';
+        sparkColor = '#fef08a';
+        arcCount = 2;
+        coreSize = 6;
+      }
+
+      const pulse = Math.sin(time * (energy >= 100 ? 20 : 12)) * 0.3 + 0.7;
+      ctx.fillStyle = coreColor;
+      ctx.shadowColor = coreGlow;
+      ctx.shadowBlur = energy >= 100 ? 28 : (energy >= 33 ? 20 : 12);
       ctx.beginPath();
-      ctx.arc(22, -65, 5 * pulse, 0, Math.PI * 2);
+      ctx.arc(22, -65, coreSize * pulse, 0, Math.PI * 2);
       ctx.fill();
 
-      // Faíscas elétricas de sobrecarga
-      if (Math.random() < 0.4 || state === FIGHTER_STATE.SPECIAL_1 || state === FIGHTER_STATE.HEAVY_PUNCH) {
-        ctx.strokeStyle = '#e0f2fe';
-        ctx.lineWidth = 1.5;
+      // Centro branco superaquecido para 100% de poder
+      if (energy >= 100 || isSuper) {
+        ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.moveTo(22, -65);
-        ctx.lineTo(22 + (Math.random() - 0.5) * 25, -65 + (Math.random() - 0.5) * 25);
-        ctx.stroke();
+        ctx.arc(22, -65, 3.5 * pulse, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Raios elétricos saindo da manopla
+      for (let i = 0; i < arcCount; i++) {
+        if (Math.random() < 0.65 || isSuper || state === FIGHTER_STATE.SPECIAL_1 || state === FIGHTER_STATE.HEAVY_PUNCH) {
+          ctx.strokeStyle = sparkColor;
+          ctx.lineWidth = energy >= 100 ? 2.5 : 1.5;
+          ctx.beginPath();
+          ctx.moveTo(22, -65);
+          const range = energy >= 100 ? 55 : (energy >= 33 ? 35 : 25);
+          ctx.lineTo(22 + (Math.random() - 0.5) * range, -65 + (Math.random() - 0.5) * range);
+          ctx.stroke();
+        }
       }
       ctx.restore();
     }

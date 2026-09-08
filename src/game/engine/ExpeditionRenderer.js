@@ -33,10 +33,8 @@ export class ExpeditionRenderer {
     ctx.fill();
     ctx.restore();
 
-    // 2. Aura de Energia e Efeitos de Tinta
-    if (fighter.energy >= 100 || fighter.state === FIGHTER_STATE.SUPER_MOVE) {
-      this.drawEnergyAura(ctx, x, y, p, char, vis, fighter.stateTime);
-    }
+    // 2. Aura de Energia por Nível de Poder (Gustave: <33% sem aura, 33-66% Amarela, 66-100% Roxa, 100%/Ult Vermelha com Raios)
+    this.drawEnergyAura(ctx, x, y, p, char, vis, fighter.stateTime, fighter.energy || 0, fighter.state);
 
     // 3. Acessórios Traseiros (Lanceram de Gustave, Cajado com Sino de Monoco, Capa de Renoir, Asas de Esquie)
     this.drawBackAccessories(ctx, x, y, f, p, vis, fighter.stateTime);
@@ -52,13 +50,13 @@ export class ExpeditionRenderer {
     this.drawTorso(ctx, x, y, f, p, vis, fighter.stateTime);
 
     // 7. Braço Traseiro (com arma se empunhada)
-    this.drawArm(ctx, x, y, p.chest, p.leftShoulder, p.leftElbow, p.leftHand, vis, false, f, fighter.stateTime);
+    this.drawArm(ctx, x, y, p.chest, p.leftShoulder, p.leftElbow, p.leftHand, vis, false, f, fighter.stateTime, fighter.energy || 0, fighter.state);
 
     // 8. Cabeça, Cabelo, Máscaras e Traços Oficiais
     this.drawHead(ctx, x, y, f, p, char, vis, fighter.stateTime);
 
     // 9. Braço Frontal & Arma Principal (Braço mecânico, Florete, Orbes, Cimitarras, Bengala, Sabre, Pincel)
-    this.drawArm(ctx, x, y, p.chest, p.rightShoulder, p.rightElbow, p.rightHand, vis, true, f, fighter.stateTime);
+    this.drawArm(ctx, x, y, p.chest, p.rightShoulder, p.rightElbow, p.rightHand, vis, true, f, fighter.stateTime, fighter.energy || 0, fighter.state);
 
     // 10. Rastros de Pincelada / Corte de Espada
     this.drawAttackTrail(ctx, fighter, x, y, f, p, vis);
@@ -82,13 +80,39 @@ export class ExpeditionRenderer {
     }
   }
 
-  static drawEnergyAura(ctx, x, y, p, char, vis, time) {
+  static drawEnergyAura(ctx, x, y, p, char, vis, time, energy = 0, state = '') {
+    const isGustave = Number(char.id) === 101 || Number(char.id) === 1 || (char.name || '').toLowerCase().includes('gustave') || vis.hasMechanicalArm;
+    let auraColor = null;
+    let auraGlow = null;
+    let isRedLightning = false;
+
+    if (isGustave) {
+      if (energy >= 100 || state === FIGHTER_STATE.SUPER_MOVE) {
+        auraColor = '#ef4444'; // Vermelho com raios
+        auraGlow = 'rgba(239, 68, 68, 0.95)';
+        isRedLightning = true;
+      } else if (energy >= 66) {
+        auraColor = '#a855f7'; // Roxo arcano
+        auraGlow = 'rgba(168, 85, 247, 0.9)';
+      } else if (energy >= 33) {
+        auraColor = '#eab308'; // Amarelo dourado
+        auraGlow = 'rgba(234, 179, 8, 0.85)';
+      }
+    } else {
+      if (energy >= 100 || state === FIGHTER_STATE.SUPER_MOVE) {
+        auraColor = char.energyColor || '#ffffff';
+        auraGlow = char.glowColor || '#d4af37';
+      }
+    }
+
+    if (!auraColor) return;
+
     ctx.save();
-    ctx.shadowColor = char.glowColor || '#d4af37';
-    ctx.shadowBlur = 25;
-    ctx.strokeStyle = char.energyColor || '#ffffff';
-    ctx.lineWidth = 2.5;
-    ctx.globalAlpha = 0.6 + 0.3 * Math.sin(time * 10);
+    ctx.shadowColor = auraGlow;
+    ctx.shadowBlur = isRedLightning ? 30 : 20;
+    ctx.strokeStyle = auraColor;
+    ctx.lineWidth = isRedLightning ? 3.5 : 2.5;
+    ctx.globalAlpha = 0.65 + 0.3 * Math.sin(time * 12);
     ctx.beginPath();
     ctx.arc(x + p.chest.x, y + p.chest.y, vis.isMonoco ? 65 : 52, 0, Math.PI * 2);
     ctx.stroke();
@@ -96,8 +120,27 @@ export class ExpeditionRenderer {
     // Glifos rotativos
     ctx.setLineDash([8, 6]);
     ctx.beginPath();
-    ctx.arc(x + p.chest.x, y + p.chest.y, vis.isMonoco ? 78 : 64, time * 2, time * 2 + Math.PI * 2);
+    ctx.arc(x + p.chest.x, y + p.chest.y, vis.isMonoco ? 78 : 64, time * 2.5, time * 2.5 + Math.PI * 2);
     ctx.stroke();
+
+    // Raios vermelhos estalando para 100% de energia
+    if (isRedLightning) {
+      ctx.setLineDash([]);
+      ctx.strokeStyle = '#fca5a5';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 4; i++) {
+        const ang = time * 7 + (i * Math.PI) / 2;
+        const sx = x + p.chest.x + Math.cos(ang) * 45;
+        const sy = y + p.chest.y + Math.sin(ang) * 45;
+        const ex = sx + (Math.random() - 0.5) * 40;
+        const ey = sy + (Math.random() - 0.5) * 40;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+      }
+    }
+
     ctx.restore();
   }
 
@@ -351,7 +394,7 @@ export class ExpeditionRenderer {
     ctx.restore();
   }
 
-  static drawArm(ctx, x, y, chest, shoulder, elbow, hand, vis, isFront, f, time) {
+  static drawArm(ctx, x, y, chest, shoulder, elbow, hand, vis, isFront, f, time, energy = 0, state = '') {
     ctx.save();
     const sx = x + shoulder.x;
     const sy = y + shoulder.y;
@@ -362,6 +405,28 @@ export class ExpeditionRenderer {
 
     ctx.globalAlpha = isFront ? 1.0 : 0.8;
     const isMechArm = isFront && vis.hasMechanicalArm;
+    const isSuper = state === FIGHTER_STATE.SUPER_MOVE;
+
+    // Cores dinâmicas da Manopla de Gustave por Energia
+    let gauntletGlow = null;
+    let coreColor = '#38bdf8'; // < 33%: Azul sutil
+    let coreSize = 2.5;
+
+    if (isMechArm) {
+      if (energy >= 100 || isSuper) {
+        coreColor = '#ef4444'; // 100%: Vermelho de raios
+        gauntletGlow = '#ff0033';
+        coreSize = 5;
+      } else if (energy >= 66) {
+        coreColor = '#a855f7'; // 66-100%: Roxo
+        gauntletGlow = '#c084fc';
+        coreSize = 3.8;
+      } else if (energy >= 33) {
+        coreColor = '#facc15'; // 33-66%: Amarelo
+        gauntletGlow = '#eab308';
+        coreSize = 3.2;
+      }
+    }
 
     // 1. Ombro
     ctx.beginPath();
@@ -374,7 +439,7 @@ export class ExpeditionRenderer {
     ctx.fill();
     if (isMechArm) {
       // Válvula de vapor no ombro de Gustave
-      ctx.strokeStyle = '#0284c7';
+      ctx.strokeStyle = coreColor;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(sx, sy, 3.5, 0, Math.PI * 2);
@@ -390,8 +455,12 @@ export class ExpeditionRenderer {
     ctx.closePath();
     ctx.fillStyle = isMechArm ? '#b45309' : (vis.gloveColor || '#1e293b');
     ctx.fill();
-    ctx.strokeStyle = isMechArm ? '#fbbf24' : (vis.accentColor || '#d4af37');
-    ctx.lineWidth = isMechArm ? 2 : 1.2;
+    ctx.strokeStyle = isMechArm ? (gauntletGlow || '#fbbf24') : (vis.accentColor || '#d4af37');
+    ctx.lineWidth = isMechArm ? 2.5 : 1.2;
+    if (gauntletGlow) {
+      ctx.shadowColor = gauntletGlow;
+      ctx.shadowBlur = energy >= 100 ? 22 : 12;
+    }
     ctx.stroke();
 
     // Braçadeira de anéis dourados com o "33" de Lune
@@ -406,18 +475,40 @@ export class ExpeditionRenderer {
       }
     }
 
-    // 3. Mão / Punho
+    // 3. Mão / Punho da Manopla
     ctx.beginPath();
-    ctx.arc(hx, hy, isMechArm ? 6.5 : 5, 0, Math.PI * 2);
-    ctx.fillStyle = isMechArm ? '#d4af37' : (vis.gloveColor || '#1e293b');
+    ctx.arc(hx, hy, isMechArm ? (isSuper ? 8 : 6.5) : 5, 0, Math.PI * 2);
+    ctx.fillStyle = isMechArm ? (isSuper ? '#ef4444' : '#d4af37') : (vis.gloveColor || '#1e293b');
     ctx.fill();
 
-    // Núcleo elétrico azul no punho de Gustave
+    // Núcleo elétrico energizado no punho de Gustave
     if (isMechArm) {
-      ctx.fillStyle = '#38bdf8';
+      ctx.save();
+      ctx.shadowColor = gauntletGlow || '#38bdf8';
+      ctx.shadowBlur = energy >= 100 ? 25 : 10;
+      ctx.fillStyle = coreColor;
       ctx.beginPath();
-      ctx.arc(hx, hy, 2.5, 0, Math.PI * 2);
+      ctx.arc(hx, hy, coreSize, 0, Math.PI * 2);
       ctx.fill();
+
+      // Ponto superaquecido branco no centro do punho
+      if (energy >= 100 || isSuper) {
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(hx, hy, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Raios saltando do punho
+        ctx.strokeStyle = '#fca5a5';
+        ctx.lineWidth = 1.8;
+        for (let i = 0; i < 3; i++) {
+          ctx.beginPath();
+          ctx.moveTo(hx, hy);
+          ctx.lineTo(hx + (Math.random() - 0.5) * 35, hy + (Math.random() - 0.5) * 35);
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
     }
 
     // 4. Armas Oficiais
