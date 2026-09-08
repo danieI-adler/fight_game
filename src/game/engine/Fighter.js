@@ -478,7 +478,7 @@ export class Fighter {
     }
 
     // 5. Atualização de Ataques
-    this.updateAttackStates(dt, particles);
+    this.updateAttackStates(dt, particles, stageWidth);
 
     // 6. Watchdog de Segurança Anti-Travamento (Golpes comuns 0.8s, Super Move 1.6s)
     const attackStates = [
@@ -507,7 +507,7 @@ export class Fighter {
     this.updateSkeletalPose();
   }
 
-  updateAttackStates(dt, particles) {
+  updateAttackStates(dt, particles, stageWidth = 2000) {
     this.activeHitbox = null;
 
     switch (this.state) {
@@ -685,6 +685,7 @@ export class Fighter {
             // Execução do Golpe (teletransporte, som, partículas de corte)
             if (this.stateTime >= strikeStartTime && this.superPhase === `STRIKE_${i}`) {
               this.superPhase = strikePhaseName;
+              this.hasHitCurrentAttack = false; // Permite que cada um dos 6 golpes cause dano e combo
               const off = strikeOffsets[i];
               this.facing = off.face;
               this.position.x = Math.max(60, Math.min(stageWidth - 60, targetX + off.x * (target ? target.facing : 1)));
