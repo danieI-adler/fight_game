@@ -162,7 +162,10 @@ export class GameEngine {
     this.currentRound = 1;
     this.p1Wins = 0;
     this.p2Wins = 0;
-    this.resetRound();
+    if (this.isTraining) {
+      this.p1.energy = 100;
+      this.p2.energy = 100;
+    }
 
     this.isRunning = true;
     this.lastTime = performance.now();
@@ -173,6 +176,10 @@ export class GameEngine {
   resetRound() {
     this.p1.reset(650);
     this.p2.reset(1350);
+    if (this.isTraining) {
+      this.p1.energy = 100;
+      this.p2.energy = 100;
+    }
     this.particles.reset();
     this.roundTimer = this.roundTime;
     this.timeScale = 1.0;
@@ -187,7 +194,6 @@ export class GameEngine {
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
-    sounds.stopBGM();
   }
 
   destroy() {

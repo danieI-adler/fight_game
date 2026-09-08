@@ -250,6 +250,16 @@ export class Fighter {
     sounds.playWhoosh();
   }
 
+  checkGustaveVoice() {
+    if (!this.charData) return;
+    const id = Number(this.charData.id);
+    const name = (this.charData.name || '').toLowerCase();
+    const isGustave = id === 101 || id === 1 || name.includes('gustave') || this.charData.visual?.hasMechanicalArm;
+    if (isGustave) {
+      sounds.playGustaveAbility();
+    }
+  }
+
   special1() {
     if (!this.canAct() || this.energy < 25) return;
     this.energy -= 25;
@@ -257,6 +267,7 @@ export class Fighter {
     this.stateTime = 0;
     this.hasHitCurrentAttack = false;
     sounds.playElectricZap();
+    this.checkGustaveVoice();
   }
 
   special2() {
@@ -266,6 +277,7 @@ export class Fighter {
     this.stateTime = 0;
     this.hasHitCurrentAttack = false;
     sounds.playElectricZap();
+    this.checkGustaveVoice();
   }
 
   superMove() {
@@ -276,6 +288,7 @@ export class Fighter {
     this.hasHitCurrentAttack = false;
     this.isInvulnerable = true;
     sounds.playSuper();
+    this.checkGustaveVoice();
   }
 
   canAct() {

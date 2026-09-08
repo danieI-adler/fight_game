@@ -107,6 +107,12 @@ export const ControlsGuide = ({ onClose }) => {
           </div>
         </div>
 
+        {/* Global Shortcuts */}
+        <div className="bg-slate-950 p-2.5 rounded border border-slate-800 flex justify-around text-xs text-slate-300 font-mono mb-2">
+          <span>🎵 <strong className="text-amber-400">[M]</strong> Trocar Música</span>
+          <span>⏸️ <strong className="text-blue-400">[Esc]</strong> Pausar</span>
+        </div>
+
         {/* Close Button */}
         <button
           onClick={() => {

@@ -1,11 +1,11 @@
 import React from 'react';
 import { sounds } from '../../game/audio/soundManager';
 
-export const PauseMenu = ({ onResume, onRestart, onSelectCharacter, onMainMenu }) => {
+export const PauseMenu = ({ onResume, onRestart, onSelectCharacter, onMainMenu, currentTrack, onNextMusic }) => {
   return (
     <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-50 select-none">
-      <div className="w-72 bg-slate-900 border border-slate-700 rounded p-6 shadow-2xl flex flex-col items-center">
-        <h2 className="text-xl font-bold text-white mb-6 uppercase tracking-wider">
+      <div className="w-80 bg-slate-900 border border-slate-700 rounded-lg p-6 shadow-2xl flex flex-col items-center">
+        <h2 className="text-xl font-bold text-white mb-5 uppercase tracking-wider">
           PAUSADO
         </h2>
 
@@ -18,6 +18,19 @@ export const PauseMenu = ({ onResume, onRestart, onSelectCharacter, onMainMenu }
             className="py-2.5 px-4 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
           >
             Continuar
+          </button>
+
+          <button
+            onClick={() => {
+              sounds.playSelect();
+              if (onNextMusic) onNextMusic();
+            }}
+            className="py-2 px-4 rounded bg-amber-950/60 hover:bg-amber-900/80 border border-amber-600/60 text-amber-300 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-between"
+          >
+            <span>🎵 Música</span>
+            <span className="text-[10px] text-amber-400/90 truncate max-w-[140px]">
+              {currentTrack?.title || 'Trocar'}
+            </span>
           </button>
 
           <button

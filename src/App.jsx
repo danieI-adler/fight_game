@@ -35,6 +35,37 @@ export function App() {
   const [isPaused, setIsPaused] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [initialOnlineRoom, setInitialOnlineRoom] = useState('');
+  const [currentTrack, setCurrentTrack] = useState(() => sounds.getCurrentTrack());
+
+  const handleNextMusic = () => {
+    const track = sounds.nextBGMTrack();
+    setCurrentTrack(track);
+    return track;
+  };
+
+  // Desbloqueio automático de áudio e atalho global [M] para alternar música
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      sounds.init();
+      sounds.startBGM();
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
+    window.addEventListener('click', handleFirstInteraction, { once: true });
+    window.addEventListener('keydown', handleFirstInteraction, { once: true });
+
+    const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+      if (e.code === 'KeyM') {
+        handleNextMusic();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('click', handleFirstInteraction);
+    };
+  }, []);
 
   // Dados da Partida
   const [matchConfig, setMatchConfig] = useState({
@@ -262,6 +293,8 @@ export function App() {
             onTogglePause={togglePause}
             isMuted={isMuted}
             onToggleMute={toggleMute}
+            currentTrack={currentTrack}
+            onNextMusic={handleNextMusic}
           />
 
           {mode === 'TRAINING' && (
@@ -280,6 +313,8 @@ export function App() {
               onRestart={handleRestartRound}
               onSelectCharacter={() => setScreen('SELECT')}
               onMainMenu={() => setScreen('MAIN_MENU')}
+              currentTrack={currentTrack}
+              onNextMusic={handleNextMusic}
             />
           )}
 

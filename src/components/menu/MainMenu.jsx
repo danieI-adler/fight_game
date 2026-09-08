@@ -16,6 +16,7 @@ export const MainMenu = ({
 }) => {
   const handleSelect = (mode) => {
     sounds.playPunch(false);
+    sounds.startBGM();
     onSelectMode(mode);
   };
 

@@ -3,6 +3,11 @@
  * Não requer arquivos externos de áudio - tudo é sintetizado no navegador em tempo real!
  */
 
+export const BGM_TRACKS = [
+  { id: 'battle_theme', title: 'Battle Theme (Épico)', url: './assets/audio/bgm_battle.mp3' },
+  { id: 'expedition_theme', title: 'Clair Obscur (Expedition 33)', url: './assets/audio/bgm_expedition.mp3' }
+];
+
 class SoundManager {
   constructor() {
     this.ctx = null;
@@ -12,6 +17,9 @@ class SoundManager {
     this.sfxGain = null;
     this.bgmPlaying = false;
     this.bgmTimer = null;
+    this.bgmAudio = null;
+    this.bgmVolume = 0.45;
+    this.currentTrackIndex = 0;
   }
 
   init() {
@@ -41,6 +49,10 @@ class SoundManager {
     this.isMuted = !this.isMuted;
     if (this.masterGain && this.ctx) {
       this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 1, this.ctx.currentTime, 0.05);
+    }
+    if (this.bgmAudio) {
+      this.bgmAudio.muted = this.isMuted;
+      this.bgmAudio.volume = this.isMuted ? 0 : this.bgmVolume;
     }
     return this.isMuted;
   }
@@ -322,57 +334,115 @@ class SoundManager {
     whiteNoise.start(this.ctx.currentTime);
   }
 
-  // --- TRILHA SONORA PROCEDURAL RETRO/SYNTHWAVE ---
-  startBGM() {
-    if (this.bgmPlaying) return;
+  // --- TRILHA SONORA DO JOGO ---
+  getCurrentTrack() {
+    return BGM_TRACKS[this.currentTrackIndex] || BGM_TRACKS[0];
+  }
+
+  setBGMTrack(index) {
+    if (typeof index === 'string') {
+      const foundIdx = BGM_TRACKS.findIndex((t) => t.id === index || t.url === index);
+      if (foundIdx !== -1) index = foundIdx;
+      else index = 0;
+    }
+    this.currentTrackIndex = ((index % BGM_TRACKS.length) + BGM_TRACKS.length) % BGM_TRACKS.length;
+    const track = this.getCurrentTrack();
+
+    if (this.bgmAudio) {
+      this.bgmAudio.pause();
+      this.bgmAudio.src = track.url;
+      this.bgmAudio.load();
+    }
+
+    if (this.bgmPlaying) {
+      this.startBGM(track.url);
+    }
+    return track;
+  }
+
+  nextBGMTrack() {
+    return this.setBGMTrack(this.currentTrackIndex + 1);
+  }
+
+  startBGM(trackIndexOrUrl = null) {
     this.init();
-    if (!this.ctx) return;
-
     this.bgmPlaying = true;
-    let step = 0;
-    const bassline = [110, 110, 130.81, 146.83, 110, 98, 110, 164.81]; // Notas A2, C3, D3, A2, G2, A2, E3
-    const tempo = 135;
-    const stepDuration = 60 / tempo / 2; // Colcheias
 
-    const playStep = () => {
-      if (!this.bgmPlaying || this.isMuted) return;
+    if (typeof trackIndexOrUrl === 'number') {
+      this.currentTrackIndex = ((trackIndexOrUrl % BGM_TRACKS.length) + BGM_TRACKS.length) % BGM_TRACKS.length;
+    }
 
-      const t = this.ctx.currentTime;
-      const freq = bassline[step % bassline.length];
+    const currentTrack = this.getCurrentTrack();
+    const url = typeof trackIndexOrUrl === 'string' ? trackIndexOrUrl : currentTrack.url;
 
-      // Baixo pulsante
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = step % 4 === 0 ? 'sawtooth' : 'triangle';
-      osc.frequency.setValueAtTime(freq, t);
-
-      gain.gain.setValueAtTime(0.18, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + stepDuration * 0.9);
-
-      osc.connect(gain);
-      gain.connect(this.bgmGain);
-
-      osc.start(t);
-      osc.stop(t + stepDuration * 0.9);
-
-      // Hi-hat / Percussão sutil
-      if (step % 2 === 1) {
-        this.playNoise(0.03, 0.05, 5000);
+    try {
+      if (!this.bgmAudio) {
+        this.bgmAudio = new Audio();
+        this.bgmAudio.loop = true;
       }
 
-      step++;
-    };
+      if (!this.bgmAudio.src || (!this.bgmAudio.src.endsWith(url.replace('./', '')) && this.bgmAudio.src !== url)) {
+        this.bgmAudio.src = url;
+      }
 
-    this.bgmTimer = setInterval(playStep, stepDuration * 1000);
+      this.bgmAudio.muted = this.isMuted;
+      this.bgmAudio.volume = this.isMuted ? 0 : this.bgmVolume;
+      const playPromise = this.bgmAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.log('BGM aguardando interação do usuário:', err.message);
+          const resumeAudio = () => {
+            if (this.ctx && this.ctx.state === 'suspended') {
+              this.ctx.resume().catch(() => {});
+            }
+            if (this.bgmPlaying && this.bgmAudio) {
+              this.bgmAudio.play().catch(() => {});
+            }
+          };
+          window.addEventListener('click', resumeAudio, { once: true });
+          window.addEventListener('keydown', resumeAudio, { once: true });
+        });
+      }
+    } catch (e) {
+      console.warn('Erro ao carregar BGM:', e);
+    }
   }
 
   stopBGM() {
     this.bgmPlaying = false;
+    if (this.bgmAudio) {
+      try {
+        this.bgmAudio.pause();
+      } catch (e) {}
+    }
     if (this.bgmTimer) {
       clearInterval(this.bgmTimer);
       this.bgmTimer = null;
     }
   }
+
+  // --- REPRODUÇÃO DE CLIPES DE VOZ E ÁUDIO ---
+  playGustaveAbility() {
+    if (this.isMuted) return;
+    this.init();
+
+    try {
+      const audio = new Audio('./assets/audio/gustave_ability.mp3');
+      audio.volume = 1.0;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn('Tentando caminho alternativo de voz:', err);
+          const fallback = new Audio('./assets/expedition33/gustave_ability.mp3');
+          fallback.volume = 1.0;
+          fallback.play().catch((e) => console.warn('Erro ao tocar voz do Gustave:', e));
+        });
+      }
+    } catch (e) {
+      console.warn('Erro ao tocar fala do Gustave:', e);
+    }
+  }
 }
 
 export const sounds = new SoundManager();
+

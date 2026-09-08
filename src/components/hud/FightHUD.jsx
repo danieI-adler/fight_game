@@ -1,5 +1,5 @@
-import React from 'react';
-import { Volume2, VolumeX, Pause, Play } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Volume2, VolumeX, Pause, Play, Music } from 'lucide-react';
 
 export const FightHUD = ({
   gameState,
@@ -9,7 +9,27 @@ export const FightHUD = ({
   onTogglePause,
   isMuted,
   onToggleMute,
+  currentTrack,
+  onNextMusic,
 }) => {
+  const [trackNotification, setTrackNotification] = useState('');
+
+  const handleMusicSwitch = () => {
+    if (onNextMusic) {
+      const newTrack = onNextMusic();
+      if (newTrack) {
+        setTrackNotification(`🎵 ${newTrack.title}`);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (trackNotification) {
+      const timer = setTimeout(() => setTrackNotification(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [trackNotification]);
+
   if (!gameState || !char1 || !char2) return null;
 
   const {
@@ -74,7 +94,7 @@ export const FightHUD = ({
 
         {/* Center Timer & Controls */}
         <div className="flex flex-col items-center mx-2 pointer-events-auto">
-          <div className="w-14 h-14 rounded bg-slate-950 border border-slate-700 flex items-center justify-center">
+          <div className="w-14 h-14 rounded bg-slate-950 border border-slate-700 flex items-center justify-center shadow-lg">
             <span className="text-2xl font-bold text-white font-mono">
               {roundTimer}
             </span>
@@ -82,19 +102,33 @@ export const FightHUD = ({
           <div className="flex gap-1 mt-1.5">
             <button
               onClick={onTogglePause}
-              className="p-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition-colors cursor-pointer"
-              title="Pausar"
+              className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+              title="Pausar [Esc]"
             >
               {isPaused ? <Play size={13} /> : <Pause size={13} />}
             </button>
             <button
               onClick={onToggleMute}
-              className="p-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition-colors cursor-pointer"
+              className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
               title={isMuted ? 'Desmutar' : 'Mutar'}
             >
               {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
             </button>
+            <button
+              onClick={handleMusicSwitch}
+              className="p-1.5 rounded bg-amber-950/70 hover:bg-amber-900 border border-amber-600/70 text-amber-300 hover:text-amber-100 transition-colors cursor-pointer flex items-center gap-1"
+              title={`Trocar Música [Tecla M] (Atual: ${currentTrack?.title || 'Trilha'})`}
+            >
+              <Music size={13} />
+            </button>
           </div>
+
+          {/* Notificação Flutuante ao Trocar Música */}
+          {trackNotification && (
+            <div className="absolute top-20 bg-black/90 border border-amber-500/80 text-amber-300 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xl backdrop-blur-md animate-bounce">
+              {trackNotification}
+            </div>
+          )}
         </div>
 
         {/* Player 2 */}
