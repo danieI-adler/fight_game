@@ -287,9 +287,21 @@ export class Fighter {
     this.stateTime = 0;
     this.hasHitCurrentAttack = false;
     this.isInvulnerable = true;
-    this.superPhase = 'CHARGE'; // 'CHARGE' (0-0.5s), 'LEAP' (0.5-0.85s), 'SLAM' (0.85-1.45s)
-    sounds.playSuperCharge();
-    this.checkGustaveVoice();
+
+    const id = Number(this.charData?.id);
+    const name = (this.charData?.name || '').toLowerCase();
+    const isMaelle = id === 102 || name.includes('maelle') || this.charData?.visual?.weaponType === 'rapier';
+
+    if (isMaelle) {
+      this.superType = 'MAELLE_WALTZ';
+      this.superPhase = 'STRIKE_0';
+      sounds.playRapierSlash();
+    } else {
+      this.superType = 'GUSTAVE_SMASH';
+      this.superPhase = 'CHARGE'; // 'CHARGE' (0-0.5s), 'LEAP' (0.5-0.85s), 'SLAM' (0.85-1.45s)
+      sounds.playSuperCharge();
+      this.checkGustaveVoice();
+    }
   }
 
   canAct() {
@@ -639,7 +651,97 @@ export class Fighter {
         break;
 
       case FIGHTER_STATE.SUPER_MOVE:
-        // --- SUPER MOVE / ULTIMATE DE GUSTAVE (3 FASES: CARGA 0.5s -> SALTO COM RAIOS -> IMPACTO AoE NO CHÃO) ---
+        // --- 1. MAELLE: VALSA DAS LÂMINAS / ALPHA STRIKE (6 Golpes Rápidos com Teletransporte e Inalvejabilidade) ---
+        if (this.superType === 'MAELLE_WALTZ') {
+          this.isInvulnerable = true;
+          this.velocity.x = 0;
+          this.velocity.y = 0;
+
+          const target = this.opponent;
+          const targetX = target ? target.position.x : this.position.x + this.facing * 120;
+          const targetY = target ? target.position.y : this.position.y;
+
+          // Ângulos / posições dos 6 golpes ao redor do alvo:
+          // 1: Frente baixa (-80px, chao)
+          // 2: Atrás no ar (+90px, -70px)
+          // 3: Cima em mergulho (0px, -110px)
+          // 4: Frente no ar (-90px, -60px)
+          // 5: Atrás baixo (+80px, chao)
+          // 6: Finalizador frontal no chão com investida (-60px, chao)
+          const strikeOffsets = [
+            { x: -80, y: 0, face: 1, text: 'VALSA: 1' },
+            { x: 90, y: -70, face: -1, text: 'VALSA: 2' },
+            { x: 0, y: -110, face: 1, text: 'VALSA: 3' },
+            { x: -90, y: -60, face: 1, text: 'VALSA: 4' },
+            { x: 80, y: 0, face: -1, text: 'VALSA: 5' },
+            { x: -60, y: 0, face: 1, text: 'VALSA DAS LÂMINAS!' }
+          ];
+
+          const strikeInterval = 0.11;
+          for (let i = 0; i < 6; i++) {
+            const strikeStartTime = 0.04 + i * strikeInterval;
+            const strikePhaseName = `STRIKE_${i + 1}`;
+
+            // Execução do Golpe (teletransporte, som, partículas de corte)
+            if (this.stateTime >= strikeStartTime && this.superPhase === `STRIKE_${i}`) {
+              this.superPhase = strikePhaseName;
+              const off = strikeOffsets[i];
+              this.facing = off.face;
+              this.position.x = Math.max(60, Math.min(stageWidth - 60, targetX + off.x * (target ? target.facing : 1)));
+              this.position.y = this.groundY + off.y;
+              this.isGrounded = off.y === 0;
+
+              const isFinisher = i === 5;
+              if (isFinisher) {
+                sounds.playRapierFinisher();
+              } else {
+                sounds.playRapierSlash();
+              }
+
+              if (particles) {
+                // Rastro de espada luminoso cortando o alvo
+                const slashStartX = this.position.x - this.facing * 30;
+                const slashStartY = this.position.y - 60;
+                const slashEndX = targetX + (this.facing * 50);
+                const slashEndY = targetY - 60 + (Math.random() - 0.5) * 40;
+
+                particles.emitSwordSlash(slashStartX, slashStartY, slashEndX, slashEndY, isFinisher ? '#fbbf24' : '#38bdf8', isFinisher ? 5.5 : 3.5);
+                if (isFinisher) {
+                  // Corte em X no golpe final
+                  particles.emitSwordSlash(slashStartX, slashEndY, slashEndX, slashStartY, '#38bdf8', 4.5);
+                  particles.emitShockwave(targetX, targetY - 60, 180, '#38bdf8');
+                  particles.emitSparks(targetX, targetY - 60, '#fbbf24', 30, 12);
+                  particles.emitFloatingText('VALSA DAS LÂMINAS! (6 HITS)', targetX, targetY - 120, '#38bdf8', true);
+                } else {
+                  particles.emitSparks(targetX, targetY - 60, '#38bdf8', 10, 6);
+                }
+              }
+            }
+
+            // Janela de Hitbox ativa para cada golpe
+            if (this.stateTime >= strikeStartTime && this.stateTime < strikeStartTime + 0.08) {
+              const isFinisher = i === 5;
+              this.activeHitbox = this.createHitbox(10, 80, 80, 50);
+              this.activeHitbox.damage = isFinisher ? 140 : 45;
+              this.activeHitbox.knockback = isFinisher ? 24 : 3;
+              this.activeHitbox.knockdown = isFinisher;
+              this.activeHitbox.isHeavy = isFinisher;
+              this.activeHitbox.attackerPower = this.attackPower;
+            }
+          }
+
+          if (this.stateTime >= 0.95) {
+            this.isInvulnerable = false;
+            this.superPhase = null;
+            this.superType = null;
+            this.position.y = this.groundY;
+            this.isGrounded = true;
+            this.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 2. GUSTAVE / SUPER MOVE PADRÃO (3 FASES: CARGA 0.5s -> SALTO COM RAIOS -> IMPACTO AoE NO CHÃO) ---
         if (this.stateTime < 0.5) {
           // Fase 1: Carga (0.0s - 0.5s)
           this.velocity.x = 0;
@@ -707,6 +809,7 @@ export class Fighter {
         if (this.stateTime >= 1.45) {
           this.isInvulnerable = false;
           this.superPhase = null;
+          this.superType = null;
           this.state = FIGHTER_STATE.IDLE;
         }
         break;
@@ -861,46 +964,63 @@ export class Fighter {
       }
 
       case FIGHTER_STATE.SUPER_MOVE: {
-        if (t < 0.5) {
-          // Fase 1: Carga (0.0s - 0.5s) - Agachamento com manopla puxada para trás vibrando com energia
-          const chargeVibe = Math.sin(t * 50) * 2;
-          p.head.y = -85 + chargeVibe;
-          p.chest.y = -60 + chargeVibe;
-          p.pelvis.y = -35;
-          p.leftHand = { x: 5 * f, y: -65 };
-          p.rightShoulder = { x: -6 * f, y: -65 };
-          p.rightElbow = { x: -26 * f + chargeVibe, y: -50 };
-          p.rightHand = { x: -35 * f + chargeVibe, y: -40 };
-          p.leftKnee = { x: -18 * f, y: -20 };
-          p.leftFoot = { x: -22 * f, y: 0 };
-          p.rightKnee = { x: 22 * f, y: -20 };
-          p.rightFoot = { x: 28 * f, y: 0 };
-        } else if (t < 0.85) {
-          // Fase 2: Pulo no ar (0.5s - 0.85s) - Salto alto com manopla vermelha erguida ao céu
-          p.head.y = -115;
-          p.chest.y = -85;
-          p.pelvis.y = -55;
-          p.leftHand = { x: -12 * f, y: -55 };
-          p.rightShoulder = { x: 16 * f, y: -90 };
-          p.rightElbow = { x: 28 * f, y: -125 };
-          p.rightHand = { x: 36 * f, y: -155 };
-          p.leftKnee = { x: -12 * f, y: -35 };
-          p.leftFoot = { x: -16 * f, y: -15 };
-          p.rightKnee = { x: 16 * f, y: -30 };
-          p.rightFoot = { x: 22 * f, y: -10 };
+        if (this.superType === 'MAELLE_WALTZ') {
+          // Pose rápida de esgrima/estocada acrobática durante a Valsa das Lâminas
+          const lunge = Math.sin(t * 40);
+          p.head.y = -100 + lunge * 4;
+          p.chest.x = 12 * f;
+          p.chest.y = -75;
+          p.pelvis.y = -45;
+          p.leftHand = { x: -20 * f, y: -75 };
+          p.rightShoulder = { x: 12 * f, y: -80 };
+          p.rightElbow = { x: 30 * f, y: -82 };
+          p.rightHand = { x: (45 + lunge * 18) * f, y: -85 };
+          p.leftKnee = { x: -16 * f, y: -25 };
+          p.leftFoot = { x: -24 * f, y: 0 };
+          p.rightKnee = { x: 22 * f, y: -25 };
+          p.rightFoot = { x: 30 * f, y: 0 };
         } else {
-          // Fase 3: Esmagamento no chão (0.85s - 1.45s) - Manopla cravada no solo liberando ondas de choque
-          p.head.y = -70;
-          p.chest.y = -45;
-          p.pelvis.y = -30;
-          p.leftHand = { x: -24 * f, y: -55 };
-          p.rightShoulder = { x: 16 * f, y: -50 };
-          p.rightElbow = { x: 28 * f, y: -25 };
-          p.rightHand = { x: 36 * f, y: 0 };
-          p.leftKnee = { x: -22 * f, y: -15 };
-          p.leftFoot = { x: -28 * f, y: 0 };
-          p.rightKnee = { x: 18 * f, y: -15 };
-          p.rightFoot = { x: 24 * f, y: 0 };
+          if (t < 0.5) {
+            // Fase 1: Carga (0.0s - 0.5s) - Agachamento com manopla puxada para trás vibrando com energia
+            const chargeVibe = Math.sin(t * 50) * 2;
+            p.head.y = -85 + chargeVibe;
+            p.chest.y = -60 + chargeVibe;
+            p.pelvis.y = -35;
+            p.leftHand = { x: 5 * f, y: -65 };
+            p.rightShoulder = { x: -6 * f, y: -65 };
+            p.rightElbow = { x: -26 * f + chargeVibe, y: -50 };
+            p.rightHand = { x: -35 * f + chargeVibe, y: -40 };
+            p.leftKnee = { x: -18 * f, y: -20 };
+            p.leftFoot = { x: -22 * f, y: 0 };
+            p.rightKnee = { x: 22 * f, y: -20 };
+            p.rightFoot = { x: 28 * f, y: 0 };
+          } else if (t < 0.85) {
+            // Fase 2: Pulo no ar (0.5s - 0.85s) - Salto alto com manopla vermelha erguida ao céu
+            p.head.y = -115;
+            p.chest.y = -85;
+            p.pelvis.y = -55;
+            p.leftHand = { x: -12 * f, y: -55 };
+            p.rightShoulder = { x: 16 * f, y: -90 };
+            p.rightElbow = { x: 28 * f, y: -125 };
+            p.rightHand = { x: 36 * f, y: -155 };
+            p.leftKnee = { x: -12 * f, y: -35 };
+            p.leftFoot = { x: -16 * f, y: -15 };
+            p.rightKnee = { x: 16 * f, y: -30 };
+            p.rightFoot = { x: 22 * f, y: -10 };
+          } else {
+            // Fase 3: Esmagamento no chão (0.85s - 1.45s) - Manopla cravada no solo liberando ondas de choque
+            p.head.y = -70;
+            p.chest.y = -45;
+            p.pelvis.y = -30;
+            p.leftHand = { x: -24 * f, y: -55 };
+            p.rightShoulder = { x: 16 * f, y: -50 };
+            p.rightElbow = { x: 28 * f, y: -25 };
+            p.rightHand = { x: 36 * f, y: 0 };
+            p.leftKnee = { x: -22 * f, y: -15 };
+            p.leftFoot = { x: -28 * f, y: 0 };
+            p.rightKnee = { x: 18 * f, y: -15 };
+            p.rightFoot = { x: 24 * f, y: 0 };
+          }
         }
         break;
       }

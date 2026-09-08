@@ -15,6 +15,7 @@ export class ParticleManager {
     this.shockwaves = [];
     this.floatingTexts = [];
     this.motionTrails = [];
+    this.slashLines = [];
   }
 
   reset() {
@@ -23,6 +24,21 @@ export class ParticleManager {
     this.shockwaves = [];
     this.floatingTexts = [];
     this.motionTrails = [];
+    this.slashLines = [];
+  }
+
+  // --- CORTES DE ESPADA / FLORETE BRILHANTES (Alpha Strike / Blade Waltz) ---
+  emitSwordSlash(x1, y1, x2, y2, color = '#38bdf8', width = 3.5) {
+    this.slashLines.push({
+      x1,
+      y1,
+      x2,
+      y2,
+      color,
+      width,
+      alpha: 1.0,
+      decay: 0.08
+    });
   }
 
   // --- FAÍSCAS E DETRITOS DE IMPACTO ---
@@ -206,6 +222,15 @@ export class ParticleManager {
         this.motionTrails.splice(i, 1);
       }
     }
+
+    // Atualizar cortes de espada
+    for (let i = this.slashLines.length - 1; i >= 0; i--) {
+      const s = this.slashLines[i];
+      s.alpha -= s.decay * dt;
+      if (s.alpha <= 0) {
+        this.slashLines.splice(i, 1);
+      }
+    }
   }
 
   draw(ctx) {
@@ -221,7 +246,27 @@ export class ParticleManager {
       ctx.restore();
     }
 
-    // 2. Desenhar ondas de choque
+    // 2. Desenhar cortes de espada / florete (Blade Waltz)
+    for (const s of this.slashLines) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, s.alpha);
+      ctx.strokeStyle = s.color || '#38bdf8';
+      ctx.shadowColor = s.color || '#38bdf8';
+      ctx.shadowBlur = 18;
+      ctx.lineWidth = s.width || 3.5;
+      ctx.beginPath();
+      ctx.moveTo(s.x1, s.y1);
+      ctx.lineTo(s.x2, s.y2);
+      ctx.stroke();
+
+      // Núcleo branco no centro do corte
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = Math.max(1, (s.width || 3.5) * 0.4);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 3. Desenhar ondas de choque
     for (const s of this.shockwaves) {
       ctx.save();
       ctx.beginPath();
@@ -235,7 +280,7 @@ export class ParticleManager {
       ctx.restore();
     }
 
-    // 3. Desenhar arcos elétricos
+    // 4. Desenhar arcos elétricos
     for (const arc of this.lightningArcs) {
       ctx.save();
       ctx.globalAlpha = arc.alpha;
@@ -257,7 +302,7 @@ export class ParticleManager {
       ctx.restore();
     }
 
-    // 4. Desenhar partículas
+    // 5. Desenhar partículas
     for (const p of this.particles) {
       ctx.save();
       ctx.globalAlpha = Math.max(0, p.alpha);
@@ -270,7 +315,7 @@ export class ParticleManager {
       ctx.restore();
     }
 
-    // 5. Desenhar textos flutuantes
+    // 6. Desenhar textos flutuantes
     for (const ft of this.floatingTexts) {
       ctx.save();
       ctx.globalAlpha = Math.max(0, ft.alpha);

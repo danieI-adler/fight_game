@@ -233,10 +233,60 @@ class SoundManager {
 
     osc.start(t);
     osc.stop(t + 0.85);
+  }
 
-    // Explosão massiva de ruído de trovão
-    this.playNoise(0.65, 0.95, 350);
-    this.playNoise(0.3, 0.7, 3000);
+  playRapierSlash() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(1400, t);
+    osc.frequency.exponentialRampToValueAtTime(320, t + 0.08);
+
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(800, t);
+
+    gain.gain.setValueAtTime(0.7, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.09);
+    this.playNoise(0.06, 0.4, 4500);
+  }
+
+  playRapierFinisher() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1800, t);
+    osc.frequency.setValueAtTime(2400, t + 0.04);
+    osc.frequency.exponentialRampToValueAtTime(400, t + 0.35);
+
+    gain.gain.setValueAtTime(0.85, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.4);
+    this.playNoise(0.2, 0.7, 2500);
   }
 
   playSuper() {
