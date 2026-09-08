@@ -386,13 +386,20 @@ export class Fighter {
   getHurtboxes() {
     const x = this.position.x;
     const y = this.position.y;
-    const crouchFactor = this.isCrouching ? 0.6 : 1.0;
-    const height = 120 * crouchFactor;
+    const crouchFactor = this.isCrouching ? 0.65 : 1.0;
+    const height = 125 * crouchFactor;
+
+    // Cabeça calculada com base na pose dinâmica do esqueleto
+    const headX = x + (this.pose?.head?.x || 0);
+    const headY = y + (this.pose?.head?.y || -115);
 
     return [
-      new Box(x - 18, y - height, 36, 32 * crouchFactor, 'hurtbox'),
-      new Box(x - 26, y - height + 28, 52, 55 * crouchFactor, 'hurtbox'),
-      new Box(x - 24, y - (height * 0.4), 48, height * 0.4, 'hurtbox'),
+      // 1. Cabeça (cobre rosto, máscara, queixo e topo da cabeça)
+      new Box(headX - 18, headY - 18, 36, 36 * (this.isCrouching ? 0.8 : 1.0), 'hurtbox'),
+      // 2. Tronco / Peitoral
+      new Box(x - 26, y - height + 30, 52, 54 * crouchFactor, 'hurtbox'),
+      // 3. Pernas / Pés
+      new Box(x - 24, y - (height * 0.42), 48, height * 0.42, 'hurtbox'),
     ];
   }
 

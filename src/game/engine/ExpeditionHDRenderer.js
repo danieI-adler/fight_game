@@ -410,21 +410,18 @@ export class ExpeditionHDRenderer {
   }
 
   static drawDebugHitboxes(ctx, fighter) {
-    // Hurtbox (Verde)
     ctx.save();
-    ctx.strokeStyle = 'rgba(34, 197, 94, 0.8)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(
-      fighter.position.x - 30,
-      fighter.position.y - 120,
-      60,
-      120
-    );
+    // Hurtboxes (Verde)
+    ctx.strokeStyle = 'rgba(34, 197, 94, 0.85)';
+    ctx.lineWidth = 1.5;
+    for (const box of fighter.getHurtboxes()) {
+      ctx.strokeRect(box.x, box.y, box.width, box.height);
+    }
 
     // Hitbox ativa (Vermelha)
     if (fighter.activeHitbox) {
       ctx.strokeStyle = 'rgba(239, 68, 68, 0.9)';
-      ctx.fillStyle = 'rgba(239, 68, 68, 0.2)';
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
       const hb = fighter.activeHitbox;
       ctx.fillRect(hb.x, hb.y, hb.width, hb.height);
       ctx.strokeRect(hb.x, hb.y, hb.width, hb.height);
