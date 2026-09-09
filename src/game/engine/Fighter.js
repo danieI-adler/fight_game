@@ -94,6 +94,7 @@ export class Fighter {
     this.luneEarthquakeTimer = 0;
     this.luneEarthquakeTick = 0;
     this.luneTornado = null; // { x, y, duration, zapTick, active }
+    this.lastAction = null; // 'BLOCK', 'JUMP', 'ATTACK', 'CROUCH'
 
     // Articulação Esquelética
     this.pose = {
@@ -157,6 +158,7 @@ export class Fighter {
     this.luneEarthquakeTimer = 0;
     this.luneEarthquakeTick = 0;
     this.luneTornado = null;
+    this.lastAction = null;
 
     // Reinicia o rank do Verso em uma nova rodada
     if (this.isVerso) {
@@ -197,6 +199,7 @@ export class Fighter {
     } else if (dir === -this.facing) {
       this.state = FIGHTER_STATE.WALK_BACK;
       this.isBlocking = true;
+      this.lastAction = 'BLOCK';
     }
   }
 
@@ -212,6 +215,7 @@ export class Fighter {
     if (!this.canAct() || !this.isGrounded || this.jumpCooldown > 0) return;
     this.isGrounded = false;
     this.jumpCooldown = 0.22; // Cooldown de pulo
+    this.lastAction = 'JUMP';
     const jumpPower = this.slowTimer > 0 ? this.jumpForce * 0.78 : this.jumpForce;
     this.velocity.y = -jumpPower;
     this.velocity.x = dirX * (this.getEffectiveSpeed() * 0.85);
@@ -226,6 +230,7 @@ export class Fighter {
 
     this.isCrouching = isCrouching;
     if (isCrouching) {
+      this.lastAction = 'CROUCH';
       this.velocity.x = 0;
       this.state = FIGHTER_STATE.CROUCH;
     } else if (this.state === FIGHTER_STATE.CROUCH) {
@@ -237,6 +242,7 @@ export class Fighter {
     if (!this.canAct() && this.state !== FIGHTER_STATE.BLOCK) return;
     this.isBlocking = isBlocking;
     if (isBlocking && this.isGrounded) {
+      this.lastAction = 'BLOCK';
       this.velocity.x = 0;
       this.state = FIGHTER_STATE.BLOCK;
     } else if (this.state === FIGHTER_STATE.BLOCK) {
@@ -256,6 +262,7 @@ export class Fighter {
 
   lightPunch() {
     if (!this.canAct()) return;
+    this.lastAction = 'ATTACK';
     this.velocity.x *= 0.3;
     this.state = !this.isGrounded ? FIGHTER_STATE.JUMP_PUNCH : (this.isCrouching ? FIGHTER_STATE.CROUCH_PUNCH : FIGHTER_STATE.LIGHT_PUNCH);
     this.stateTime = 0;
@@ -265,6 +272,7 @@ export class Fighter {
 
   heavyPunch() {
     if (!this.canAct()) return;
+    this.lastAction = 'ATTACK';
     this.velocity.x *= 0.2;
     this.state = !this.isGrounded ? FIGHTER_STATE.JUMP_PUNCH : FIGHTER_STATE.HEAVY_PUNCH;
     this.stateTime = 0;
@@ -274,6 +282,7 @@ export class Fighter {
 
   lightKick() {
     if (!this.canAct()) return;
+    this.lastAction = 'ATTACK';
     this.velocity.x *= 0.3;
     this.state = !this.isGrounded ? FIGHTER_STATE.JUMP_KICK : (this.isCrouching ? FIGHTER_STATE.CROUCH_KICK : FIGHTER_STATE.LIGHT_KICK);
     this.stateTime = 0;
@@ -283,6 +292,7 @@ export class Fighter {
 
   heavyKick() {
     if (!this.canAct()) return;
+    this.lastAction = 'ATTACK';
     this.velocity.x *= 0.2;
     this.state = !this.isGrounded ? FIGHTER_STATE.JUMP_KICK : FIGHTER_STATE.HEAVY_KICK;
     this.stateTime = 0;
@@ -292,6 +302,7 @@ export class Fighter {
 
   crouchPunch() {
     if (!this.canAct() || !this.isGrounded) return;
+    this.lastAction = 'ATTACK';
     this.isCrouching = true;
     this.velocity.x = 0;
     this.state = FIGHTER_STATE.CROUCH_PUNCH;
@@ -302,6 +313,7 @@ export class Fighter {
 
   crouchKick() {
     if (!this.canAct() || !this.isGrounded) return;
+    this.lastAction = 'ATTACK';
     this.isCrouching = true;
     this.velocity.x = 0;
     this.state = FIGHTER_STATE.CROUCH_KICK;
@@ -320,6 +332,7 @@ export class Fighter {
   special1() {
     if (this.charData?.hasNoSkills || this.isVerso) return;
     if (!this.canAct() || this.energy < 25) return;
+    this.lastAction = 'ATTACK';
     this.energy -= 25;
     this.state = FIGHTER_STATE.SPECIAL_1;
     this.stateTime = 0;
@@ -331,6 +344,7 @@ export class Fighter {
   special2() {
     if (this.charData?.hasNoSkills || this.isVerso) return;
     if (!this.canAct() || this.energy < 35) return;
+    this.lastAction = 'ATTACK';
     this.energy -= 35;
     this.state = FIGHTER_STATE.SPECIAL_2;
     this.stateTime = 0;
@@ -361,8 +375,23 @@ export class Fighter {
       this.superPhase = 'DASH_IN';
       sounds.playWhoosh();
     } else if (this.superType === 'LUNE_ELEMENTAL') {
-      const elements = ['ICE', 'FIRE', 'EARTH', 'WIND'];
-      this.luneElement = elements[Math.floor(Math.random() * elements.length)];
+      // Controle do elemento de Lune baseado na ação anterior do jogador:
+      // Bloquear -> Gelo (ICE)
+      // Pular -> Ar (WIND)
+      // Atacar -> Fogo (FIRE)
+      // Agachar -> Terra (EARTH)
+      if (this.lastAction === 'BLOCK' || this.isBlocking || this.state === FIGHTER_STATE.BLOCK || this.state === FIGHTER_STATE.WALK_BACK) {
+        this.luneElement = 'ICE';
+      } else if (this.lastAction === 'JUMP' || !this.isGrounded || this.state === FIGHTER_STATE.JUMP) {
+        this.luneElement = 'WIND';
+      } else if (this.lastAction === 'CROUCH' || this.isCrouching || this.state === FIGHTER_STATE.CROUCH) {
+        this.luneElement = 'EARTH';
+      } else if (this.lastAction === 'ATTACK') {
+        this.luneElement = 'FIRE';
+      } else {
+        this.luneElement = 'ICE';
+      }
+
       this.superPhase = 'CAST_' + this.luneElement;
       sounds.playSuperCharge();
       if (this.luneElement === 'ICE') {
@@ -690,7 +719,7 @@ export class Fighter {
               isHeavy: true,
               attackerPower: this.attackPower
             };
-            this.opponent.takeHit(attackData, { x: this.luneIceLance.x, y: this.luneIceLance.y }, particles);
+            this.opponent.receiveHit(attackData, { x: this.luneIceLance.x, y: this.luneIceLance.y }, particles);
             this.opponent.slowTimer = 4.0; // Aplica slow de 4 segundos!
             sounds.playIceSpell();
             if (particles) {
