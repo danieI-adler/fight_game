@@ -245,6 +245,7 @@ export const EXPEDITION_33_CHARACTERS = [
   {
     id: 110,
     name: 'Batman',
+    image: './assets/expedition33/batman.jpg',
     themeColor: '#38bdf8',
     secondaryColor: '#0f172a',
     glowColor: 'rgba(56, 189, 248, 0.85)',
@@ -272,6 +273,7 @@ export const EXPEDITION_33_CHARACTERS = [
   {
     id: 111,
     name: 'Darth Vader',
+    image: './assets/expedition33/darth_vader.jpg',
     themeColor: '#ef4444',
     secondaryColor: '#09090b',
     glowColor: 'rgba(239, 68, 68, 0.9)',
@@ -299,6 +301,7 @@ export const EXPEDITION_33_CHARACTERS = [
   {
     id: 112,
     name: 'Palpatine',
+    image: './assets/expedition33/palpatine.jpg',
     themeColor: '#a855f7',
     secondaryColor: '#18181b',
     glowColor: 'rgba(168, 85, 247, 0.9)',
@@ -326,6 +329,7 @@ export const EXPEDITION_33_CHARACTERS = [
   {
     id: 113,
     name: 'Coringa',
+    image: './assets/expedition33/coringa.jpg',
     themeColor: '#10b981',
     secondaryColor: '#7c3aed',
     glowColor: 'rgba(16, 185, 129, 0.85)',
@@ -353,6 +357,7 @@ export const EXPEDITION_33_CHARACTERS = [
   {
     id: 114,
     name: 'Jack Sparrow',
+    image: './assets/expedition33/jack_sparrow.jpg',
     themeColor: '#f59e0b',
     secondaryColor: '#78350f',
     glowColor: 'rgba(245, 158, 11, 0.85)',
@@ -380,6 +385,7 @@ export const EXPEDITION_33_CHARACTERS = [
   {
     id: 115,
     name: 'Relâmpago McQueen',
+    image: './assets/expedition33/relampago_mcqueen.jpg',
     themeColor: '#ef4444',
     secondaryColor: '#facc15',
     glowColor: 'rgba(239, 68, 68, 0.95)',
