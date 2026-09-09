@@ -533,7 +533,9 @@ export class Fighter {
       FIGHTER_STATE.DASH_FORWARD,
       FIGHTER_STATE.DASH_BACK
     ];
-    const maxLockTime = this.state === FIGHTER_STATE.SUPER_MOVE ? 1.6 : 0.8;
+    const maxLockTime = this.state === FIGHTER_STATE.SUPER_MOVE 
+      ? (this.superType === 'RENOIR_FLOWER' ? 2.0 : 1.6) 
+      : 0.8;
     if (attackStates.includes(this.state) && this.stateTime > maxLockTime) {
       this.state = this.isGrounded ? FIGHTER_STATE.IDLE : FIGHTER_STATE.JUMP;
       this.stateTime = 0;

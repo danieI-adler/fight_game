@@ -27,6 +27,8 @@ export class ExpeditionHDRenderer {
   static draw(ctx, fighter, showHitboxes = false) {
     const char = fighter.charData;
     const vis = char.visual || {};
+    const themeColor = char.themeColor || '#0ea5e9';
+    const glowColor = char.glowColor || 'rgba(14, 165, 233, 0.85)';
     const x = fighter.position.x;
     const y = fighter.position.y;
     const f = fighter.facing; // 1 = direita, -1 = esquerda
