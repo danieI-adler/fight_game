@@ -809,16 +809,35 @@ export class FighterCombat {
             particles.emitShockwave(fighter.position.x + fighter.facing * 50, fighter.groundY, 60, '#ef4444');
           }
 
-          // Apenas o PRIMEIRO HIT causa dano! Uma vez acertado o oponente, o giro continua estético sem dar dano repetido
-          if (fighter.stateTime > 0.15 && fighter.stateTime < 1.4) {
-            if (!fighter.hasHitCurrentAttack) {
-              const hb = fighter.createHitbox(10, 85, 150, 85);
-              hb.damage = 380; // Dano total concentrado no primeiro hit do golpe
-              hb.knockback = 20;
-              hb.knockdown = true;
-              hb.isHeavy = true;
-              hb.attackerPower = fighter.attackPower;
-              fighter.activeHitbox = hb;
+          // Múltiplos golpes separados de sabre! Cada giro conecta um hit separado com som e faíscas
+          const hitCount = 6;
+          const hitInterval = 0.2;
+          for (let i = 0; i < hitCount; i++) {
+            const hitTime = 0.16 + i * hitInterval;
+            if (fighter.stateTime >= hitTime && fighter.stateTime < hitTime + 0.1) {
+              if (fighter.superPhase === `SABER_HIT_${i}`) {
+                fighter.superPhase = `SABER_HIT_${i + 1}`;
+                fighter.hasHitCurrentAttack = false; // Permite que cada golpe acerte individualmente!
+                sounds.playRapierSlash();
+
+                const isFinal = (i === hitCount - 1);
+                const hb = fighter.createHitbox(10, 85, 150, 85);
+                hb.damage = isFinal ? 95 : 55; // Danos separados somando ~370 no total
+                hb.knockback = isFinal ? 22 : 4;
+                hb.knockdown = isFinal;
+                hb.isHeavy = true;
+                hb.attackerPower = fighter.attackPower;
+                fighter.activeHitbox = hb;
+
+                if (isFinal) {
+                  sounds.playThunderSlam();
+                  if (particles) {
+                    particles.emitShockwave(fighter.position.x + fighter.facing * 60, fighter.groundY, 120, '#ef4444');
+                  }
+                }
+              }
+            } else if (fighter.stateTime < hitTime && fighter.superPhase === 'SABER_SPIN') {
+              fighter.superPhase = 'SABER_HIT_0';
             }
           }
 
