@@ -210,6 +210,7 @@ export const EXPEDITION_33_CHARACTERS = [
       weaponType: 'gestral_staff',
       isMonoco: true
     },
+    superType: 'MONOCO_PARRY_MIMIC',
     description: 'Gestral guardião. Corpo pétreo coberto por pelos brancos, monólito gravado como rosto e cajado com sino de bronze.'
   },
   {

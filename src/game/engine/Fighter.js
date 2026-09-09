@@ -65,6 +65,12 @@ export class Fighter {
     this.versoHitStreak = 0;
     this.attackPower = this.isVerso ? this.baseAttackPower * this.versoRankMultipliers[this.versoRankIndex] : this.baseAttackPower;
 
+    // Habilidade Exclusiva de Monoco: Skill sempre pronta (Parry & Mimic)
+    this.isMonoco = Boolean(charData.isMonoco || Number(charData.id) === 107 || (charData.name || '').toLowerCase().includes('monoco'));
+    if (this.isMonoco) {
+      this.energy = this.maxEnergy; // Monoco sempre tem a skill pronta!
+    }
+
     // Estado e Animação
     this.state = FIGHTER_STATE.IDLE;
     this.stateTime = 0;
@@ -167,6 +173,11 @@ export class Fighter {
       this.versoRankIndex = 0;
       this.versoHitStreak = 0;
       this.attackPower = this.baseAttackPower * this.versoRankMultipliers[0];
+    }
+
+    // Monoco sempre mantém energia cheia para sua skill
+    if (this.isMonoco) {
+      this.energy = this.maxEnergy;
     }
   }
 
@@ -357,16 +368,20 @@ export class Fighter {
 
   superMove() {
     if (this.charData?.hasNoSkills || this.isVerso) return;
-    if (!this.canAct() || this.energy < 100) return;
-    this.energy = 0;
+    if (!this.canAct() || (!this.isMonoco && this.energy < 100)) return;
+    this.energy = this.isMonoco ? this.maxEnergy : 0;
     this.state = FIGHTER_STATE.SUPER_MOVE;
     this.stateTime = 0;
     this.hasHitCurrentAttack = false;
-    this.isInvulnerable = true;
 
     this.superType = this.charData?.superType || null;
+    this.isInvulnerable = this.superType !== 'MONOCO_PARRY_MIMIC';
 
-    if (this.superType === 'MAELLE_WALTZ') {
+    if (this.superType === 'MONOCO_PARRY_MIMIC') {
+      this.superPhase = 'PARRY_STANCE';
+      sounds.playStaffBell();
+      sounds.playWhoosh();
+    } else if (this.superType === 'MAELLE_WALTZ') {
       this.superPhase = 'STRIKE_0';
       sounds.playRapierSlash();
     } else if (this.superType === 'RENOIR_FLOWER') {
@@ -446,6 +461,22 @@ export class Fighter {
   receiveHit(attackData, hitPoint, particles) {
     if (this.isDead || this.isInvulnerable) return false;
 
+    // --- PARRY E REFLEXÃO DE MONOCO ---
+    // Se Monoco estiver na postura de Parry (PARRY_STANCE), ele não toma dano e reflete/copia a skill!
+    if (this.isMonoco && this.state === FIGHTER_STATE.SUPER_MOVE && this.superPhase === 'PARRY_STANCE') {
+      sounds.playParryReflect();
+      sounds.playStaffBell();
+
+      if (particles) {
+        particles.emitShockwave(this.position.x, this.position.y - 60, 240, '#fbbf24');
+        particles.emitSparks(this.position.x, this.position.y - 60, '#ffffff', 45, 14);
+        particles.emitFloatingText('PARRY & REFLECT!', this.position.x, this.position.y - 110, '#f59e0b', true);
+      }
+
+      this.executeMonocoReflect(attackData, particles);
+      return false; // NÃO TOMA DANO!
+    }
+
     const isGuarding = this.isBlocking || (this.state === FIGHTER_STATE.WALK_BACK && this.isGrounded);
 
     if (isGuarding && !attackData.unblockable) {
@@ -509,6 +540,71 @@ export class Fighter {
     }
 
     return true;
+  }
+
+  // --- MECÂNICA DE REFLEXÃO E CÓPIA DE HABILIDADE (MONOCO) ---
+
+  executeMonocoReflect(attackData, particles) {
+    const op = this.opponent;
+    const opSuper = op?.superType;
+
+    // Copia e ativa imediatamente a habilidade do oponente contra ele!
+    if (opSuper === 'GUSTAVE_SMASH' || op?.charData?.name === 'Gustave') {
+      this.superType = 'GUSTAVE_SMASH';
+      this.superPhase = 'LEAP';
+      this.stateTime = 0.5;
+      this.isInvulnerable = true;
+      const targetX = op ? op.position.x : this.position.x + this.facing * 320;
+      this._superTargetX = targetX;
+      this._superStartX = this.position.x;
+      this.facing = (targetX - this.position.x) >= 0 ? 1 : -1;
+      this.velocity.y = -15;
+      this.velocity.x = 0;
+      this.isGrounded = false;
+      sounds.playSuper();
+    } else if (opSuper === 'MAELLE_WALTZ' || op?.charData?.name === 'Maelle') {
+      this.superType = 'MAELLE_WALTZ';
+      this.superPhase = 'STRIKE_0';
+      this.stateTime = 0;
+      this.isInvulnerable = true;
+      sounds.playRapierSlash();
+    } else if (opSuper === 'RENOIR_FLOWER' || op?.charData?.name === 'Renoir') {
+      this.superType = 'RENOIR_FLOWER';
+      this.superPhase = 'SUMMON_FLOWER';
+      this.stateTime = 0.45;
+      this.isInvulnerable = true;
+      sounds.playSuperCharge();
+    } else if (opSuper === 'SCIEL_DARK_WAVE' || op?.charData?.name === 'Sciel') {
+      this.superType = 'SCIEL_DARK_WAVE';
+      this.superPhase = 'HORIZONTAL_CUT';
+      this.stateTime = 0.25;
+      this.isInvulnerable = true;
+      sounds.playRapierSlash();
+    } else if (opSuper === 'LUNE_ELEMENTAL' || op?.charData?.name === 'Lune') {
+      this.superType = 'LUNE_ELEMENTAL';
+      this.luneElement = op?.luneElement || 'FIRE';
+      this.superPhase = 'CAST_' + this.luneElement;
+      this.stateTime = 0.2;
+      this.isInvulnerable = true;
+      if (this.luneElement === 'ICE') sounds.playIceSpell();
+      else if (this.luneElement === 'FIRE') sounds.playFireCast();
+      else if (this.luneElement === 'EARTH') sounds.playEarthquakeSound();
+      else sounds.playWindTornado();
+    } else if (opSuper === 'PAINTRESS_CHROMATIC_WAVES' || op?.charData?.name === 'La Peintresse') {
+      this.superType = 'PAINTRESS_CHROMATIC_WAVES';
+      this.superPhase = 'WAVE_1';
+      this.stateTime = 0.3;
+      this.isInvulnerable = true;
+      this._wavesSpawned = [false, false, false];
+      sounds.playChromaticWaveCast();
+    } else {
+      // Contra-ataque de Reversão Místico do Cajado Gestral
+      this.superType = 'MONOCO_PARRY_MIMIC';
+      this.superPhase = 'MIMIC_BURST';
+      this.stateTime = 0;
+      this.isInvulnerable = true;
+      sounds.playThunderSlam();
+    }
   }
 
   getHurtboxes() {
@@ -861,6 +957,11 @@ export class Fighter {
 
     // Renderiza as Ondas Cromáticas de La Peintresse
     this.drawChromaticWaves(ctx);
+
+    // Renderiza a Cúpula de Parry do Monoco
+    if (this.isMonoco && this.state === FIGHTER_STATE.SUPER_MOVE && this.superPhase === 'PARRY_STANCE') {
+      this.drawMonocoParryDome(ctx);
+    }
   }
 
   drawRenoirBlackFlower(ctx) {
@@ -1419,5 +1520,39 @@ export class Fighter {
 
       ctx.restore();
     }
+  }
+
+  drawMonocoParryDome(ctx) {
+    const cx = this.position.x;
+    const cy = this.position.y - 65;
+    const t = this.stateTime;
+    const pulse = Math.sin(t * 15) * 0.12 + 0.88;
+
+    ctx.save();
+    ctx.shadowColor = '#fbbf24';
+    ctx.shadowBlur = 25;
+
+    // 1. Cúpula translúcida dourada
+    ctx.beginPath();
+    ctx.arc(cx, cy, 72 * pulse, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(251, 191, 36, 0.2)';
+    ctx.fill();
+
+    // 2. Anel de runas douradas
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // 3. Arcos rúnicos rotativos
+    ctx.strokeStyle = '#fef08a';
+    ctx.lineWidth = 1.8;
+    for (let i = 0; i < 4; i++) {
+      const startAngle = (t * 4) + (i * Math.PI / 2);
+      ctx.beginPath();
+      ctx.arc(cx, cy, 64 * pulse, startAngle, startAngle + Math.PI / 4);
+      ctx.stroke();
+    }
+
+    ctx.restore();
   }
 }

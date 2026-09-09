@@ -605,7 +605,62 @@ export class FighterCombat {
           break;
         }
 
-        // --- 6. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
+        // --- 6. MONOCO: PARRY MÍSTICO & REFLEXÃO GESTRAL ---
+        if (fighter.superType === 'MONOCO_PARRY_MIMIC') {
+          fighter.velocity.x = 0;
+          fighter.velocity.y = 0;
+
+          // Fase 1: Postura de Parry ativa por curto período (0s a 0.55s)
+          // "não faz nada" a menos que seja atingido
+          if (fighter.superPhase === 'PARRY_STANCE') {
+            fighter.isInvulnerable = false;
+
+            if (particles && Math.random() < 0.45) {
+              const staffX = fighter.position.x + fighter.facing * 30;
+              const staffY = fighter.position.y - 70;
+              particles.emitSparks(staffX, staffY, '#fbbf24', 2, 4);
+            }
+
+            // Se ninguém atacou Monoco durante a janela de parry, a postura acaba sem efeito ("não faz nada")
+            if (fighter.stateTime >= 0.55) {
+              fighter.superPhase = null;
+              fighter.superType = null;
+              fighter.state = FIGHTER_STATE.IDLE;
+            }
+          }
+
+          // Fase 2: Explosão Mística de Reversão (quando contra-ataca ataque comum)
+          else if (fighter.superPhase === 'MIMIC_BURST') {
+            fighter.isInvulnerable = true;
+
+            if (fighter.stateTime >= 0.1 && fighter.stateTime < 0.35 && !fighter.hasHitCurrentAttack) {
+              const reach = 220;
+              const boxX = fighter.facing === 1 ? fighter.position.x + 10 : fighter.position.x - 10 - reach;
+              const hb = new Box(boxX, fighter.position.y - 120, reach, 110, 'hitbox');
+              hb.damage = 420;
+              hb.knockback = 26;
+              hb.knockdown = true;
+              hb.isHeavy = true;
+              hb.attackerPower = fighter.attackPower;
+              fighter.activeHitbox = hb;
+
+              if (particles) {
+                particles.emitShockwave(fighter.position.x + fighter.facing * 50, fighter.position.y - 60, 200, '#fbbf24');
+                particles.emitSparks(fighter.position.x + fighter.facing * 50, fighter.position.y - 60, '#f59e0b', 30, 12);
+              }
+            }
+
+            if (fighter.stateTime >= 0.65) {
+              fighter.isInvulnerable = false;
+              fighter.superPhase = null;
+              fighter.superType = null;
+              fighter.state = FIGHTER_STATE.IDLE;
+            }
+          }
+          break;
+        }
+
+        // --- 7. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
         if (fighter.stateTime < 0.5) {
           fighter.velocity.x = 0;
           fighter.isInvulnerable = true;

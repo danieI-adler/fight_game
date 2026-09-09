@@ -704,6 +704,61 @@ class SoundManager {
     osc.stop(t + 0.5);
     this.playNoise(0.35, 0.6, 600);
   }
+
+  // --- MONOCO: SINO GESTRAL E PARRY / REFLEXÃO ---
+
+  playStaffBell() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    // Ressonância rica de sino de bronze
+    const freqs = [440, 880, 1320, 2200];
+    freqs.forEach((f, i) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f, t);
+
+      const amp = (0.4 / (i + 1));
+      gain.gain.setValueAtTime(amp, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.8 + i * 0.2);
+
+      osc.connect(gain);
+      gain.connect(this.sfxGain);
+
+      osc.start(t);
+      osc.stop(t + 0.8 + i * 0.2);
+    });
+  }
+
+  playParryReflect() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    // Flash sonoro triunfal de reflexão cósmica
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(520, t);
+    osc.frequency.linearRampToValueAtTime(1400, t + 0.08);
+    osc.frequency.exponentialRampToValueAtTime(220, t + 0.45);
+
+    gain.gain.setValueAtTime(0.95, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.5);
+    this.playNoise(0.2, 0.5, 3000);
+  }
 }
 
 export const sounds = new SoundManager();
