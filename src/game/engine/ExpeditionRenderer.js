@@ -538,24 +538,32 @@ export class ExpeditionRenderer {
       ctx.arc(hx + 4 * f, hy, 6, -Math.PI / 2, Math.PI / 2);
       ctx.stroke();
     } else if (vis.weaponType === 'dual_curved_blades') {
-      // Cimitarras douradas duplas de Sciel
+      // Cetro/Foice dupla de Sciel — haste central com lâminas curvas em lados opostos
       ctx.shadowColor = '#fbbf24';
       ctx.shadowBlur = 6;
 
-      // Lâmina superior (curva para cima)
-      ctx.strokeStyle = '#fbbf24';
+      // Haste central do cetro
+      ctx.strokeStyle = '#1e293b';
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(hx, hy - 4);
-      ctx.quadraticCurveTo(hx + 18 * f, hy - 28, hx + 36 * f, hy - 16);
+      ctx.moveTo(hx - 20 * f, hy + 16);
+      ctx.lineTo(hx + 24 * f, hy - 14);
       ctx.stroke();
 
-      // Lâmina inferior (curva para baixo)
+      // Lâmina superior (ponta curva para cima, lado da frente)
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(hx + 20 * f, hy - 12);
+      ctx.quadraticCurveTo(hx + 34 * f, hy - 30, hx + 28 * f, hy - 38);
+      ctx.stroke();
+
+      // Lâmina inferior (ponta curva para baixo, lado de trás)
       ctx.strokeStyle = '#f59e0b';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
-      ctx.moveTo(hx, hy + 4);
-      ctx.quadraticCurveTo(hx + 18 * f, hy + 22, hx + 34 * f, hy + 10);
+      ctx.moveTo(hx - 16 * f, hy + 14);
+      ctx.quadraticCurveTo(hx - 30 * f, hy + 30, hx - 24 * f, hy + 38);
       ctx.stroke();
 
       ctx.shadowBlur = 0;
