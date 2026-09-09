@@ -515,6 +515,7 @@ export const CHARACTERS = [
     energyColor: '#e2e8f0',
     style: 'Vigilante Martial Arts',
     stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
+    superType: 'BATMAN_BATMOBILE',
     visual: {
       coatType: 'capelet',
       headgear: 'bat_cowl',
@@ -528,7 +529,7 @@ export const CHARACTERS = [
       gloveColor: '#0f172a',
       paintTrailColor: '#38bdf8'
     },
-    description: 'O guardião encapuzado de Gotham adaptado à Belle Époque, usando Batarangues explosivos e cortinas de fumaça tática.'
+    description: 'O guardião encapuzado de Gotham adaptado à Belle Époque, usando Batarangues que vão e voltam e convocando o Batmóvel com mortal no ar.'
   },
   {
     id: 22,
@@ -541,6 +542,7 @@ export const CHARACTERS = [
     energyColor: '#fca5a5',
     style: 'Form V Sith Lightsaber',
     stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
+    superType: 'VADER_CHOKE',
     visual: {
       coatType: 'draped_overcoat',
       headgear: 'sith_helmet',
@@ -554,7 +556,7 @@ export const CHARACTERS = [
       gloveColor: '#18181b',
       paintTrailColor: '#ef4444'
     },
-    description: 'Imponente Lorde Negro com armadura escura, capa dramática e domínio da Força para esmagar seus oponentes à distância.'
+    description: 'Imponente Lorde Negro arremessando seu sabre de luz giratório e sufocando oponentes com o lendário Force Choke.'
   },
   {
     id: 23,
@@ -567,6 +569,7 @@ export const CHARACTERS = [
     energyColor: '#c084fc',
     style: 'Dark Side Force Lightning',
     stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
+    superType: 'PALPATINE_DUAL_SABERS',
     visual: {
       coatType: 'mantle',
       headgear: 'hood',
@@ -580,7 +583,7 @@ export const CHARACTERS = [
       gloveColor: '#3b0764',
       paintTrailColor: '#c084fc'
     },
-    description: 'Mestre do Lado Sombrio sob um manto negro pontilhado, disparando tempestades devastadoras de Relâmpagos da Força.'
+    description: 'Mestre do Lado Sombrio sob manto negro, disparando Relâmpagos da Força e girando com dois sabres faiscando o piso.'
   },
   {
     id: 24,
@@ -593,6 +596,7 @@ export const CHARACTERS = [
     energyColor: '#f43f5e',
     style: 'Chaotic Acrobatics & Gas',
     stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
+    superType: 'JOKER_CROWBAR',
     visual: {
       coatType: 'trenchcoat',
       headgear: 'fedora',
@@ -606,7 +610,7 @@ export const CHARACTERS = [
       gloveColor: '#7c3aed',
       paintTrailColor: '#10b981'
     },
-    description: 'Sobretudo roxo imperial, colete verde vívido e ataques imprevisíveis com cartas afiadas e nuvens de Gás do Riso.'
+    description: 'Sobretudo roxo imperial, Acid Blossom na flor da lapela e espancamento brutal de 6 golpes estendidos com pé de cabra.'
   },
   {
     id: 25,
@@ -619,6 +623,7 @@ export const CHARACTERS = [
     energyColor: '#fef3c7',
     style: 'Drunken Pirate Sabre',
     stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
+    superType: 'SPARROW_BLACK_PEARL',
     visual: {
       coatType: 'duster',
       headgear: 'tricorne',
@@ -632,7 +637,7 @@ export const CHARACTERS = [
       gloveColor: '#78350f',
       paintTrailColor: '#fbbf24'
     },
-    description: 'Lendário pirata de casaca esfarrapada e tricorne, lutando com esgrima cambaleante e disparos de pederneira encharcada de pólvora.'
+    description: 'Lendário capitão pirata bebendo rum para esquivar cambaleando e bombardeios periódicos de canhão do Pérola Negra.'
   },
   {
     id: 26,
@@ -645,7 +650,10 @@ export const CHARACTERS = [
     energyColor: '#fde047',
     style: 'Ka-Chow Turbocharge',
     stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
+    superType: 'MCQUEEN_KACHOW_BLITZ',
     visual: {
+      isVehicle: true,
+      isMcQueen: true,
       coatType: 'overcoat',
       headgear: 'racer_cap',
       maskStyle: 'visor_95',
@@ -658,7 +666,7 @@ export const CHARACTERS = [
       gloveColor: '#dc2626',
       paintTrailColor: '#facc15'
     },
-    description: 'Guerreiro veloz ornado com o emblema 95 escarlate e raios dourados, atropelando os rivais com seu arranco turbo Ka-Chow.'
+    description: 'O lendário carro de corrida número 95 da Copa Pistão, soltando fumaça em derrapagens drift e atropelando rivais no Ka-Chow Blitz!'
   }
 ];
 

@@ -720,6 +720,241 @@ export class FighterCombat {
           break;
         }
 
+        // --- 7. BATMAN: CONVOCAÇÃO DO BATMÓVEL (Mortal no ar e atropelamento) ---
+        if (fighter.superType === 'BATMAN_BATMOBILE') {
+          fighter.isInvulnerable = true;
+          // Batman gira em mortal no ar
+          fighter.pose.head.y = -130;
+          fighter.pose.chest.y = -95;
+          fighter.pose.pelvis.y = -65;
+
+          if (fighter.stateTime >= 1.45) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.isGrounded = true;
+            fighter.position.y = fighter.groundY;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 8. DARTH VADER: FORCE CHOKE (Ergue a mão, oponente flutua stunado, e ao fechar o punho sofre dano massivo) ---
+        if (fighter.superType === 'VADER_CHOKE') {
+          fighter.velocity.x = 0;
+          fighter.velocity.y = 0;
+          fighter.isInvulnerable = true;
+          const target = fighter.opponent;
+
+          // Levitação e asfixia
+          if (target && !target.isDead) {
+            target.isGrounded = false;
+            target.velocity.x = 0;
+            target.velocity.y = 0;
+            target.position.y = fighter.groundY - 80; // suspenso no ar
+            target.state = FIGHTER_STATE.HURT;
+            target.hitstunTime = 1.0;
+
+            if (particles && Math.random() < 0.6) {
+              particles.emitSparks(target.position.x, target.position.y - 70, '#ef4444', 3, 3);
+              particles.emitDust(target.position.x, fighter.groundY, 2, '#09090b');
+            }
+          }
+
+          // Fecha o punho e aplica o dano massivo em t=1.2s
+          if (fighter.stateTime >= 1.2 && !fighter.hasHitCurrentAttack) {
+            fighter.hasHitCurrentAttack = true;
+            fighter.superPhase = 'CHOKE_CRUSH';
+            sounds.playDimensionalPierce();
+            sounds.playThunderSlam();
+
+            if (target && !target.isDead) {
+              const attackData = {
+                damage: 360,
+                knockback: 18,
+                knockdown: true,
+                isHeavy: true,
+                attackerPower: fighter.attackPower
+              };
+              target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 70 }, particles);
+              target.velocity.y = 4; // arremessado ao chão
+            }
+
+            if (particles && target) {
+              particles.emitShockwave(target.position.x, target.position.y - 70, 180, '#ef4444');
+              particles.emitSparks(target.position.x, target.position.y - 70, '#ef4444', 40, 12);
+            }
+          }
+
+          if (fighter.stateTime >= 1.7) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 9. PALPATINE: DOIS SABRES DE LUZ GIRATÓRIOS COM FAÍSCAS NO SOLO ---
+        if (fighter.superType === 'PALPATINE_DUAL_SABERS') {
+          fighter.isInvulnerable = true;
+          // Avança cortando com rotação contínua
+          fighter.velocity.x = fighter.facing * (fighter.speed * 1.5);
+
+          if (particles && Math.random() < 0.8) {
+            // Faíscas jorrando do chão em ambos os lados
+            const fx = fighter.position.x + (Math.random() - 0.5) * 110;
+            particles.emitSparks(fx, fighter.groundY - 10, '#ef4444', 6, 8);
+            particles.emitSparks(fx, fighter.groundY - 10, '#fbbf24', 4, 6);
+            particles.emitShockwave(fighter.position.x, fighter.groundY, 60, '#ef4444');
+          }
+
+          // Múltiplos hits de corte com dois sabres
+          if (fighter.stateTime > 0.15 && fighter.stateTime < 1.35) {
+            const hb = fighter.createHitbox(-60, 80, 160, 80);
+            hb.damage = 38; // múltiplos hits somando dano alto
+            hb.knockback = 5;
+            hb.knockdown = false;
+            hb.isHeavy = true;
+            hb.attackerPower = fighter.attackPower;
+            fighter.activeHitbox = hb;
+          }
+
+          if (fighter.stateTime >= 1.4) {
+            // Golpe finalizador com knockdown
+            const finHb = fighter.createHitbox(-70, 85, 180, 90);
+            finHb.damage = 120;
+            finHb.knockback = 24;
+            finHb.knockdown = true;
+            finHb.isHeavy = true;
+            finHb.attackerPower = fighter.attackPower;
+            fighter.activeHitbox = finHb;
+            sounds.playThunderSlam();
+          }
+
+          if (fighter.stateTime >= 1.55) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.palpatineDualSabers = false;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 10. CORINGA: PÉ DE CABRA ESPANCAMENTO (Alcance maior que soco normal, 6 hits, cada hit com 200% do dano de hit da ult da Maelle) ---
+        // (Hit da Maelle = 75 dano -> 200% = 150 dano por hit x 6 = 900 de dano máximo potencial, equilibrado proporcionalmente base: 70 por hit x 6 = 420 dano)
+        if (fighter.superType === 'JOKER_CROWBAR') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          fighter.velocity.y = 0;
+
+          const target = fighter.opponent;
+          const hitInterval = 0.18;
+          const targetX = target ? target.position.x : fighter.position.x + fighter.facing * 90;
+
+          // Se aproxima para o alcance do pé de cabra
+          if (target && fighter.stateTime < 0.15) {
+            const desiredX = targetX - fighter.facing * 85;
+            fighter.position.x += (desiredX - fighter.position.x) * 0.3;
+          }
+
+          for (let i = 0; i < 6; i++) {
+            const hitTime = 0.16 + i * hitInterval;
+            if (fighter.stateTime >= hitTime && fighter.stateTime < hitTime + 0.1) {
+              if (fighter.superPhase === `HIT_${i}`) {
+                fighter.superPhase = `HIT_${i + 1}`;
+                sounds.playPunch(true);
+                sounds.playRapierSlash();
+
+                // Hitbox com alcance ampliado (115px vs 60px do soco comum)
+                const hb = fighter.createHitbox(15, 95, 115, 60);
+                hb.damage = 70; // 200% do dano por golpe padrão da ult da Maelle (Maelle = 35/hit)
+                hb.knockback = i === 5 ? 26 : 4;
+                hb.knockdown = i === 5;
+                hb.isHeavy = true;
+                hb.attackerPower = fighter.attackPower;
+                fighter.activeHitbox = hb;
+
+                if (particles && target) {
+                  const hx = target.position.x + (Math.random() - 0.5) * 30;
+                  const hy = target.position.y - 70 + (Math.random() - 0.5) * 40;
+                  particles.emitSparks(hx, hy, '#10b981', 18, 6);
+                  particles.emitSparks(hx, hy, '#7c3aed', 12, 5);
+                  if (i === 5) {
+                    particles.emitShockwave(target.position.x, target.position.y - 60, 180, '#10b981');
+                  }
+                }
+              }
+            } else if (fighter.stateTime < hitTime && fighter.superPhase === 'CROWBAR_RUSH') {
+              fighter.superPhase = 'HIT_0';
+            }
+          }
+
+          if (fighter.stateTime >= 1.35) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 11. JACK SPARROW: SALVAS DE CANHÃO DO PÉROLA NEGRA ---
+        if (fighter.superType === 'SPARROW_BLACK_PEARL') {
+          // Sparrow comanda com floreio bêbado de espada
+          if (fighter.stateTime >= 0.8) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 12. RELÂMPAGO MCQUEEN: KA-CHOW BLITZ ---
+        if (fighter.superType === 'MCQUEEN_KACHOW_BLITZ') {
+          fighter.isInvulnerable = true;
+          // Arranca a velocidades ultra-sônicas
+          fighter.velocity.x = fighter.facing * (fighter.speed * 4.2);
+
+          if (particles && Math.random() < 0.85) {
+            particles.emitSparks(fighter.position.x - fighter.facing * 40, fighter.groundY - 15, '#ef4444', 8, 8);
+            particles.emitSparks(fighter.position.x - fighter.facing * 40, fighter.groundY - 15, '#facc15', 8, 8);
+            particles.emitDust(fighter.position.x - fighter.facing * 30, fighter.groundY, 6, '#18181b');
+          }
+
+          // Atropelamento Blitz
+          if (!fighter.hasHitCurrentAttack && fighter.opponent && !fighter.opponent.isDead) {
+            const dist = Math.abs(fighter.position.x - fighter.opponent.position.x);
+            if (dist < 80) {
+              fighter.hasHitCurrentAttack = true;
+              const attackData = {
+                damage: 395,
+                knockback: 35,
+                knockdown: true,
+                isHeavy: true,
+                attackerPower: fighter.attackPower
+              };
+              fighter.opponent.receiveHit(attackData, { x: fighter.opponent.position.x, y: fighter.groundY - 40 }, particles);
+              sounds.playThunderSlam();
+              if (particles) {
+                particles.emitShockwave(fighter.opponent.position.x, fighter.groundY, 200, '#ef4444');
+                particles.emitSparks(fighter.opponent.position.x, fighter.groundY - 30, '#facc15', 50, 16);
+                particles.emitFloatingText('KA-CHOW!', fighter.position.x, fighter.position.y - 90, '#facc15', true);
+              }
+            }
+          }
+
+          if (fighter.stateTime >= 0.75) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
         // --- 7. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
         if (fighter.stateTime < 0.5) {
           fighter.velocity.x = 0;

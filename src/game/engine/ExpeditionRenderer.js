@@ -36,6 +36,29 @@ export class ExpeditionRenderer {
     // 2. Aura de Energia por Nível de Poder (Gustave: <33% sem aura, 33-66% Amarela, 66-100% Roxa, 100%/Ult Vermelha com Raios)
     this.drawEnergyAura(ctx, x, y, p, char, vis, fighter.stateTime, fighter.energy || 0, fighter.state);
 
+    // SE FOR RELÂMPAGO MCQUEEN: DESENHAR COMO CARRO DA COPA PISTÃO
+    const isMcQueen = (char.name || '').toLowerCase().includes('mcqueen') || vis.isVehicle || vis.isMcQueen;
+    if (isMcQueen) {
+      this.drawMcQueenCar(ctx, x, y, f, fighter);
+      ctx.restore();
+
+      if (showHitboxes) {
+        ctx.save();
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 1.5;
+        for (const box of fighter.getHurtboxes()) {
+          ctx.strokeRect(box.x, box.y, box.width, box.height);
+        }
+        if (fighter.activeHitbox) {
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2.5;
+          ctx.strokeRect(fighter.activeHitbox.x, fighter.activeHitbox.y, fighter.activeHitbox.width, fighter.activeHitbox.height);
+        }
+        ctx.restore();
+      }
+      return;
+    }
+
     // 3. Acessórios Traseiros (Lanceram de Gustave, Cajado com Sino de Monoco, Capa de Renoir, Asas de Esquie)
     this.drawBackAccessories(ctx, x, y, f, p, vis, fighter.stateTime);
 
@@ -854,6 +877,143 @@ export class ExpeditionRenderer {
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 2.5;
     ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // --- RENDERIZADOR EXCLUSIVO DE RELÂMPAGO MCQUEEN (CARRO DA COPA PISTÃO) ---
+  static drawMcQueenCar(ctx, x, y, f, fighter) {
+    const t = fighter.stateTime;
+    const isMoving = Math.abs(fighter.velocity.x) > 0.5;
+    const wheelRot = isMoving ? t * 25 * f : 0;
+    const bounce = Math.sin(t * 14) * (isMoving ? 2 : 0.8);
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(f, 1);
+
+    // 1. Chassi Principal Vermelho de Corrida (#dc2626 com gradiente #991b1b)
+    const carGrad = ctx.createLinearGradient(-75, -55, 75, 0);
+    carGrad.addColorStop(0, '#dc2626');
+    carGrad.addColorStop(0.5, '#ef4444');
+    carGrad.addColorStop(1, '#991b1b');
+
+    ctx.fillStyle = carGrad;
+    ctx.beginPath();
+    ctx.moveTo(-75, -15); // traseira baixa
+    ctx.lineTo(-78, -38); // spoiler base
+    ctx.lineTo(-65, -42); // subida traseira
+    ctx.lineTo(-30, -56 + bounce); // teto / cabine
+    ctx.lineTo(25, -56 + bounce);  // topo parabrisa
+    ctx.lineTo(60, -32);  // capô dianteiro
+    ctx.lineTo(82, -18);  // bico dianteiro
+    ctx.lineTo(82, -8);   // para-choque
+    ctx.lineTo(-75, -8);  // saia lateral
+    ctx.closePath();
+    ctx.fill();
+
+    // Contorno do carro
+    ctx.strokeStyle = '#7f1d1d';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // 2. Spoiler Traseiro Elevado
+    ctx.fillStyle = '#b91c1c';
+    ctx.fillRect(-78, -52 + bounce, 18, 5);
+    ctx.fillStyle = '#7f1d1d';
+    ctx.fillRect(-72, -47 + bounce, 6, 9);
+
+    // 3. Para-brisa com Olhos Expressivos da Pixar
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(-15, -53 + bounce);
+    ctx.lineTo(22, -53 + bounce);
+    ctx.lineTo(45, -34);
+    ctx.lineTo(-12, -34);
+    ctx.closePath();
+    ctx.fill();
+
+    // Íris azuis de McQueen
+    ctx.fillStyle = '#0284c7';
+    ctx.beginPath();
+    ctx.arc(8, -42 + bounce, 5, 0, Math.PI * 2);
+    ctx.arc(26, -42 + bounce, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pupilas
+    ctx.fillStyle = '#09090b';
+    ctx.beginPath();
+    ctx.arc(9, -42 + bounce, 2.5, 0, Math.PI * 2);
+    ctx.arc(27, -42 + bounce, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4. Decalque Relâmpago e Número 95
+    ctx.fillStyle = '#facc15';
+    ctx.beginPath();
+    ctx.moveTo(-35, -28);
+    ctx.lineTo(5, -28);
+    ctx.lineTo(-8, -18);
+    ctx.lineTo(25, -18);
+    ctx.lineTo(10, -12);
+    ctx.lineTo(-25, -12);
+    ctx.closePath();
+    ctx.fill();
+
+    // Número 95 dourado/amarelo na lateral
+    ctx.font = '900 16px "Impact", sans-serif';
+    ctx.fillStyle = '#facc15';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1.5;
+    ctx.strokeText('95', -22, -32);
+    ctx.fillText('95', -22, -32);
+
+    // 5. Boca / Sorriso no para-choque
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(68, -14, 10, 0.2, Math.PI * 0.8);
+    ctx.stroke();
+
+    // 6. Quatro Rodas Lightyear Pretas com Calotas Vermelhas
+    const drawWheel = (wx, wy) => {
+      ctx.save();
+      ctx.translate(wx, wy);
+      ctx.rotate(wheelRot);
+
+      // Pneu de borracha preta
+      ctx.fillStyle = '#18181b';
+      ctx.beginPath();
+      ctx.arc(0, 0, 15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#27272a';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Roda vermelha / aro
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.arc(0, 0, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Centro cromado
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(0, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    };
+
+    drawWheel(-48, -4);
+    drawWheel(52, -4);
+
+    // 7. Faróis Dianteiros com Brilho
+    ctx.fillStyle = '#fef08a';
+    ctx.shadowColor = '#facc15';
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.ellipse(75, -24, 6, 3, 0.2, 0, Math.PI * 2);
+    ctx.fill();
 
     ctx.restore();
   }

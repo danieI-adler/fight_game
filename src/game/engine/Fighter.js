@@ -112,6 +112,22 @@ export class Fighter {
     this.versoEnterUsed = false; // 1x por combate enter para Rank S
     this.isWeakenedSway = false; // cinemática especial: balançando atordoado em pé
 
+    // Novas Habilidades & Ultimates dos 6 novos personagens
+    this.batmanBatarang = null; // { x, y, vx, returning, originX, damage, active, hasHit }
+    this.vaderThrowingSaber = null; // { x, y, vx, returning, startX, maxDist, damage, active, hasHit }
+    this.palpatineLightning = null; // { timer, reach, damage, active }
+    this.jokerAcidBlossom = null; // { x, y, vx, timer, damage, active, hasHit }
+    this.sparrowDrunkTimer = 0; // chance de esquiva aumentada
+    this.mcqueenDriftBurn = null; // { x, y, duration, active }
+    
+    // Ultimates
+    this.batmanBatmobile = null; // { x, vx, active, hasHit, hitOpponent }
+    this.vaderChokeTarget = null; // { target, timer, damageApplied }
+    this.palpatineDualSabers = false; // flag para rodopio
+    this.jokerCrowbarBeat = null; // { hitCount, timer, nextHitTime, target }
+    this.sparrowBlackPearl = null; // { timer, shotsFired, maxShots: 3, interval: 5.0, cannonballs: [] }
+    this.mcqueenBlitz = null; // { phase, timer, startX, targetX, hasHit }
+
     // Articulação Esquelética
     this.pose = {
       head: { x: 0, y: -115 },
@@ -179,17 +195,22 @@ export class Fighter {
     this.lastAction = null;
     this.chromaticWaves = [];
 
-    // Reset de Ataques Extras
+    // Reset de Ataques Extras & Ultimates
     this.gustaveBullet = null;
     this.renoirBlackHole = null;
     this.paintressRealityTear = null;
     this.batmanBatarang = null;
-    this.vaderChokeTimer = 0;
+    this.vaderThrowingSaber = null;
+    this.vaderChokeTarget = null;
     this.palpatineLightning = null;
-    this.jokerGasCloud = null;
-    this.jackSparrowShot = null;
-    this.mcqueenTurboActive = false;
-    this.mcqueenTurboTimer = 0;
+    this.palpatineDualSabers = false;
+    this.jokerAcidBlossom = null;
+    this.jokerCrowbarBeat = null;
+    this.sparrowDrunkTimer = 0;
+    this.sparrowBlackPearl = null;
+    this.mcqueenDriftBurn = null;
+    this.mcqueenBlitz = null;
+    this.batmanBatmobile = null;
     this.timeFreezeTimer = 0;
     this.extraType = null;
     this.extraAttackLevel = 1;
@@ -491,49 +512,55 @@ export class Fighter {
         active: true
       };
     }
-    // 7. Batman: Lançamento de Batarangue veloz
+    // 7. Batman: Lançamento de Batarangue que viaja até o fim do mapa e volta
     else if (charName.includes('batman')) {
       this.extraType = 'BATMAN_BATARANG';
       sounds.playWhoosh();
-      const bx = this.position.x + this.facing * 30;
+      const bx = this.position.x + this.facing * 35;
       const by = this.position.y - 75;
       this.batmanBatarang = {
         x: bx,
         y: by,
-        vx: this.facing * 1250,
-        damage: level === 2 ? 170 : 110,
+        vx: this.facing * 1100,
+        returning: false,
+        originFighter: this,
+        damage: level === 2 ? 160 : 100,
         active: true,
-        hasHit: false
+        hasHitOut: false,
+        hasHitBack: false
       };
     }
-    // 8. Darth Vader: Asfixia / Esmagamento da Força (Force Choke)
+    // 8. Darth Vader: Arremesso de Sabre de Luz Giratório (vai para frente e retorna)
     else if (charName.includes('vader')) {
-      this.extraType = 'VADER_FORCE_CHOKE';
+      this.extraType = 'VADER_SABER_THROW';
+      sounds.playWhoosh();
       sounds.playDimensionalPierce();
-      const target = this.opponent;
-      if (target && !target.isDead) {
-        target.hitstunTime = level === 2 ? 1.4 : 0.8;
-        target.velocity.x = 0;
-        target.velocity.y = -2;
-        const attackData = {
-          damage: level === 2 ? 190 : 120,
-          knockback: 6,
-          knockdown: level === 2,
-          isHeavy: level === 2,
-          attackerPower: this.attackPower
-        };
-        target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 80 }, null);
-      }
+      const sx = this.position.x + this.facing * 40;
+      const sy = this.position.y - 75;
+      this.vaderThrowingSaber = {
+        x: sx,
+        y: sy,
+        startX: sx,
+        vx: this.facing * 950,
+        maxDist: level === 2 ? 450 : 350,
+        returning: false,
+        originFighter: this,
+        damage: level === 2 ? 180 : 120,
+        active: true,
+        hasHitOut: false,
+        hasHitBack: false,
+        rot: 0
+      };
     }
-    // 9. Palpatine: Relâmpagos da Força (Force Lightning contínuo)
+    // 9. Palpatine: Relâmpagos da Força contínuos
     else if (charName.includes('palpatine')) {
       this.extraType = 'PALPATINE_FORCE_LIGHTNING';
       sounds.playElectricZap();
-      const reach = level === 2 ? 450 : 320;
+      const reach = level === 2 ? 480 : 350;
       this.palpatineLightning = {
-        timer: level === 2 ? 0.8 : 0.45,
+        timer: level === 2 ? 0.9 : 0.5,
         reach: reach,
-        damage: level === 2 ? 200 : 130,
+        damage: level === 2 ? 210 : 135,
         active: true
       };
       const target = this.opponent;
@@ -542,9 +569,9 @@ export class Fighter {
         const facingTarget = (target.position.x - this.position.x) * this.facing > 0;
         if (facingTarget && dist < reach) {
           const attackData = {
-            damage: level === 2 ? 200 : 130,
-            knockback: 12,
-            knockdown: level === 2,
+            damage: level === 2 ? 210 : 135,
+            knockback: 10,
+            knockdown: false,
             isHeavy: true,
             attackerPower: this.attackPower
           };
@@ -552,43 +579,44 @@ export class Fighter {
         }
       }
     }
-    // 10. Coringa: Bomba de Gás do Riso venenosa
+    // 10. Coringa: Acid Blossom (esguicho rápido de ácido que atinge e deixa em pé stunado)
     else if (charName.includes('coringa') || charName.includes('joker')) {
-      this.extraType = 'JOKER_LAUGH_GAS';
-      sounds.playSuperCharge();
-      const gasX = this.position.x + this.facing * 120;
-      this.jokerGasCloud = {
-        x: gasX,
-        y: this.groundY - 40,
-        duration: level === 2 ? 4.0 : 2.5,
-        damage: level === 2 ? 45 : 30,
-        tick: 0,
-        active: true
-      };
-    }
-    // 11. Jack Sparrow: Disparo traiçoeiro de Pistola de Pederneira
-    else if (charName.includes('jack') || charName.includes('sparrow')) {
-      this.extraType = 'SPARROW_FLINTLOCK';
-      sounds.playGunshot();
-      const fx = this.position.x + this.facing * 35;
-      const fy = this.position.y - 75;
-      this.jackSparrowShot = {
-        x: fx,
-        y: fy,
-        vx: this.facing * 1350,
-        damage: level === 2 ? 180 : 115,
+      this.extraType = 'JOKER_ACID_BLOSSOM';
+      sounds.playWhoosh();
+      const ax = this.position.x + this.facing * 30;
+      const ay = this.position.y - 82;
+      this.jokerAcidBlossom = {
+        x: ax,
+        y: ay,
+        vx: this.facing * 1200,
+        damage: level === 2 ? 150 : 95,
         active: true,
         hasHit: false
       };
     }
-    // 12. Relâmpago McQueen: Arranque Turbo Ka-Chow!
+    // 11. Jack Sparrow: Garrafa de Rum e Caminhar Bêbado de Esquiva
+    else if (charName.includes('jack') || charName.includes('sparrow')) {
+      this.extraType = 'SPARROW_DRUNKEN_RUM';
+      sounds.playHealSound();
+      sounds.playWhoosh();
+      this.sparrowDrunkTimer = level === 2 ? 4.5 : 3.0; // esquiva ativa pelos próximos 3 a 4.5 segundos!
+    }
+    // 12. Relâmpago McQueen: Drift & Queima de Pneus
     else if (charName.includes('mcqueen') || charName.includes('relampago')) {
-      this.extraType = 'MCQUEEN_TURBO_CHARGE';
-      sounds.playSuper();
+      this.extraType = 'MCQUEEN_DRIFT_BURNOUT';
       sounds.playDash();
-      this.mcqueenTurboActive = true;
-      this.mcqueenTurboTimer = level === 2 ? 0.65 : 0.4;
-      this.velocity.x = this.facing * (this.speed * 3.2);
+      sounds.playThunderSlam();
+      this.mcqueenDriftBurn = {
+        x: this.position.x,
+        y: this.groundY,
+        facing: this.facing,
+        duration: level === 2 ? 3.5 : 2.2,
+        damage: level === 2 ? 35 : 22,
+        tick: 0,
+        active: true
+      };
+      // Dá um tranco em drift para trás/frente
+      this.velocity.x = this.facing * (this.speed * 2.0);
     }
     // Personagens genéricos: golpe padrão fortificado
     else {
@@ -675,6 +703,76 @@ export class Fighter {
       this.superPhase = 'SUMMON_WAVES';
       sounds.playSuperCharge();
       sounds.playChromaticWaveCast();
+    } else if (this.superType === 'BATMAN_BATMOBILE') {
+      this.superPhase = 'SUMMON_CAR';
+      sounds.playSuperCharge();
+      sounds.playWhoosh();
+      // O Batmóvel surge veloz de trás ou da frente dependendo do facing
+      const spawnX = this.position.x - this.facing * 500;
+      this.batmanBatmobile = {
+        x: spawnX,
+        vx: this.facing * 1400,
+        active: true,
+        hasHit: false
+      };
+      // Batman dá um mortal no ar invulnerável para não ser atropelado
+      this.velocity.y = -16;
+      this.velocity.x = this.facing * 2;
+      this.isGrounded = false;
+    } else if (this.superType === 'VADER_CHOKE') {
+      this.superPhase = 'CHOKE_LIFT';
+      sounds.playSuperCharge();
+      sounds.playDimensionalPierce();
+      const target = this.opponent;
+      this.vaderChokeTarget = {
+        target: target,
+        timer: 0,
+        damageApplied: false
+      };
+      if (target && !target.isDead) {
+        target.isInvulnerable = false;
+        target.velocity.x = 0;
+        target.velocity.y = -7;
+        target.isGrounded = false;
+        target.state = FIGHTER_STATE.HURT;
+        target.hitstunTime = 2.0;
+      }
+    } else if (this.superType === 'PALPATINE_DUAL_SABERS') {
+      this.superPhase = 'SABER_SPIN';
+      sounds.playSuperCharge();
+      sounds.playSuper();
+      this.palpatineDualSabers = true;
+    } else if (this.superType === 'JOKER_CROWBAR') {
+      this.superPhase = 'CROWBAR_RUSH';
+      sounds.playSuperCharge();
+      sounds.playRapierSlash();
+      this.jokerCrowbarBeat = {
+        hitCount: 0,
+        nextHitTime: 0.15,
+        totalHits: 6,
+        target: this.opponent
+      };
+    } else if (this.superType === 'SPARROW_BLACK_PEARL') {
+      this.superPhase = 'CANNON_COMMAND';
+      sounds.playSuperCharge();
+      sounds.playGunshot();
+      // 3 tiros de canhão: 1 a cada 5 segundos
+      this.sparrowBlackPearl = {
+        timer: 0,
+        shotsFired: 0,
+        maxShots: 3,
+        interval: 5.0,
+        cannonballs: []
+      };
+    } else if (this.superType === 'MCQUEEN_KACHOW_BLITZ') {
+      this.superPhase = 'NITRO_CHARGE';
+      sounds.playSuperCharge();
+      sounds.playSuper();
+      this.mcqueenBlitz = {
+        timer: 0,
+        phase: 'DASH_OUT',
+        hasHit: false
+      };
     } else {
       this.superType = 'GUSTAVE_SMASH';
       this.superPhase = 'CHARGE'; // 'CHARGE' (0-0.5s), 'LEAP' (0.5-0.85s), 'SLAM' (0.85-1.45s)
@@ -713,6 +811,20 @@ export class Fighter {
 
   receiveHit(attackData, hitPoint, particles) {
     if (this.isDead || this.isInvulnerable) return false;
+
+    // --- ESQUIVA EMBRIAGADA DE JACK SPARROW ---
+    if (this.sparrowDrunkTimer > 0) {
+      if (Math.random() < 0.70) {
+        // Esquiva bem sucedida!
+        sounds.playWhoosh();
+        this.velocity.x = -this.facing * 5; // cambaleia para longe
+        if (particles) {
+          particles.emitFloatingText('EVADED!', this.position.x, this.position.y - 85, '#fbbf24', true);
+          particles.emitSparks(this.position.x, this.position.y - 50, '#f59e0b', 8, 4);
+        }
+        return false;
+      }
+    }
 
     // --- PARRY E REFLEXÃO DE MONOCO ---
     // Se Monoco estiver na postura de Parry (PARRY_STANCE), ele não toma dano e reflete/copia!
@@ -1271,47 +1383,119 @@ export class Fighter {
       }
     }
 
-    // 5.10 Batarangue do Batman (Ataque Extra)
+    // 5.10 Batarangue do Batman (Ataque Extra: vai até a borda da arena e volta)
     if (this.batmanBatarang && this.batmanBatarang.active) {
-      this.batmanBatarang.x += this.batmanBatarang.vx * dt;
-      if (particles && Math.random() < 0.4) {
-        particles.emitSparks(this.batmanBatarang.x, this.batmanBatarang.y, '#38bdf8', 2, 2);
+      const b = this.batmanBatarang;
+      b.x += b.vx * dt;
+      if (particles && Math.random() < 0.45) {
+        particles.emitSparks(b.x, b.y, '#38bdf8', 2, 2);
       }
-      if (this.opponent && !this.batmanBatarang.hasHit && !this.opponent.isDead) {
-        const bx = this.batmanBatarang.x;
-        const by = this.batmanBatarang.y;
-        const bBox = new Box(bx - 18, by - 12, 36, 24, 'hitbox');
-        for (const hurt of this.opponent.getHurtboxes()) {
-          if (bBox.intersects(hurt)) {
-            this.batmanBatarang.hasHit = true;
-            this.batmanBatarang.active = false;
-            const attackData = {
-              damage: this.batmanBatarang.damage || 110,
-              knockback: 12,
-              knockdown: false,
-              isHeavy: true,
-              attackerPower: this.attackPower
-            };
-            this.opponent.receiveHit(attackData, { x: bx, y: by }, particles);
-            sounds.playPunch(true);
-            if (particles) {
-              particles.emitShockwave(bx, by, 60, '#38bdf8');
-              particles.emitSparks(bx, by, '#0f172a', 20, 8);
+
+      // Checa se atingiu o fim do mapa
+      if (!b.returning) {
+        if (b.x <= 40 || b.x >= stageWidth - 40) {
+          b.returning = true;
+          b.vx = -b.vx; // Inverte o sentido em direção ao Batman!
+          sounds.playWhoosh();
+        }
+      } else {
+        // Retornando em direção ao Batman
+        const distToBatman = Math.abs(b.x - this.position.x);
+        if (distToBatman < 40) {
+          b.active = false; // Batman pegou o batarangue de volta!
+        }
+      }
+
+      if (this.opponent && !this.opponent.isDead) {
+        const hitKey = b.returning ? 'hasHitBack' : 'hasHitOut';
+        if (!b[hitKey]) {
+          const bBox = new Box(b.x - 18, b.y - 12, 36, 24, 'hitbox');
+          for (const hurt of this.opponent.getHurtboxes()) {
+            if (bBox.intersects(hurt)) {
+              b[hitKey] = true;
+              const attackData = {
+                damage: b.damage || 110,
+                knockback: b.returning ? -8 : 10,
+                knockdown: false,
+                isHeavy: true,
+                attackerPower: this.attackPower
+              };
+              this.opponent.receiveHit(attackData, { x: b.x, y: b.y }, particles);
+              sounds.playPunch(true);
+              if (particles) {
+                particles.emitShockwave(b.x, b.y, 60, '#38bdf8');
+                particles.emitSparks(b.x, b.y, '#0f172a', 20, 8);
+              }
+              break;
             }
-            break;
           }
         }
       }
-      if (this.batmanBatarang.x < -100 || this.batmanBatarang.x > stageWidth + 100) {
-        this.batmanBatarang.active = false;
+
+      if (b.x < -200 || b.x > stageWidth + 200) {
+        b.active = false;
       }
     }
 
-    // 5.11 Relâmpagos de Palpatine (Ataque Extra)
+    // 5.11 Sabre Giratório de Darth Vader (Ataque Extra: voa girando para frente e volta)
+    if (this.vaderThrowingSaber && this.vaderThrowingSaber.active) {
+      const s = this.vaderThrowingSaber;
+      s.x += s.vx * dt;
+      s.rot += dt * 30; // Rotação rápida do sabre
+      if (particles && Math.random() < 0.6) {
+        particles.emitSparks(s.x, s.y, '#ef4444', 3, 4);
+      }
+
+      const travelDist = Math.abs(s.x - s.startX);
+      if (!s.returning) {
+        if (travelDist >= s.maxDist || s.x <= 40 || s.x >= stageWidth - 40) {
+          s.returning = true;
+          s.vx = -s.vx;
+          sounds.playWhoosh();
+        }
+      } else {
+        // Retornando para as mãos de Vader
+        if (Math.abs(s.x - this.position.x) < 35) {
+          s.active = false;
+        }
+      }
+
+      if (this.opponent && !this.opponent.isDead) {
+        const hitKey = s.returning ? 'hasHitBack' : 'hasHitOut';
+        if (!s[hitKey]) {
+          const sBox = new Box(s.x - 30, s.y - 15, 60, 30, 'hitbox');
+          for (const hurt of this.opponent.getHurtboxes()) {
+            if (sBox.intersects(hurt)) {
+              s[hitKey] = true;
+              const attackData = {
+                damage: s.damage || 130,
+                knockback: s.returning ? -6 : 12,
+                knockdown: false,
+                isHeavy: true,
+                attackerPower: this.attackPower
+              };
+              this.opponent.receiveHit(attackData, { x: s.x, y: s.y }, particles);
+              sounds.playPunch(true);
+              if (particles) {
+                particles.emitShockwave(s.x, s.y, 70, '#ef4444');
+                particles.emitSparks(s.x, s.y, '#fca5a5', 22, 9);
+              }
+              break;
+            }
+          }
+        }
+      }
+
+      if (s.x < -200 || s.x > stageWidth + 200) {
+        s.active = false;
+      }
+    }
+
+    // 5.12 Relâmpagos de Palpatine (Ataque Extra)
     if (this.palpatineLightning && this.palpatineLightning.active) {
       this.palpatineLightning.timer -= dt;
       if (particles && Math.random() < 0.6) {
-        const lX = this.position.x + this.facing * (Math.random() * (this.palpatineLightning.reach || 320));
+        const lX = this.position.x + this.facing * (Math.random() * (this.palpatineLightning.reach || 350));
         particles.emitSparks(lX, this.position.y - 70, '#a855f7', 4, 4);
       }
       if (this.palpatineLightning.timer <= 0) {
@@ -1319,90 +1503,174 @@ export class Fighter {
       }
     }
 
-    // 5.12 Nuvem de Gás do Coringa (Ataque Extra)
-    if (this.jokerGasCloud && this.jokerGasCloud.active) {
-      this.jokerGasCloud.duration -= dt;
-      this.jokerGasCloud.tick += dt;
-      if (particles && Math.random() < 0.3) {
-        particles.emitDust(this.jokerGasCloud.x + (Math.random() - 0.5) * 60, this.jokerGasCloud.y, 2, '#10b981');
+    // 5.13 Acid Blossom do Coringa (Ataque Extra: atinge e deixa de pé atordoado)
+    if (this.jokerAcidBlossom && this.jokerAcidBlossom.active) {
+      const a = this.jokerAcidBlossom;
+      a.x += a.vx * dt;
+      if (particles && Math.random() < 0.5) {
+        particles.emitSparks(a.x, a.y, '#10b981', 3, 3);
+        particles.emitSparks(a.x, a.y, '#fbbf24', 2, 2);
       }
-      if (this.jokerGasCloud.tick >= 0.5) {
-        this.jokerGasCloud.tick = 0;
-        if (this.opponent && !this.opponent.isDead) {
-          const dist = Math.abs(this.jokerGasCloud.x - this.opponent.position.x);
-          if (dist < 85) {
+      if (this.opponent && !a.hasHit && !this.opponent.isDead) {
+        const aBox = new Box(a.x - 16, a.y - 12, 32, 24, 'hitbox');
+        for (const hurt of this.opponent.getHurtboxes()) {
+          if (aBox.intersects(hurt)) {
+            a.hasHit = true;
+            a.active = false;
+            // Dano com hitstun longo que DEIXA O OPONENTE DE PÉ (knockdown: false)
+            this.opponent.hitstunTime = 0.95; // atordoado de pé
             const attackData = {
-              damage: this.jokerGasCloud.damage || 30,
-              knockback: 0,
+              damage: a.damage || 110,
+              knockback: 2, // Quase sem knockback para ficar de pé no lugar
               knockdown: false,
               isHeavy: false,
               attackerPower: this.attackPower
             };
-            this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
-          }
-        }
-      }
-      if (this.jokerGasCloud.duration <= 0) {
-        this.jokerGasCloud.active = false;
-      }
-    }
-
-    // 5.13 Pederneira de Jack Sparrow (Ataque Extra)
-    if (this.jackSparrowShot && this.jackSparrowShot.active) {
-      this.jackSparrowShot.x += this.jackSparrowShot.vx * dt;
-      if (particles && Math.random() < 0.5) {
-        particles.emitSparks(this.jackSparrowShot.x, this.jackSparrowShot.y, '#f59e0b', 3, 3);
-      }
-      if (this.opponent && !this.jackSparrowShot.hasHit && !this.opponent.isDead) {
-        const sx = this.jackSparrowShot.x;
-        const sy = this.jackSparrowShot.y;
-        const sBox = new Box(sx - 15, sy - 10, 30, 20, 'hitbox');
-        for (const hurt of this.opponent.getHurtboxes()) {
-          if (sBox.intersects(hurt)) {
-            this.jackSparrowShot.hasHit = true;
-            this.jackSparrowShot.active = false;
-            const attackData = {
-              damage: this.jackSparrowShot.damage || 115,
-              knockback: 14,
-              knockdown: true,
-              isHeavy: true,
-              attackerPower: this.attackPower
-            };
-            this.opponent.receiveHit(attackData, { x: sx, y: sy }, particles);
-            sounds.playPunch(true);
+            this.opponent.receiveHit(attackData, { x: a.x, y: a.y }, particles);
+            sounds.playPunch(false);
+            if (particles) {
+              particles.emitShockwave(a.x, a.y, 80, '#10b981');
+              particles.emitSparks(a.x, a.y, '#22c55e', 25, 8);
+              particles.emitFloatingText('ACID STUN!', this.opponent.position.x, this.opponent.position.y - 85, '#10b981', true);
+            }
             break;
           }
         }
       }
-      if (this.jackSparrowShot.x < -100 || this.jackSparrowShot.x > stageWidth + 100) {
-        this.jackSparrowShot.active = false;
+      if (a.x < -100 || a.x > stageWidth + 100) {
+        a.active = false;
       }
     }
 
-    // 5.14 Turbo Ka-Chow de McQueen (Ataque Extra)
-    if (this.mcqueenTurboActive) {
-      this.mcqueenTurboTimer -= dt;
-      if (particles && Math.random() < 0.6) {
-        particles.emitSparks(this.position.x - this.facing * 30, this.groundY - 10, '#ef4444', 4, 4);
-        particles.emitDust(this.position.x - this.facing * 20, this.groundY, 3, '#facc15');
+    // 5.14 Rum & Esquiva Bêbada de Jack Sparrow (Ataque Extra)
+    if (this.sparrowDrunkTimer > 0) {
+      this.sparrowDrunkTimer -= dt;
+      if (particles && Math.random() < 0.25) {
+        particles.emitSparks(this.position.x, this.position.y - 80, '#fbbf24', 2, 2);
       }
-      if (this.opponent && !this.opponent.isDead && !this.hasHitCurrentAttack) {
-        const dist = Math.abs(this.position.x - this.opponent.position.x);
-        if (dist < 60) {
-          this.hasHitCurrentAttack = true;
+    }
+
+    // 5.15 Queima de Pneu / Drift de McQueen (Ataque Extra)
+    if (this.mcqueenDriftBurn && this.mcqueenDriftBurn.active) {
+      const db = this.mcqueenDriftBurn;
+      db.duration -= dt;
+      db.tick += dt;
+      if (particles) {
+        // Fumaça de pneu e faíscas
+        particles.emitDust(db.x + (Math.random() - 0.5) * 80, db.y, 4, '#18181b');
+        particles.emitSparks(db.x + (Math.random() - 0.5) * 60, db.y - 10, '#ef4444', 3, 4);
+      }
+      if (db.tick >= 0.4) {
+        db.tick = 0;
+        if (this.opponent && !this.opponent.isDead) {
+          const dist = Math.abs(db.x - this.opponent.position.x);
+          if (dist < 110) {
+            const attackData = {
+              damage: db.damage || 25,
+              knockback: 3,
+              knockdown: false,
+              isHeavy: false,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 30 }, particles);
+          }
+        }
+      }
+      if (db.duration <= 0) {
+        db.active = false;
+      }
+    }
+
+    // 5.16 Batmóvel do Batman (Ultimate)
+    if (this.batmanBatmobile && this.batmanBatmobile.active) {
+      const bm = this.batmanBatmobile;
+      bm.x += bm.vx * dt;
+      if (particles && Math.random() < 0.6) {
+        particles.emitDust(bm.x, this.groundY, 6, '#09090b');
+        particles.emitSparks(bm.x, this.groundY - 15, '#38bdf8', 4, 5);
+      }
+      // Atropela o oponente
+      if (this.opponent && !bm.hasHit && !this.opponent.isDead) {
+        const dist = Math.abs(bm.x - this.opponent.position.x);
+        if (dist < 100) {
+          bm.hasHit = true;
           const attackData = {
-            damage: 160,
-            knockback: 20,
+            damage: 380,
+            knockback: 32,
             knockdown: true,
             isHeavy: true,
             attackerPower: this.attackPower
           };
-          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
-          sounds.playPunch(true);
+          this.opponent.receiveHit(attackData, { x: bm.x, y: this.groundY - 40 }, particles);
+          sounds.playThunderSlam();
+          if (particles) {
+            particles.emitShockwave(bm.x, this.groundY, 180, '#38bdf8');
+            particles.emitSparks(bm.x, this.groundY - 30, '#0284c7', 40, 15);
+            particles.emitDust(bm.x, this.groundY, 20, '#09090b');
+          }
         }
       }
-      if (this.mcqueenTurboTimer <= 0) {
-        this.mcqueenTurboActive = false;
+      if (bm.x < -300 || bm.x > stageWidth + 300) {
+        bm.active = false;
+      }
+    }
+
+    // 5.17 Canhões do Pérola Negra de Jack Sparrow (Ultimate: 3 tiros, 1 a cada 5s)
+    if (this.sparrowBlackPearl) {
+      const bp = this.sparrowBlackPearl;
+      bp.timer += dt;
+
+      // Dispara 1 tiro a cada 5 segundos até 3 tiros
+      if (bp.shotsFired < bp.maxShots && bp.timer >= bp.shotsFired * bp.interval) {
+        bp.shotsFired++;
+        sounds.playGunshot();
+        sounds.playThunderSlam();
+        const targetX = this.opponent ? this.opponent.position.x : this.position.x + this.facing * 200;
+        bp.cannonballs.push({
+          targetX: targetX,
+          x: targetX,
+          y: -150, // Cai dos céus
+          vy: 650,
+          exploded: false,
+          active: true
+        });
+      }
+
+      // Atualiza balas de canhão caindo
+      for (const cb of bp.cannonballs) {
+        if (!cb.active) continue;
+        cb.y += cb.vy * dt;
+        if (particles && Math.random() < 0.4) {
+          particles.emitDust(cb.x, cb.y, 2, '#451a03');
+        }
+        // Impacto no chão
+        if (cb.y >= this.groundY - 10 && !cb.exploded) {
+          cb.exploded = true;
+          cb.active = false;
+          sounds.playThunderSlam();
+          if (particles) {
+            particles.emitShockwave(cb.x, this.groundY, 150, '#f59e0b');
+            particles.emitSparks(cb.x, this.groundY - 20, '#ef4444', 35, 12);
+            particles.emitDust(cb.x, this.groundY, 25, '#78350f');
+          }
+          if (this.opponent && !this.opponent.isDead) {
+            const dist = Math.abs(cb.x - this.opponent.position.x);
+            if (dist < 130) {
+              const attackData = {
+                damage: 130, // 3 tiros x 130 = 390 de dano total
+                knockback: 18,
+                knockdown: true,
+                isHeavy: true,
+                attackerPower: this.attackPower
+              };
+              this.opponent.receiveHit(attackData, { x: cb.x, y: this.groundY - 20 }, particles);
+            }
+          }
+        }
+      }
+      bp.cannonballs = bp.cannonballs.filter((cb) => cb.active);
+      if (bp.shotsFired >= bp.maxShots && bp.cannonballs.length === 0 && bp.timer > 16.0) {
+        this.sparrowBlackPearl = null;
       }
     }
 
@@ -1600,41 +1868,71 @@ export class Fighter {
       ctx.restore();
     }
 
-    // 5. Batarangue do Batman
+    // 5. Batarangue do Batman (vai e volta com rotação)
     if (this.batmanBatarang && this.batmanBatarang.active) {
       const bx = this.batmanBatarang.x;
       const by = this.batmanBatarang.y;
-      const rot = Date.now() * 0.02;
+      const rot = Date.now() * 0.025;
       ctx.save();
       ctx.translate(bx, by);
       ctx.rotate(rot);
       ctx.shadowColor = '#38bdf8';
-      ctx.shadowBlur = 12;
+      ctx.shadowBlur = 14;
       ctx.fillStyle = '#09090b';
       ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 2.0;
       ctx.beginPath();
-      ctx.moveTo(-16, -4);
-      ctx.quadraticCurveTo(0, -12, 16, -4);
-      ctx.lineTo(8, 6);
-      ctx.lineTo(0, 2);
-      ctx.lineTo(-8, 6);
+      ctx.moveTo(-18, -5);
+      ctx.quadraticCurveTo(0, -14, 18, -5);
+      ctx.lineTo(10, 8);
+      ctx.lineTo(0, 3);
+      ctx.lineTo(-10, 8);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
       ctx.restore();
     }
 
-    // 6. Relâmpagos de Palpatine
+    // 6. Sabre Giratório de Darth Vader (vai e volta)
+    if (this.vaderThrowingSaber && this.vaderThrowingSaber.active) {
+      const sx = this.vaderThrowingSaber.x;
+      const sy = this.vaderThrowingSaber.y;
+      const rot = this.vaderThrowingSaber.rot || 0;
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.rotate(rot);
+
+      // Lâmina de plasma escarlate giratória
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = 22;
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(-45, 0);
+      ctx.lineTo(45, 0);
+      ctx.stroke();
+
+      // Núcleo branco incandescente
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+
+      // Cabo metálico no centro
+      ctx.fillStyle = '#09090b';
+      ctx.fillRect(-8, -3, 16, 6);
+      ctx.restore();
+    }
+
+    // 7. Relâmpagos de Palpatine
     if (this.palpatineLightning && this.palpatineLightning.active) {
       const sx = this.position.x + this.facing * 30;
       const sy = this.position.y - 75;
-      const reach = this.palpatineLightning.reach || 320;
+      const reach = this.palpatineLightning.reach || 350;
       ctx.save();
       ctx.shadowColor = '#a855f7';
-      ctx.shadowBlur = 20;
+      ctx.shadowBlur = 22;
       ctx.strokeStyle = '#c084fc';
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 2.8;
 
       for (let branch = 0; branch < 3; branch++) {
         ctx.beginPath();
@@ -1653,34 +1951,166 @@ export class Fighter {
       ctx.restore();
     }
 
-    // 7. Nuvem de Gás do Coringa
-    if (this.jokerGasCloud && this.jokerGasCloud.active) {
-      const gx = this.jokerGasCloud.x;
-      const gy = this.jokerGasCloud.y;
+    // 8. Acid Blossom do Coringa (esguicho de ácido verde borbulhante)
+    if (this.jokerAcidBlossom && this.jokerAcidBlossom.active) {
+      const ax = this.jokerAcidBlossom.x;
+      const ay = this.jokerAcidBlossom.y;
       ctx.save();
       ctx.shadowColor = '#10b981';
-      ctx.shadowBlur = 25;
-      ctx.fillStyle = 'rgba(16, 185, 129, 0.35)';
-      const t = Date.now() * 0.005;
-      for (let puff = 0; puff < 5; puff++) {
-        const ox = Math.sin(t + puff * 1.5) * 25;
-        const oy = Math.cos(t * 1.2 + puff) * 15;
-        ctx.beginPath();
-        ctx.arc(gx + ox, gy + oy, 32 + puff * 4, 0, Math.PI * 2);
-        ctx.fill();
+      ctx.shadowBlur = 18;
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.arc(ax, ay, 9, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Gotas menores de ácido
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(ax - this.facing * 12, ay - 4, 5, 0, Math.PI * 2);
+      ctx.arc(ax - this.facing * 22, ay + 3, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 9. Garrafa de Rum de Jack Sparrow (indicador visual de embriaguez/esquiva)
+    if (this.sparrowDrunkTimer > 0) {
+      const hx = this.position.x;
+      const hy = this.position.y - 125;
+      const pulse = Math.sin(Date.now() * 0.01) * 3;
+      ctx.save();
+      ctx.shadowColor = '#fbbf24';
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = 'bold 12px "Cinzel", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🍾 RUM DODGE!', hx, hy + pulse);
+      ctx.restore();
+    }
+
+    // 10. Queima de Pneu / Drift de McQueen
+    if (this.mcqueenDriftBurn && this.mcqueenDriftBurn.active) {
+      const bx = this.mcqueenDriftBurn.x;
+      const by = this.mcqueenDriftBurn.y;
+      ctx.save();
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = 15;
+      // Marca de pneu no asfalto
+      ctx.fillStyle = '#09090b';
+      ctx.fillRect(bx - 50, by - 6, 100, 6);
+      // Faíscas e chamas do atrito
+      ctx.fillStyle = '#facc15';
+      for (let s = 0; s < 4; s++) {
+        const sx = bx + (s - 1.5) * 25 + Math.sin(Date.now() * 0.01 + s) * 8;
+        ctx.fillRect(sx, by - 12, 5, 8);
       }
       ctx.restore();
     }
 
-    // 8. Pederneira de Jack Sparrow
-    if (this.jackSparrowShot && this.jackSparrowShot.active) {
+    // 11. Batmóvel Atropelando (Batman Ultimate)
+    if (this.batmanBatmobile && this.batmanBatmobile.active) {
+      const mx = this.batmanBatmobile.x;
+      const my = this.groundY;
+      const dir = Math.sign(this.batmanBatmobile.vx) || 1;
       ctx.save();
-      ctx.shadowColor = '#f59e0b';
-      ctx.shadowBlur = 12;
-      ctx.fillStyle = '#fbbf24';
+      ctx.translate(mx, my);
+      ctx.scale(dir, 1);
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 25;
+
+      // Carroceria aerodinâmica escura do Batmóvel
+      ctx.fillStyle = '#050505';
       ctx.beginPath();
-      ctx.arc(this.jackSparrowShot.x, this.jackSparrowShot.y, 5, 0, Math.PI * 2);
+      ctx.moveTo(-110, -10);
+      ctx.lineTo(-80, -38);
+      ctx.lineTo(-20, -42);
+      ctx.lineTo(40, -30);
+      ctx.lineTo(95, -15);
+      ctx.lineTo(110, 0);
+      ctx.lineTo(-110, 0);
+      ctx.closePath();
       ctx.fill();
+
+      // Turbina de fogo traseira
+      ctx.shadowColor = '#38bdf8';
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.moveTo(-110, -22);
+      ctx.lineTo(-150 - Math.random() * 25, -18);
+      ctx.lineTo(-110, -14);
+      ctx.closePath();
+      ctx.fill();
+
+      // Rodas robustas
+      ctx.fillStyle = '#18181b';
+      ctx.beginPath();
+      ctx.arc(-65, -4, 16, 0, Math.PI * 2);
+      ctx.arc(65, -4, 16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Faróis azuis cortando a noite
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.4)';
+      ctx.beginPath();
+      ctx.moveTo(95, -20);
+      ctx.lineTo(240, -45);
+      ctx.lineTo(240, 5);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // 12. Balas de Canhão do Pérola Negra (Jack Sparrow Ultimate)
+    if (this.sparrowBlackPearl && this.sparrowBlackPearl.cannonballs) {
+      for (const cb of this.sparrowBlackPearl.cannonballs) {
+        if (!cb.active) continue;
+        ctx.save();
+        // Sombra no chão que aumenta de tamanho conforme a bala se aproxima
+        const distToGround = Math.max(0, this.groundY - cb.y);
+        const shadowR = Math.max(8, 30 - distToGround * 0.05);
+        ctx.beginPath();
+        ctx.ellipse(cb.x, this.groundY, shadowR, shadowR * 0.35, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+        ctx.fill();
+
+        // Bola de ferro incandescente em queda
+        ctx.shadowColor = '#f59e0b';
+        ctx.shadowBlur = 16;
+        ctx.fillStyle = '#1c1917';
+        ctx.beginPath();
+        ctx.arc(cb.x, cb.y, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // 13. Sabres Duplos Giratórios de Palpatine (Giro helicóptero de sabres no chão)
+    if (this.palpatineDualSabers && this.state === FIGHTER_STATE.SUPER_MOVE) {
+      const px = this.position.x;
+      const py = this.position.y - 45;
+      const rot = this.stateTime * 28;
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(rot);
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = 24;
+
+      // Dois sabres vermelhos em 180 graus opostos
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 7;
+      ctx.beginPath();
+      ctx.moveTo(-75, 0);
+      ctx.lineTo(75, 0);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
       ctx.restore();
     }
   }

@@ -251,7 +251,7 @@ export const EXPEDITION_33_CHARACTERS = [
     glowColor: 'rgba(56, 189, 248, 0.85)',
     energyColor: '#e2e8f0',
     stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
-    superType: 'BATMAN_BOMB',
+    superType: 'BATMAN_BATMOBILE',
     visual: {
       coatType: 'capelet',
       headgear: 'bat_cowl',
@@ -268,7 +268,7 @@ export const EXPEDITION_33_CHARACTERS = [
       paintTrailColor: '#38bdf8',
       weaponType: 'batarang'
     },
-    description: 'O Cavaleiro das Trevas de Gotham adaptado à expedição. Luta com artes marciais furtivas, batarangues e bombas de fumaça.'
+    description: 'O Cavaleiro das Trevas de Gotham adaptado à expedição. Luta com artes marciais furtivas, batarangues e atropela com o Batmóvel enquanto salta com um mortal acrobático.'
   },
   {
     id: 111,
@@ -307,7 +307,7 @@ export const EXPEDITION_33_CHARACTERS = [
     glowColor: 'rgba(168, 85, 247, 0.9)',
     energyColor: '#c084fc',
     stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
-    superType: 'PALPATINE_LIGHTNING',
+    superType: 'PALPATINE_DUAL_SABERS',
     visual: {
       coatType: 'mantle',
       headgear: 'hood',
@@ -324,7 +324,7 @@ export const EXPEDITION_33_CHARACTERS = [
       paintTrailColor: '#c084fc',
       weaponType: 'force_lightning'
     },
-    description: 'O Imperador das Sombras conjurando torrentes infinitas de raios da Força que eletrocutam e paralisam quem estiver pela frente.'
+    description: 'O Imperador das Sombras conjurando torrentes de raios da Força e desferindo um violento turbilhão com dois sabres de luz soltando faíscas no chão.'
   },
   {
     id: 113,
@@ -335,7 +335,7 @@ export const EXPEDITION_33_CHARACTERS = [
     glowColor: 'rgba(16, 185, 129, 0.85)',
     energyColor: '#f43f5e',
     stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
-    superType: 'JOKER_GAS',
+    superType: 'JOKER_CROWBAR',
     visual: {
       coatType: 'trenchcoat',
       headgear: 'fedora',
@@ -352,7 +352,7 @@ export const EXPEDITION_33_CHARACTERS = [
       paintTrailColor: '#10b981',
       weaponType: 'clown_cards'
     },
-    description: 'O Palhaço do Crime com terno púrpura e maquiagem sinistra. Lança cartas afiadas como navalhas e nuvens de gás hilariante.'
+    description: 'O Palhaço do Crime com Acid Blossom na lapela e um pé de cabra brutal para espancar o alvo em alcance estendido com 6 golpes devastadores.'
   },
   {
     id: 114,
@@ -363,7 +363,7 @@ export const EXPEDITION_33_CHARACTERS = [
     glowColor: 'rgba(245, 158, 11, 0.85)',
     energyColor: '#fef3c7',
     stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
-    superType: 'SPARROW_RUM_FRENZY',
+    superType: 'SPARROW_BLACK_PEARL',
     visual: {
       coatType: 'duster',
       headgear: 'tricorne',
@@ -380,7 +380,7 @@ export const EXPEDITION_33_CHARACTERS = [
       paintTrailColor: '#fbbf24',
       weaponType: 'pirate_saber'
     },
-    description: 'Capitão Jack Sparrow empunhando seu sabre naval com ginga imprevisível e disparos surpresa de pistola de pederneira.'
+    description: 'Capitão Jack Sparrow bebendo rum para esquivas imprevisíveis e bombardeando a arena com salvas de canhão periódicas do Pérola Negra.'
   },
   {
     id: 115,
@@ -391,8 +391,10 @@ export const EXPEDITION_33_CHARACTERS = [
     glowColor: 'rgba(239, 68, 68, 0.95)',
     energyColor: '#fde047',
     stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
-    superType: 'MCQUEEN_TURBO',
+    superType: 'MCQUEEN_KACHOW_BLITZ',
     visual: {
+      isVehicle: true,
+      isMcQueen: true,
       coatType: 'overcoat',
       headgear: 'racer_cap',
       hairColor: '#facc15',
@@ -408,7 +410,7 @@ export const EXPEDITION_33_CHARACTERS = [
       paintTrailColor: '#facc15',
       weaponType: 'turbo_thrust'
     },
-    description: 'O lendário número 95 da Copa Pistão em versão humanoide motorizada, acelerando a velocidades absurdas com seu grito Ka-Chow!'
+    description: 'O lendário número 95 da Copa Pistão em sua forma autêntica de carro de corrida, queimando pneus com drift e atropelando tudo no Ka-Chow Blitz!'
   }
 ];
 
