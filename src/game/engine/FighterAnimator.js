@@ -148,6 +148,36 @@ export class FighterAnimator {
           p.leftFoot = { x: -24 * f, y: 0 };
           p.rightKnee = { x: 22 * f, y: -25 };
           p.rightFoot = { x: 30 * f, y: 0 };
+        } else if (fighter.superType === 'RENOIR_FLOWER') {
+          // Renoir ergue a bengala solenemente aos céus para conjurar e arremessar a flor negra
+          if (t < 1.2) {
+            // Postura imponente, erguendo a bengala para o alto
+            const castVibe = Math.sin(t * 15) * 1.5;
+            p.head.y = -118;
+            p.chest.y = -85;
+            p.pelvis.y = -50;
+            p.leftHand = { x: -16 * f, y: -75 }; // Mão esquerda nas costas ou segurando a lapela
+            p.rightShoulder = { x: 10 * f, y: -90 };
+            p.rightElbow = { x: 18 * f, y: -130 };
+            p.rightHand = { x: 22 * f + castVibe, y: -165 + castVibe }; // Mão e bengala apontando direto para cima
+            p.leftKnee = { x: -12 * f, y: -25 };
+            p.leftFoot = { x: -18 * f, y: 0 };
+            p.rightKnee = { x: 14 * f, y: -25 };
+            p.rightFoot = { x: 20 * f, y: 0 };
+          } else {
+            // Golpeia / aponta a bengala para baixo com força ordenando o esmagamento da flor
+            p.head.y = -105;
+            p.chest.y = -75;
+            p.pelvis.y = -45;
+            p.leftHand = { x: -22 * f, y: -65 };
+            p.rightShoulder = { x: 16 * f, y: -80 };
+            p.rightElbow = { x: 28 * f, y: -70 };
+            p.rightHand = { x: 42 * f, y: -45 }; // Bengala apontada para frente/baixo em direção ao alvo
+            p.leftKnee = { x: -16 * f, y: -22 };
+            p.leftFoot = { x: -22 * f, y: 0 };
+            p.rightKnee = { x: 20 * f, y: -22 };
+            p.rightFoot = { x: 26 * f, y: 0 };
+          }
         } else {
           if (t < 0.5) {
             const chargeVibe = Math.sin(t * 50) * 2;

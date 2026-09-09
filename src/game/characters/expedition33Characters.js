@@ -130,6 +130,7 @@ export const EXPEDITION_33_CHARACTERS = [
     glowColor: 'rgba(120, 113, 108, 0.85)',
     energyColor: '#e7e5e4',
     stats: { health: 1200, speed: 5.8, jumpForce: 12.6, attackPower: 1.25, defense: 1.2 },
+    superType: 'RENOIR_FLOWER',
     visual: {
       coatType: 'draped_overcoat',
       headgear: 'none',
@@ -159,6 +160,7 @@ export const EXPEDITION_33_CHARACTERS = [
     energyColor: '#c7d2fe',
     stats: { health: 950, speed: 8.3, jumpForce: 14.4, attackPower: 1.02, defense: 0.92 },
     isVerso: true,
+    hasNoSkills: true,
     visual: {
       coatType: 'fur_collar_coat',
       headgear: 'none',

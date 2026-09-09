@@ -559,7 +559,17 @@ export class ExpeditionRenderer {
       ctx.lineWidth = 3.5;
       ctx.beginPath();
       ctx.moveTo(hx, hy);
-      ctx.lineTo(hx + 6 * f, hy + 38);
+      if (state === FIGHTER_STATE.SUPER_MOVE) {
+        if (time < 1.2) {
+          // Erguida apontando para cima na evocação da Flor Negra
+          ctx.lineTo(hx + 4 * f, hy - 45);
+        } else {
+          // Apontada para frente/baixo no esmagamento
+          ctx.lineTo(hx + 38 * f, hy + 18);
+        }
+      } else {
+        ctx.lineTo(hx + 6 * f, hy + 38);
+      }
       ctx.stroke();
 
       // Pomo prateado

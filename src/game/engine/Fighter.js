@@ -291,6 +291,7 @@ export class Fighter {
   }
 
   special1() {
+    if (this.charData?.hasNoSkills || this.isVerso) return;
     if (!this.canAct() || this.energy < 25) return;
     this.energy -= 25;
     this.state = FIGHTER_STATE.SPECIAL_1;
@@ -301,6 +302,7 @@ export class Fighter {
   }
 
   special2() {
+    if (this.charData?.hasNoSkills || this.isVerso) return;
     if (!this.canAct() || this.energy < 35) return;
     this.energy -= 35;
     this.state = FIGHTER_STATE.SPECIAL_2;
@@ -311,6 +313,7 @@ export class Fighter {
   }
 
   superMove() {
+    if (this.charData?.hasNoSkills || this.isVerso) return;
     if (!this.canAct() || this.energy < 100) return;
     this.energy = 0;
     this.state = FIGHTER_STATE.SUPER_MOVE;
@@ -323,6 +326,10 @@ export class Fighter {
     if (this.superType === 'MAELLE_WALTZ') {
       this.superPhase = 'STRIKE_0';
       sounds.playRapierSlash();
+    } else if (this.superType === 'RENOIR_FLOWER') {
+      this.superPhase = 'SUMMON_FLOWER';
+      sounds.playWhoosh();
+      sounds.playSuperCharge();
     } else {
       this.superType = 'GUSTAVE_SMASH';
       this.superPhase = 'CHARGE'; // 'CHARGE' (0-0.5s), 'LEAP' (0.5-0.85s), 'SLAM' (0.85-1.45s)
@@ -562,6 +569,116 @@ export class Fighter {
     if (this.isVerso && !this.isDead) {
       this.drawVersoStyleRank(ctx);
     }
+
+    // Renderiza a Flor Negra Titânica de Renoir
+    if (this.superType === 'RENOIR_FLOWER' && this.state === FIGHTER_STATE.SUPER_MOVE) {
+      this.drawRenoirBlackFlower(ctx);
+    }
+  }
+
+  drawRenoirBlackFlower(ctx) {
+    const t = this.stateTime;
+    const target = this.opponent;
+    const targetX = target ? target.position.x : this.position.x + this.facing * 180;
+    const groundY = this.groundY;
+
+    // Altura da flor: paira a 220px acima do chão durante o carregamento (0s - 1.2s),
+    // e aos 1.2s - 1.45s desce violentamente esmagando o chão.
+    let flowerY = groundY - 210;
+    let flowerScale = 1.0;
+
+    if (t < 0.6) {
+      // Florescendo e crescendo
+      flowerScale = Math.min(1.0, t / 0.5) * 1.1;
+      flowerY = groundY - 210 - Math.sin(t * 8) * 6;
+    } else if (t < 1.2) {
+      // Carregando energia com pulso
+      flowerScale = 1.1 + Math.sin((t - 0.6) * 18) * 0.12;
+      flowerY = groundY - 210 + Math.sin(t * 10) * 4;
+    } else if (t < 1.45) {
+      // Queda devastadora em direção ao chão
+      const fallProgress = Math.min(1.0, (t - 1.2) / 0.22);
+      flowerY = (groundY - 210) + (210 * Math.pow(fallProgress, 2.5));
+      flowerScale = 1.2 + fallProgress * 0.4;
+    } else {
+      // Pós impacto - pétalas se dissipando no chão
+      const fadeProgress = Math.min(1.0, (t - 1.45) / 0.4);
+      flowerY = groundY - 15;
+      flowerScale = 1.6 + fadeProgress * 0.4;
+      ctx.globalAlpha = Math.max(0, 1.0 - fadeProgress);
+    }
+
+    ctx.save();
+    ctx.translate(targetX, flowerY);
+
+    // 1. Aura Negra e Neblina Sombria
+    ctx.save();
+    ctx.shadowColor = '#000000';
+    ctx.shadowBlur = 35;
+
+    const rot = t * 1.5;
+    const petalCount = 8;
+    const baseRadius = 55 * flowerScale;
+
+    // Pétalas traseiras mais escuras
+    for (let i = 0; i < petalCount; i++) {
+      const angle = rot + (i * Math.PI * 2) / petalCount;
+      const px = Math.cos(angle) * (baseRadius * 0.65);
+      const py = Math.sin(angle) * (baseRadius * 0.65);
+
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(angle + Math.PI / 2);
+
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 22 * flowerScale, 45 * flowerScale, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#09090b';
+      ctx.fill();
+      ctx.strokeStyle = '#44403c';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Pétalas dianteiras com gradiente de ébano e borda obsidiana brilhante
+    for (let i = 0; i < petalCount; i++) {
+      const angle = rot + Math.PI / petalCount + (i * Math.PI * 2) / petalCount;
+      const px = Math.cos(angle) * (baseRadius * 0.45);
+      const py = Math.sin(angle) * (baseRadius * 0.45);
+
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(angle + Math.PI / 2);
+
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 18 * flowerScale, 38 * flowerScale, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#18181b';
+      ctx.fill();
+      ctx.strokeStyle = t >= 1.2 ? '#ef4444' : '#78716c';
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Centro / Núcleo Abissal da Flor
+    ctx.beginPath();
+    ctx.arc(0, 0, 26 * flowerScale, 0, Math.PI * 2);
+    ctx.fillStyle = '#000000';
+    ctx.fill();
+    ctx.strokeStyle = t >= 1.2 ? '#f87171' : '#d4af37';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Runa interna de Renoir / Pistilo Carmesim & Dourado
+    ctx.beginPath();
+    ctx.arc(0, 0, 10 * flowerScale, 0, Math.PI * 2);
+    ctx.fillStyle = t >= 1.2 ? '#dc2626' : '#a855f7';
+    ctx.shadowColor = t >= 1.2 ? '#ef4444' : '#c084fc';
+    ctx.shadowBlur = 20;
+    ctx.fill();
+
+    ctx.restore();
+    ctx.restore();
   }
 
   drawVersoStyleRank(ctx) {

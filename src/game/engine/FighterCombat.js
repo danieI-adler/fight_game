@@ -233,7 +233,91 @@ export class FighterCombat {
           break;
         }
 
-        // --- 2. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
+        // --- 2. RENOIR: FLOR NEGRA MONUMENTAL (Bengala Erguida, Carga da Flor & Esmagamento Abissal) ---
+        if (fighter.superType === 'RENOIR_FLOWER') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          fighter.velocity.y = 0;
+
+          const target = fighter.opponent;
+          const targetX = target ? target.position.x : fighter.position.x + fighter.facing * 180;
+          const groundY = fighter.groundY;
+
+          // Fase 1: Evocação e Florescimento (0.0s - 0.7s)
+          if (fighter.stateTime < 0.7) {
+            if (fighter.superPhase === 'SUMMON_FLOWER' && fighter.stateTime >= 0.1) {
+              fighter.superPhase = 'FLOWER_BLOOM';
+            }
+            if (particles && Math.random() < 0.6) {
+              // Pétalas e fagulhas sombrias subindo acima do adversário
+              const px = targetX + (Math.random() - 0.5) * 80;
+              const py = groundY - 210 + (Math.random() - 0.5) * 60;
+              particles.emitSparks(px, py, '#09090b', 4, 3);
+              particles.emitSparks(px, py, '#78716c', 2, 2);
+            }
+          }
+          // Fase 2: Carga de Energia Abissal (0.7s - 1.2s)
+          else if (fighter.stateTime >= 0.7 && fighter.stateTime < 1.2) {
+            if (fighter.superPhase !== 'FLOWER_CHARGING') {
+              fighter.superPhase = 'FLOWER_CHARGING';
+              sounds.playElectricZap();
+            }
+            if (particles && Math.random() < 0.75) {
+              const fx = targetX + (Math.random() - 0.5) * 90;
+              const fy = groundY - 210 + (Math.random() - 0.5) * 70;
+              particles.emitElectricArc(fx, fy, targetX, groundY - 210, '#000000', 1);
+              particles.emitSparks(targetX, groundY - 210, '#a855f7', 3, 5);
+            }
+          }
+          // Fase 3: Queda Devastadora da Flor sobre o Adversário (1.2s - 1.55s)
+          else if (fighter.stateTime >= 1.2 && fighter.stateTime < 1.55) {
+            if (fighter.superPhase !== 'FLOWER_SLAM') {
+              fighter.superPhase = 'FLOWER_SLAM';
+              sounds.playThunderSlam();
+              sounds.playPunch(true);
+
+              if (particles) {
+                // Impacto titânico no chão sob a cabeça do adversário
+                particles.emitShockwave(targetX, groundY, 320, '#000000');
+                particles.emitShockwave(targetX, groundY, 220, '#78716c');
+                particles.emitShockwave(targetX, groundY, 140, '#ef4444');
+                particles.emitSparks(targetX, groundY - 30, '#000000', 50, 16);
+                particles.emitSparks(targetX, groundY - 30, '#ef4444', 35, 12);
+                particles.emitDust(targetX, groundY, 30, '#1c1917');
+              }
+            }
+
+            // Hitbox massiva AoE de impacto no chão onde a flor cai
+            if (fighter.stateTime >= 1.25 && fighter.stateTime < 1.48 && !fighter.hasHitCurrentAttack) {
+              const boxWidth = 260;
+              const boxLeft = targetX - boxWidth / 2;
+              fighter.activeHitbox = {
+                x: boxLeft,
+                y: groundY - 140,
+                width: boxWidth,
+                height: 150,
+                damage: 380,
+                knockback: 25,
+                knockdown: true,
+                isHeavy: true,
+                unblockable: false,
+                attackerPower: fighter.attackPower
+              };
+            }
+          }
+
+          // Fase 4: Recuperação e Término
+          if (fighter.stateTime >= 1.85) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.activeHitbox = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 3. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
         if (fighter.stateTime < 0.5) {
           fighter.velocity.x = 0;
           fighter.isInvulnerable = true;
