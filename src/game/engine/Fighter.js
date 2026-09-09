@@ -368,8 +368,8 @@ export class Fighter {
 
   superMove() {
     if (this.charData?.hasNoSkills || this.isVerso) return;
-    if (!this.canAct() || (!this.isMonoco && this.energy < 100)) return;
-    this.energy = this.isMonoco ? this.maxEnergy : 0;
+    if (!this.canAct() || this.energy < 100) return;
+    this.energy = 0;
     this.state = FIGHTER_STATE.SUPER_MOVE;
     this.stateTime = 0;
     this.hasHitCurrentAttack = false;
@@ -462,18 +462,28 @@ export class Fighter {
     if (this.isDead || this.isInvulnerable) return false;
 
     // --- PARRY E REFLEXÃO DE MONOCO ---
-    // Se Monoco estiver na postura de Parry (PARRY_STANCE), ele não toma dano e reflete/copia a skill!
+    // Se Monoco estiver na postura de Parry (PARRY_STANCE), ele não toma dano e reflete/copia!
     if (this.isMonoco && this.state === FIGHTER_STATE.SUPER_MOVE && this.superPhase === 'PARRY_STANCE') {
       sounds.playParryReflect();
       sounds.playStaffBell();
 
+      const isSkill = Boolean(
+        attackData?.isSuper ||
+        attackData?.isSkill ||
+        (this.opponent && [
+          FIGHTER_STATE.SUPER_MOVE,
+          FIGHTER_STATE.SPECIAL_1,
+          FIGHTER_STATE.SPECIAL_2
+        ].includes(this.opponent.state))
+      );
+
       if (particles) {
-        particles.emitShockwave(this.position.x, this.position.y - 60, 240, '#fbbf24');
-        particles.emitSparks(this.position.x, this.position.y - 60, '#ffffff', 45, 14);
-        particles.emitFloatingText('PARRY & REFLECT!', this.position.x, this.position.y - 110, '#f59e0b', true);
+        particles.emitShockwave(this.position.x, this.position.y - 60, isSkill ? 240 : 130, '#fbbf24');
+        particles.emitSparks(this.position.x, this.position.y - 60, '#ffffff', isSkill ? 40 : 18, isSkill ? 14 : 7);
+        particles.emitFloatingText(isSkill ? 'PARRY & MIMIC!' : 'PARRY COUNTER!', this.position.x, this.position.y - 110, '#f59e0b', isSkill);
       }
 
-      this.executeMonocoReflect(attackData, particles);
+      this.executeMonocoReflect(attackData, particles, isSkill);
       return false; // NÃO TOMA DANO!
     }
 
@@ -544,11 +554,22 @@ export class Fighter {
 
   // --- MECÂNICA DE REFLEXÃO E CÓPIA DE HABILIDADE (MONOCO) ---
 
-  executeMonocoReflect(attackData, particles) {
+  executeMonocoReflect(attackData, particles, isSkill = false) {
     const op = this.opponent;
-    const opSuper = op?.superType;
 
-    // Copia e ativa imediatamente a habilidade do oponente contra ele!
+    // SE NÃO FOR HABILIDADE (ATAQUE PADRÃO) -> REFLETE UM CONTRA-ATAQUE PADRÃO!
+    if (!isSkill) {
+      this.superType = 'MONOCO_PARRY_MIMIC';
+      this.superPhase = 'PARRY_BASIC_COUNTER';
+      this.stateTime = 0;
+      this.isInvulnerable = false;
+      sounds.playPunch(true);
+      return;
+    }
+
+    // SE FOR HABILIDADE -> COPIA E ATIVA A HABILIDADE DO OPONENTE!
+    const opSuper = op?.superType || op?.charData?.superType;
+
     if (opSuper === 'GUSTAVE_SMASH' || op?.charData?.name === 'Gustave') {
       this.superType = 'GUSTAVE_SMASH';
       this.superPhase = 'LEAP';

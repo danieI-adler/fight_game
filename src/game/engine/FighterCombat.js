@@ -629,7 +629,32 @@ export class FighterCombat {
             }
           }
 
-          // Fase 2: Explosão Mística de Reversão (quando contra-ataca ataque comum)
+          // Fase 2: Contra-Ataque com Golpe Padrão (quando dá parry em soco/chute comum)
+          else if (fighter.superPhase === 'PARRY_BASIC_COUNTER') {
+            fighter.isInvulnerable = false;
+
+            if (fighter.stateTime >= 0.06 && fighter.stateTime < 0.22 && !fighter.hasHitCurrentAttack) {
+              const hb = fighter.createHitbox(15, 80, 85, 55);
+              hb.damage = 90;
+              hb.knockback = 8;
+              hb.knockdown = false;
+              hb.isHeavy = false;
+              hb.attackerPower = fighter.attackPower;
+              fighter.activeHitbox = hb;
+
+              if (particles) {
+                particles.emitSparks(fighter.position.x + fighter.facing * 35, fighter.position.y - 70, '#f59e0b', 8, 4);
+              }
+            }
+
+            if (fighter.stateTime >= 0.28) {
+              fighter.superPhase = null;
+              fighter.superType = null;
+              fighter.state = FIGHTER_STATE.IDLE;
+            }
+          }
+
+          // Fase 3: Explosão Mística de Reversão (quando contra-ataca habilidade)
           else if (fighter.superPhase === 'MIMIC_BURST') {
             fighter.isInvulnerable = true;
 
