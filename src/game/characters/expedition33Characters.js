@@ -158,6 +158,7 @@ export const EXPEDITION_33_CHARACTERS = [
     glowColor: 'rgba(99, 102, 241, 0.85)',
     energyColor: '#c7d2fe',
     stats: { health: 950, speed: 8.3, jumpForce: 14.4, attackPower: 1.02, defense: 0.92 },
+    isVerso: true,
     visual: {
       coatType: 'fur_collar_coat',
       headgear: 'none',

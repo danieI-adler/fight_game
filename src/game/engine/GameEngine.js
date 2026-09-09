@@ -227,10 +227,12 @@ export class GameEngine {
         p1MaxHealth: this.p1.maxHealth,
         p1Energy: this.p1.energy,
         p1Combo: this.p1.comboCount,
+        p1VersoRank: this.p1.isVerso ? this.p1.versoRanks[this.p1.versoRankIndex] : null,
         p2Health: this.p2.health,
         p2MaxHealth: this.p2.maxHealth,
         p2Energy: this.p2.energy,
         p2Combo: this.p2.comboCount,
+        p2VersoRank: this.p2.isVerso ? this.p2.versoRanks[this.p2.versoRankIndex] : null,
         roundTimer: Math.ceil(this.roundTimer),
         currentRound: this.currentRound,
         p1Wins: this.p1Wins,
@@ -448,7 +450,11 @@ export class GameEngine {
         this.p1.comboCount++;
         // Ganha 5% ao bater
         this.p1.gainAttackEnergy(5);
-        this.p2.receiveHit(this.p1.activeHitbox, hitResult.point, this.particles);
+        const hitLanded = this.p2.receiveHit(this.p1.activeHitbox, hitResult.point, this.particles);
+        // Se acertou golpe sem ser bloqueado (defesas não contam como hit), Verso sobe de rank
+        if (hitLanded && this.p1.isVerso) {
+          this.p1.gainVersoHit();
+        }
 
         if (this.p1.activeHitbox.isHeavy) {
           this.camera.addShake(12, 0.25);
@@ -467,7 +473,11 @@ export class GameEngine {
         this.p2.comboCount++;
         // Ganha 5% ao bater
         this.p2.gainAttackEnergy(5);
-        this.p1.receiveHit(this.p2.activeHitbox, hitResult.point, this.particles);
+        const hitLanded = this.p1.receiveHit(this.p2.activeHitbox, hitResult.point, this.particles);
+        // Se acertou golpe sem ser bloqueado (defesas não contam como hit), Verso sobe de rank
+        if (hitLanded && this.p2.isVerso) {
+          this.p2.gainVersoHit();
+        }
 
         if (this.p2.activeHitbox.isHeavy) {
           this.camera.addShake(12, 0.25);

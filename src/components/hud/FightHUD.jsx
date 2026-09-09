@@ -37,10 +37,12 @@ export const FightHUD = ({
     p1MaxHealth = 1000,
     p1Energy = 0,
     p1Combo = 0,
+    p1VersoRank = null,
     p2Health = 1000,
     p2MaxHealth = 1000,
     p2Energy = 0,
     p2Combo = 0,
+    p2VersoRank = null,
     roundTimer = 99,
     currentRound = 1,
     p1Wins = 0,
@@ -48,6 +50,30 @@ export const FightHUD = ({
     statusMessage = '',
     statusSubMessage = '',
   } = gameState;
+
+  const rankBadgeStyle = (rank) => {
+    switch (rank) {
+      case 'S': return 'bg-rose-950/80 text-rose-400 border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)] animate-pulse';
+      case 'A': return 'bg-orange-950/80 text-orange-400 border-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]';
+      case 'B': return 'bg-amber-950/80 text-amber-300 border-amber-500';
+      case 'C': return 'bg-emerald-950/80 text-emerald-400 border-emerald-500';
+      case 'D': return 'bg-sky-950/80 text-sky-400 border-sky-500';
+      case 'E':
+      default: return 'bg-slate-900/80 text-slate-400 border-slate-600';
+    }
+  };
+
+  const rankMultiplier = (rank) => {
+    switch (rank) {
+      case 'S': return '200%';
+      case 'A': return '175%';
+      case 'B': return '150%';
+      case 'C': return '125%';
+      case 'D': return '100%';
+      case 'E':
+      default: return '75%';
+    }
+  };
 
   const p1HealthPercent = Math.max(0, Math.min(100, (p1Health / p1MaxHealth) * 100));
   const p2HealthPercent = Math.max(0, Math.min(100, (p2Health / p2MaxHealth) * 100));
@@ -62,6 +88,14 @@ export const FightHUD = ({
             <span className="font-bold text-base text-slate-100">
               {char1.name}
             </span>
+            {p1VersoRank && (
+              <span
+                className={`text-xs font-black px-2 py-0.5 rounded border font-mono tracking-wider flex items-center gap-1 ${rankBadgeStyle(p1VersoRank)}`}
+                title={`Rank de Estilo ${p1VersoRank}: ${rankMultiplier(p1VersoRank)} de dano`}
+              >
+                RANK {p1VersoRank} <span className="text-[10px] opacity-80 font-normal">({rankMultiplier(p1VersoRank)})</span>
+              </span>
+            )}
             <div className="flex gap-1 ml-2">
               {[0, 1].map((idx) => (
                 <div
@@ -144,6 +178,14 @@ export const FightHUD = ({
                 />
               ))}
             </div>
+            {p2VersoRank && (
+              <span
+                className={`text-xs font-black px-2 py-0.5 rounded border font-mono tracking-wider flex items-center gap-1 ${rankBadgeStyle(p2VersoRank)}`}
+                title={`Rank de Estilo ${p2VersoRank}: ${rankMultiplier(p2VersoRank)} de dano`}
+              >
+                RANK {p2VersoRank} <span className="text-[10px] opacity-80 font-normal">({rankMultiplier(p2VersoRank)})</span>
+              </span>
+            )}
             <span className="font-bold text-base text-slate-100">
               {char2.name}
             </span>

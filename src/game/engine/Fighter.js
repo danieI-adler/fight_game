@@ -54,8 +54,16 @@ export class Fighter {
     this.maxEnergy = 100;
     this.speed = charData.stats.speed || 7.0;
     this.jumpForce = 13.8;
-    this.attackPower = charData.stats.attackPower || 1.0;
+    this.baseAttackPower = charData.stats.attackPower || 1.0;
     this.defense = charData.stats.defense || 1.0;
+
+    // Habilidade Exclusiva de Verso: Sistema de Ranks E -> D -> C -> B -> A -> S
+    this.isVerso = Boolean(charData.isVerso || Number(charData.id) === 106 || (charData.name || '').toLowerCase().includes('verso'));
+    this.versoRanks = ['E', 'D', 'C', 'B', 'A', 'S'];
+    this.versoRankMultipliers = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+    this.versoRankIndex = 0; // Inicia em E (0.75x)
+    this.versoHitStreak = 0;
+    this.attackPower = this.isVerso ? this.baseAttackPower * this.versoRankMultipliers[this.versoRankIndex] : this.baseAttackPower;
 
     // Estado e Animação
     this.state = FIGHTER_STATE.IDLE;
@@ -127,6 +135,29 @@ export class Fighter {
     this.jumpCooldown = 0;
     this.activeHitbox = null;
     this.facing = this.isPlayer2 ? -1 : 1;
+
+    // Reinicia o rank do Verso em uma nova rodada
+    if (this.isVerso) {
+      this.versoRankIndex = 0;
+      this.versoHitStreak = 0;
+      this.attackPower = this.baseAttackPower * this.versoRankMultipliers[0];
+    }
+  }
+
+  // --- HABILIDADE PASSIVA DE VERSO (STYLE RANK) ---
+  gainVersoHit() {
+    if (!this.isVerso) return;
+    if (this.versoRankIndex < this.versoRanks.length - 1) {
+      this.versoRankIndex++;
+      this.attackPower = this.baseAttackPower * this.versoRankMultipliers[this.versoRankIndex];
+    }
+  }
+
+  resetVersoRankOnHitTaken() {
+    if (!this.isVerso) return;
+    this.versoRankIndex = 0;
+    this.versoHitStreak = 0;
+    this.attackPower = this.baseAttackPower * this.versoRankMultipliers[0];
   }
 
   // --- CONTROLES ---
@@ -351,6 +382,9 @@ export class Fighter {
     // Ganha 2,5% de energia ao receber pancada
     this.energy = Math.min(this.maxEnergy, this.energy + 2.5);
 
+    // Se Verso levar um golpe limpo (fora da defesa), o rank dele volta para E (75% do dano)
+    this.resetVersoRankOnHitTaken();
+
     if (attackData.isHeavy) {
       sounds.playPunch(true);
       if (particles) {
@@ -523,5 +557,75 @@ export class Fighter {
     } else {
       FighterRenderer.draw(ctx, this, showHitboxes);
     }
+
+    // Renderiza a insígnia de Rank de Estilo sobre a cabeça de Verso (E, D, C, B, A ou S)
+    if (this.isVerso && !this.isDead) {
+      this.drawVersoStyleRank(ctx);
+    }
+  }
+
+  drawVersoStyleRank(ctx) {
+    const headX = this.position.x + (this.pose?.head?.x || 0);
+    const headY = this.position.y + (this.pose?.head?.y || -115);
+    const badgeY = headY - 32;
+
+    const rankLetters = ['E', 'D', 'C', 'B', 'A', 'S'];
+    const currentRank = rankLetters[this.versoRankIndex] || 'E';
+
+    // Cores temáticas elegantes estilo Clair Obscur / Devil May Cry
+    const rankColors = {
+      E: { text: '#94a3b8', glow: 'rgba(148, 163, 184, 0.6)', border: '#475569', label: '75%' },
+      D: { text: '#38bdf8', glow: 'rgba(56, 189, 248, 0.7)', border: '#0284c7', label: '100%' },
+      C: { text: '#4ade80', glow: 'rgba(74, 222, 128, 0.75)', border: '#16a34a', label: '125%' },
+      B: { text: '#fbbf24', glow: 'rgba(251, 191, 36, 0.8)', border: '#d97706', label: '150%' },
+      A: { text: '#f97316', glow: 'rgba(249, 115, 22, 0.85)', border: '#ea580c', label: '175%' },
+      S: { text: '#f43f5e', glow: 'rgba(244, 63, 94, 0.95)', border: '#e11d48', label: '200%' }
+    };
+
+    const style = rankColors[currentRank] || rankColors.E;
+    const isMaxRank = currentRank === 'S';
+    const bounce = isMaxRank ? Math.sin(this.stateTime * 14) * 2.5 : Math.sin(this.stateTime * 4) * 1.2;
+
+    ctx.save();
+    ctx.translate(headX, badgeY + bounce);
+
+    // 1. Auréola / Brilho suave de fundo
+    ctx.save();
+    ctx.shadowColor = style.glow;
+    ctx.shadowBlur = isMaxRank ? 18 : 10;
+
+    // Losango / Emblema metálico
+    const r = isMaxRank ? 16 : 14;
+    ctx.beginPath();
+    ctx.moveTo(0, -r);
+    ctx.lineTo(r, 0);
+    ctx.lineTo(0, r);
+    ctx.lineTo(-r, 0);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+    ctx.fill();
+
+    ctx.strokeStyle = style.border;
+    ctx.lineWidth = isMaxRank ? 2.5 : 1.8;
+    ctx.stroke();
+
+    // Detalhe interno se for Rank S
+    if (isMaxRank) {
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-6, -6, 12, 12);
+    }
+    ctx.restore();
+
+    // 2. Letra do Rank
+    ctx.font = isMaxRank ? '900 17px "Cinzel", "Times New Roman", serif' : 'bold 15px "Cinzel", "Times New Roman", serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = style.text;
+    ctx.shadowColor = style.glow;
+    ctx.shadowBlur = isMaxRank ? 12 : 6;
+    ctx.fillText(currentRank, 0, 1);
+
+    ctx.restore();
   }
 }
