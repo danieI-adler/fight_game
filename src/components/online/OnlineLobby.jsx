@@ -50,11 +50,25 @@ export const OnlineLobby = ({ initialRoomCode, graphicsMode = 'BELLE_EPOQUE_2D',
           p1Ready: lobbyStateRef.current.p1Ready,
           p2Ready: false
         });
+      } else {
+        // Cliente solicita sync do estado atual do Host imediatamente
+        network.send(MSG_TYPE.LOBBY_REQUEST_SYNC, {});
       }
     });
 
     const unsubData = network.on('data', (type, payload) => {
-      if (type === MSG_TYPE.LOBBY_SYNC) {
+      if (type === MSG_TYPE.LOBBY_REQUEST_SYNC) {
+        // Host responde com estado completo caso o cliente tenha solicitado
+        if (network.isHost) {
+          network.send(MSG_TYPE.LOBBY_SYNC, {
+            p1CharId: lobbyStateRef.current.p1CharId,
+            p2CharId: lobbyStateRef.current.p2CharId,
+            selectedStage: lobbyStateRef.current.selectedStage,
+            p1Ready: lobbyStateRef.current.p1Ready,
+            p2Ready: lobbyStateRef.current.p2Ready
+          });
+        }
+      } else if (type === MSG_TYPE.LOBBY_SYNC) {
         if (payload.p1CharId !== undefined) setP1CharId(payload.p1CharId);
         if (payload.p2CharId !== undefined) setP2CharId(payload.p2CharId);
         if (payload.selectedStage !== undefined) setSelectedStage(payload.selectedStage);
@@ -67,6 +81,8 @@ export const OnlineLobby = ({ initialRoomCode, graphicsMode = 'BELLE_EPOQUE_2D',
           p2Id: payload.p2Id,
           stageId: payload.stageId,
           isHost: network.isHost,
+          isExpedition: false,
+          graphicsMode: payload.graphicsMode || graphicsMode || 'BELLE_EPOQUE_2D'
         });
       }
     });
@@ -199,15 +215,16 @@ export const OnlineLobby = ({ initialRoomCode, graphicsMode = 'BELLE_EPOQUE_2D',
 
       if (next && p2Ready) {
         setTimeout(() => {
-          network.send(MSG_TYPE.START_MATCH, {
-            p1Id: p1CharId,
-            p2Id: p2CharId,
-            stageId: selectedStage
-          });
-          onStartOnlineMatch({
+          const matchPayload = {
             p1Id: p1CharId,
             p2Id: p2CharId,
             stageId: selectedStage,
+            isExpedition: false,
+            graphicsMode: graphicsMode || 'BELLE_EPOQUE_2D'
+          };
+          network.send(MSG_TYPE.START_MATCH, matchPayload);
+          onStartOnlineMatch({
+            ...matchPayload,
             isHost: true
           });
         }, 500);

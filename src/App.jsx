@@ -105,7 +105,12 @@ export function App() {
 
   // Iniciar partida online
   const handleStartOnlineMatch = (config) => {
-    setMatchConfig({ ...config, isExpedition: config.isExpedition !== undefined ? config.isExpedition : isExpedition });
+    const onlineExpedition = config.isExpedition !== undefined ? config.isExpedition : false;
+    setMatchConfig({
+      ...config,
+      isExpedition: onlineExpedition,
+      graphicsMode: config.graphicsMode || graphicsMode
+    });
     setMode('ONLINE');
     setScreen('FIGHT');
     setIsPaused(false);
@@ -124,6 +129,9 @@ export function App() {
       setGameState({ ...state });
     };
 
+    const effectiveExpedition = matchConfig.isExpedition !== undefined ? matchConfig.isExpedition : isExpedition;
+    const effectiveGraphics = matchConfig.graphicsMode || graphicsMode;
+
     engine.startFight(
       matchConfig.p1Id,
       matchConfig.p2Id,
@@ -131,8 +139,8 @@ export function App() {
       matchConfig.difficulty,
       matchConfig.stageId,
       matchConfig.isHost !== undefined ? matchConfig.isHost : true,
-      graphicsMode,
-      matchConfig.isExpedition !== undefined ? matchConfig.isExpedition : isExpedition
+      effectiveGraphics,
+      effectiveExpedition
     );
 
     return () => {
@@ -202,9 +210,10 @@ export function App() {
     }
   };
 
-  const getChar = (matchConfig.isExpedition || isExpedition) ? getExpeditionCharacterById : getCharacterById;
-  const char1 = getChar(matchConfig.p1Id) || ((matchConfig.isExpedition || isExpedition) ? getExpeditionCharacterById(101) : getCharacterById(1));
-  const char2 = getChar(matchConfig.p2Id) || ((matchConfig.isExpedition || isExpedition) ? getExpeditionCharacterById(102) : getCharacterById(2));
+  const activeExpedition = matchConfig.isExpedition !== undefined ? matchConfig.isExpedition : isExpedition;
+  const getChar = activeExpedition ? getExpeditionCharacterById : getCharacterById;
+  const char1 = getChar(matchConfig.p1Id) || (activeExpedition ? getExpeditionCharacterById(101) : getCharacterById(1));
+  const char2 = getChar(matchConfig.p2Id) || (activeExpedition ? getExpeditionCharacterById(102) : getCharacterById(2));
   const isMatchOver = gameState && gameState.status === GAME_STATUS.MATCH_OVER;
   const winner = gameState && (gameState.p1Wins >= 2 ? char1 : char2);
   const loser = gameState && (gameState.p1Wins >= 2 ? char2 : char1);

@@ -376,28 +376,84 @@ export class GameEngine {
     this.camera.update(this.p1, this.p2, dt);
   }
 
+  extractFighterSnapshot(fighter) {
+    return {
+      x: Math.round(fighter.position.x),
+      y: Math.round(fighter.position.y),
+      state: fighter.state,
+      hp: fighter.health,
+      energy: Math.round(fighter.energy),
+      facing: fighter.facing,
+      isGrounded: fighter.isGrounded,
+      stateTime: fighter.stateTime,
+      isBlocking: fighter.isBlocking,
+      isCrouching: fighter.isCrouching,
+      superType: fighter.superType,
+      superPhase: fighter.superPhase,
+      // Buffs & efeitos especiais
+      mcqueenSpeedBuffTimer: fighter.mcqueenSpeedBuffTimer,
+      mcqueenSpeedMultiplier: fighter.mcqueenSpeedMultiplier,
+      sparrowDrunkTimer: fighter.sparrowDrunkTimer,
+      sparrowDodgeCharges: fighter.sparrowDodgeCharges,
+      palpatineDualSabers: fighter.palpatineDualSabers,
+      // Projéteis e summons
+      batmanBatarang: fighter.batmanBatarang ? { ...fighter.batmanBatarang } : null,
+      batmanBatmobile: fighter.batmanBatmobile ? { ...fighter.batmanBatmobile } : null,
+      vaderThrowingSaber: fighter.vaderThrowingSaber ? { ...fighter.vaderThrowingSaber } : null,
+      palpatineLightning: fighter.palpatineLightning ? { ...fighter.palpatineLightning } : null,
+      jokerAcidBlossom: fighter.jokerAcidBlossom ? { ...fighter.jokerAcidBlossom } : null,
+      mcqueenDriftBurn: fighter.mcqueenDriftBurn ? { ...fighter.mcqueenDriftBurn } : null,
+      sparrowBlackPearl: fighter.sparrowBlackPearl ? {
+        shipX: fighter.sparrowBlackPearl.shipX,
+        shipY: fighter.sparrowBlackPearl.shipY,
+        shipFacing: fighter.sparrowBlackPearl.shipFacing,
+        cannonballs: (fighter.sparrowBlackPearl.cannonballs || []).map(cb => ({ ...cb }))
+      } : null,
+      gustaveBullet: fighter.gustaveBullet ? { ...fighter.gustaveBullet } : null,
+      renoirBlackHole: fighter.renoirBlackHole ? { ...fighter.renoirBlackHole } : null
+    };
+  }
+
+  applyFighterSnapshot(fighter, s) {
+    if (!fighter || !s) return;
+    fighter.position.x += (s.x - fighter.position.x) * 0.4;
+    fighter.position.y = s.y;
+    fighter.state = s.state;
+    fighter.health = s.hp;
+    fighter.energy = s.energy;
+    fighter.facing = s.facing;
+    fighter.isGrounded = s.isGrounded;
+    fighter.stateTime = s.stateTime;
+    if (s.isBlocking !== undefined) fighter.isBlocking = s.isBlocking;
+    if (s.isCrouching !== undefined) fighter.isCrouching = s.isCrouching;
+    if (s.superType !== undefined) fighter.superType = s.superType;
+    if (s.superPhase !== undefined) fighter.superPhase = s.superPhase;
+
+    // Buffs
+    if (s.mcqueenSpeedBuffTimer !== undefined) fighter.mcqueenSpeedBuffTimer = s.mcqueenSpeedBuffTimer;
+    if (s.mcqueenSpeedMultiplier !== undefined) fighter.mcqueenSpeedMultiplier = s.mcqueenSpeedMultiplier;
+    if (s.sparrowDrunkTimer !== undefined) fighter.sparrowDrunkTimer = s.sparrowDrunkTimer;
+    if (s.sparrowDodgeCharges !== undefined) fighter.sparrowDodgeCharges = s.sparrowDodgeCharges;
+    if (s.palpatineDualSabers !== undefined) fighter.palpatineDualSabers = s.palpatineDualSabers;
+
+    // Projéteis
+    fighter.batmanBatarang = s.batmanBatarang;
+    fighter.batmanBatmobile = s.batmanBatmobile;
+    fighter.vaderThrowingSaber = s.vaderThrowingSaber;
+    fighter.palpatineLightning = s.palpatineLightning;
+    fighter.jokerAcidBlossom = s.jokerAcidBlossom;
+    fighter.mcqueenDriftBurn = s.mcqueenDriftBurn;
+    fighter.sparrowBlackPearl = s.sparrowBlackPearl;
+    fighter.gustaveBullet = s.gustaveBullet;
+    fighter.renoirBlackHole = s.renoirBlackHole;
+
+    fighter.updateSkeletalPose();
+  }
+
   broadcastHostState() {
     const snapshot = {
-      p1: {
-        x: Math.round(this.p1.position.x),
-        y: Math.round(this.p1.position.y),
-        state: this.p1.state,
-        hp: this.p1.health,
-        energy: Math.round(this.p1.energy),
-        facing: this.p1.facing,
-        isGrounded: this.p1.isGrounded,
-        stateTime: this.p1.stateTime
-      },
-      p2: {
-        x: Math.round(this.p2.position.x),
-        y: Math.round(this.p2.position.y),
-        state: this.p2.state,
-        hp: this.p2.health,
-        energy: Math.round(this.p2.energy),
-        facing: this.p2.facing,
-        isGrounded: this.p2.isGrounded,
-        stateTime: this.p2.stateTime
-      },
+      p1: this.extractFighterSnapshot(this.p1),
+      p2: this.extractFighterSnapshot(this.p2),
       roundTimer: this.roundTimer,
       currentRound: this.currentRound,
       p1Wins: this.p1Wins,
@@ -412,31 +468,8 @@ export class GameEngine {
   applyHostStateSnapshot(snap) {
     if (!snap) return;
 
-    // Sincronizar P1
-    if (snap.p1) {
-      this.p1.position.x += (snap.p1.x - this.p1.position.x) * 0.4;
-      this.p1.position.y = snap.p1.y;
-      this.p1.state = snap.p1.state;
-      this.p1.health = snap.p1.hp;
-      this.p1.energy = snap.p1.energy;
-      this.p1.facing = snap.p1.facing;
-      this.p1.isGrounded = snap.p1.isGrounded;
-      this.p1.stateTime = snap.p1.stateTime;
-      this.p1.updateSkeletalPose();
-    }
-
-    // Sincronizar P2
-    if (snap.p2) {
-      this.p2.position.x += (snap.p2.x - this.p2.position.x) * 0.4;
-      this.p2.position.y = snap.p2.y;
-      this.p2.state = snap.p2.state;
-      this.p2.health = snap.p2.hp;
-      this.p2.energy = snap.p2.energy;
-      this.p2.facing = snap.p2.facing;
-      this.p2.isGrounded = snap.p2.isGrounded;
-      this.p2.stateTime = snap.p2.stateTime;
-      this.p2.updateSkeletalPose();
-    }
+    if (snap.p1) this.applyFighterSnapshot(this.p1, snap.p1);
+    if (snap.p2) this.applyFighterSnapshot(this.p2, snap.p2);
 
     this.roundTimer = snap.roundTimer;
     this.currentRound = snap.currentRound;
