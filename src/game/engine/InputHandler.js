@@ -106,14 +106,38 @@ export class InputHandler {
     const down = this.isPressed(binds.down) || (gp && gp.down);
     const block = this.isPressed(binds.block) || (gp && gp.block);
 
-    // Agachamento
+    // Processar ataques prioritariamente (se o jogador atacar enquanto 'down' estiver pressionado, aciona golpe agachado)
+    let attackInitiated = false;
+    if (justPressed.superMove) {
+      fighter.superMove();
+      attackInitiated = true;
+    } else if (justPressed.special1) {
+      fighter.specialAttack();
+      attackInitiated = true;
+    } else if (justPressed.punch || justPressed.lightPunch || justPressed.heavyPunch) {
+      // Se estiver abaixado (segurando down ou já agachado), garante estado agachado antes de socar
+      if (down || fighter.isCrouching || fighter.state === 'CROUCH') {
+        fighter.isCrouching = true;
+      }
+      fighter.punch();
+      attackInitiated = true;
+    } else if (justPressed.kick || justPressed.lightKick || justPressed.heavyKick) {
+      // Se estiver abaixado (segurando down ou já agachado), garante estado agachado antes de chutar
+      if (down || fighter.isCrouching || fighter.state === 'CROUCH') {
+        fighter.isCrouching = true;
+      }
+      fighter.kick();
+      attackInitiated = true;
+    }
+
+    // Agachamento contínuo (não cancela golpes ativos)
     fighter.crouch(down);
 
     // Bloqueio
     fighter.block(block);
 
-    // Movimentação horizontal (permite andar em pé ou andar agachado!)
-    if (!block) {
+    // Movimentação horizontal (permite andar em pé ou andar agachado quando não estiver executando um golpe)
+    if (!block && !attackInitiated) {
       if (left && !right) {
         fighter.move(-1);
       } else if (right && !left) {
@@ -124,15 +148,9 @@ export class InputHandler {
     }
 
     // Pulo (Disparo Único por clique, sem loop de repetição)
-    if (justPressed.jump || (gp && gp.up)) {
+    if ((justPressed.jump || (gp && gp.up)) && !attackInitiated && !down) {
       const dirX = left ? -1 : (right ? 1 : 0);
       fighter.jump(dirX);
     }
-
-    // Golpes (2 Ataques Padrão: Soco e Chute + Ataque Extra + Super)
-    if (justPressed.superMove) fighter.superMove();
-    else if (justPressed.special1) fighter.specialAttack();
-    else if (justPressed.punch || justPressed.lightPunch || justPressed.heavyPunch) fighter.punch();
-    else if (justPressed.kick || justPressed.lightKick || justPressed.heavyKick) fighter.kick();
   }
 }

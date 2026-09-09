@@ -178,8 +178,8 @@ export class GameEngine {
 
   resetRound() {
     this.specialCinematic = null;
-    this.p1.reset(650);
-    this.p2.reset(1350);
+    this.p1.reset(650, true);
+    this.p2.reset(1350, true);
     if (this.isTraining) {
       this.p1.energy = 100;
       this.p2.energy = 100;
@@ -510,51 +510,55 @@ export class GameEngine {
     let renoirKiller = null;
     let gustaveVictim = null;
 
-    if (this.p2.isDead && p1IsRenoir && p2IsGustave) {
-      renoirKiller = this.p1;
-      gustaveVictim = this.p2;
+    if (this.p2.isDead) {
       this.p1Wins++;
-    } else if (this.p1.isDead && p2IsRenoir && p1IsGustave) {
-      renoirKiller = this.p2;
-      gustaveVictim = this.p1;
+      if (p1IsRenoir && p2IsGustave && this.p1Wins >= this.maxRounds) {
+        renoirKiller = this.p1;
+        gustaveVictim = this.p2;
+      }
+    } else if (this.p1.isDead) {
       this.p2Wins++;
+      if (p2IsRenoir && p1IsGustave && this.p2Wins >= this.maxRounds) {
+        renoirKiller = this.p2;
+        gustaveVictim = this.p1;
+      }
     }
 
     if (renoirKiller && gustaveVictim) {
-      // Ativa Cinemática Especial: Renoir eliminando Gustave
-      this.statusTimer = 5.2; // tempo estendido para a cinemática completa
+      // Ativa Cinemática Especial: Renoir eliminando Gustave na vitória definitiva (2 pontos)
+      this.statusTimer = 11.2; // Sequência estendida e dramática
       this.timeScale = 1.0;
       this.specialCinematic = {
         active: true,
         timer: 0,
         renoir: renoirKiller,
         gustave: gustaveVictim,
-        phase: 'WALK_AWAY',
+        phase: 'WALK_BACK',
+        ghostTrail: [],
         beamActive: false,
+        beamProgress: 0,
         beamStart: null,
         beamEnd: null
       };
 
-      // Gustave não cai de joelhos: fica em pé se balançando atordoado
+      // Gustave se recupera e fica em pé se balançando atordoado inicialmente
       gustaveVictim.state = FIGHTER_STATE.HURT;
       gustaveVictim.isWeakenedSway = true;
       gustaveVictim.velocity.x = 0;
       gustaveVictim.velocity.y = 0;
 
-      // Renoir começa se afastando andando
-      const walkDir = renoirKiller.position.x < gustaveVictim.position.x ? -1 : 1;
-      renoirKiller.facing = -walkDir; // olha pra frente do recuo ou costas
-      renoirKiller.state = FIGHTER_STATE.WALK_FORWARD;
+      // Renoir começa se afastando andando para trás solenemente
+      const awayDir = renoirKiller.position.x < gustaveVictim.position.x ? -1 : 1;
+      renoirKiller.facing = -awayDir; // olhando para Gustave enquanto recua
+      renoirKiller.state = FIGHTER_STATE.WALK_BACK;
     } else {
       this.statusTimer = 2.8;
       this.timeScale = 0.4;
       this.camera.addShake(16, 0.4);
 
       if (this.p1.isDead) {
-        this.p2Wins++;
         this.p2.state = FIGHTER_STATE.VICTORY;
       } else {
-        this.p1Wins++;
         this.p1.state = FIGHTER_STATE.VICTORY;
       }
     }
@@ -566,73 +570,133 @@ export class GameEngine {
     sc.timer += dt;
     const { renoir, gustave } = sc;
 
-    // Gustave permanece em pé se balançando atordoado até ser golpeado
-    if (sc.timer < 3.2) {
-      gustave.state = FIGHTER_STATE.HURT;
-      gustave.isWeakenedSway = true;
-      gustave.velocity.x = 0;
-      gustave.velocity.y = 0;
+    // Atualiza partículas da trilha fantasma
+    if (sc.ghostTrail && sc.ghostTrail.length > 0) {
+      for (const g of sc.ghostTrail) {
+        g.alpha -= dt * 2.2;
+      }
+      sc.ghostTrail = sc.ghostTrail.filter((g) => g.alpha > 0);
     }
 
-    // Fase 1: 0s a 1.6s -> Renoir se afasta andando devagar
-    if (sc.timer < 1.6) {
-      sc.phase = 'WALK_AWAY';
+    // FASE 1 (0s a 5.0s): Renoir anda 5 segundos para trás devagar
+    if (sc.timer < 5.0) {
+      sc.phase = 'WALK_BACK';
       const awayDir = renoir.position.x < gustave.position.x ? -1 : 1;
-      renoir.velocity.x = awayDir * (renoir.getEffectiveSpeed() * 0.4);
-      renoir.state = awayDir === renoir.facing ? FIGHTER_STATE.WALK_FORWARD : FIGHTER_STATE.WALK_BACK;
+      renoir.facing = -awayDir; // encara Gustave enquanto recua
+      renoir.state = FIGHTER_STATE.WALK_BACK;
+      renoir.velocity.x = awayDir * (renoir.getEffectiveSpeed() * 0.45);
+
+      // A partir de 1.0s, Gustave desembainha a espada e corre na direção de Renoir até a metade do caminho
+      if (sc.timer >= 1.0) {
+        gustave.isWeakenedSway = false;
+        gustave.facing = gustave.position.x < renoir.position.x ? 1 : -1;
+        gustave.state = FIGHTER_STATE.WALK_FORWARD;
+
+        // Distância entre eles
+        const curDist = Math.abs(renoir.position.x - gustave.position.x);
+        // Corre se ainda não chegou à metade do caminho
+        if (curDist > 260) {
+          gustave.velocity.x = gustave.facing * (gustave.getEffectiveSpeed() * 0.95);
+        } else {
+          gustave.velocity.x = 0;
+          gustave.state = FIGHTER_STATE.IDLE;
+        }
+      } else {
+        gustave.state = FIGHTER_STATE.HURT;
+        gustave.isWeakenedSway = true;
+        gustave.velocity.x = 0;
+      }
     }
-    // Fase 2: 1.6s -> Teletransporte instantâneo PARA A FRENTE de Gustave!
-    else if (sc.timer >= 1.6 && sc.timer < 1.7) {
+    // FASE 2 (5.0s a 5.8s): Renoir para e se inclina para a frente
+    else if (sc.timer >= 5.0 && sc.timer < 5.8) {
+      if (sc.phase !== 'LEAN_FORWARD') {
+        sc.phase = 'LEAN_FORWARD';
+        renoir.velocity.x = 0;
+        renoir.state = FIGHTER_STATE.IDLE;
+        renoir.isLeaningForward = true;
+        gustave.velocity.x = 0;
+        gustave.state = FIGHTER_STATE.IDLE;
+      }
+    }
+    // FASE 3 (5.8s a 6.0s): Renoir teleporta para a frente de Gustave com trilha "fantasma"
+    else if (sc.timer >= 5.8 && sc.timer < 6.0) {
       if (sc.phase !== 'TELEPORT') {
         sc.phase = 'TELEPORT';
+        renoir.isLeaningForward = false;
         sounds.playStaffBell();
-        this.particles.emitSparks(renoir.position.x, renoir.position.y - 60, '#000000', 30, 8);
-        this.particles.emitSparks(renoir.position.x, renoir.position.y - 60, '#ffffff', 20, 6);
 
-        // Teleporta para a frente do rosto de Gustave
-        const frontX = gustave.position.x + (gustave.facing * 90);
-        renoir.position.x = Math.max(80, Math.min(1920, frontX));
-        renoir.facing = -gustave.facing; // encara Gustave de frente
+        // Cria a trilha "fantasma" ao longo do trajeto
+        const startX = renoir.position.x;
+        const targetX = gustave.position.x + (gustave.facing * 85);
+        const steps = 7;
+        for (let i = 0; i <= steps; i++) {
+          const tPos = i / steps;
+          sc.ghostTrail.push({
+            x: startX + (targetX - startX) * tPos,
+            y: renoir.position.y,
+            facing: -gustave.facing,
+            alpha: 0.85 - (i / steps) * 0.3
+          });
+        }
+
+        this.particles.emitSparks(renoir.position.x, renoir.position.y - 60, '#000000', 30, 8);
+        this.particles.emitSparks(renoir.position.x, renoir.position.y - 60, '#ffffff', 25, 6);
+
+        // Teleporta instantaneamente à frente de Gustave
+        renoir.position.x = Math.max(80, Math.min(1920, targetX));
+        renoir.facing = -gustave.facing;
         renoir.velocity.x = 0;
         renoir.velocity.y = 0;
 
-        this.particles.emitShockwave(renoir.position.x, renoir.groundY, 90, '#ffffff');
-        this.particles.emitSparks(renoir.position.x, renoir.position.y - 60, '#000000', 30, 8);
+        this.particles.emitShockwave(renoir.position.x, renoir.groundY, 110, '#ffffff');
       }
     }
-    // Fase 3: 1.7s a 3.1s -> Golpe de baixo para cima atravessando Gustave com feixe preto e bordas brancas bem longo
-    else if (sc.timer >= 1.7 && sc.timer < 3.1) {
-      if (sc.phase !== 'STRIKE') {
-        sc.phase = 'STRIKE';
+    // FASE 4 (6.0s a 9.0s -> 3 Segundos): Perfura Gustave de baixo para cima com feixe dramático
+    else if (sc.timer >= 6.0 && sc.timer < 9.0) {
+      const strikeTime = sc.timer - 6.0; // 0.0s a 3.0s
+      renoir.state = FIGHTER_STATE.HEAVY_PUNCH;
+      gustave.state = FIGHTER_STATE.HURT;
+      gustave.isWeakenedSway = false;
+      gustave.velocity.x = 0;
+      gustave.velocity.y = 0;
+
+      if (sc.phase !== 'PIERCE') {
+        sc.phase = 'PIERCE';
         sounds.playDimensionalPierce();
         sounds.playThunderSlam();
-        this.camera.addShake(18, 0.4);
-        renoir.state = FIGHTER_STATE.HEAVY_PUNCH;
+        this.camera.addShake(22, 0.6);
         sc.beamActive = true;
+      }
 
-        // Configura o feixe de baixo para cima atravessando Gustave
-        const startX = renoir.position.x + (renoir.facing * 10);
-        const startY = renoir.groundY - 10; // bem de baixo
-        // Diagonal ascendente atravessando o peito/cabeça de Gustave em direção ao céu
-        const beamDirX = (gustave.position.x - renoir.position.x) * 1.8;
-        const endX = startX + beamDirX;
-        const endY = startY - 260; // sobe alto rasgando o espaço
-        sc.beamStart = { x: startX, y: startY };
-        sc.beamEnd = { x: endX, y: endY };
+      // O feixe é curto antes de perfurar (0 a 0.3s), depois cresce cortando aos céus (0.3s a 3.0s)
+      const lengthProgress = Math.min(1.0, strikeTime / 0.35);
+      sc.beamProgress = lengthProgress;
 
-        this.particles.emitElectricArc(startX, startY, endX, endY, '#ffffff', 5);
-        this.particles.emitSparks(gustave.position.x, gustave.position.y - 60, '#000000', 40, 12);
-        this.particles.emitSparks(gustave.position.x, gustave.position.y - 60, '#ffffff', 30, 10);
+      const startX = renoir.position.x + (renoir.facing * 10);
+      const startY = renoir.groundY - 12; // De baixo
+      const maxDistX = (gustave.position.x - renoir.position.x) * 2.6;
+      const endX = startX + (maxDistX * (0.3 + 0.7 * lengthProgress));
+      const endY = startY - (120 + 260 * lengthProgress); // Feixe longo e ascendente
+      sc.beamStart = { x: startX, y: startY };
+      sc.beamEnd = { x: endX, y: endY };
+
+      // Emissão contínua de faíscas sombrias e fragmentos/pétalas pretos e vermelhos
+      if (Math.random() < 0.4) {
+        this.camera.addShake(4, 0.08);
+      }
+      if (Math.random() < 0.6) {
+        this.particles.emitSparks(gustave.position.x, gustave.position.y - 65, '#000000', 6, 8);
+        this.particles.emitSparks(gustave.position.x, gustave.position.y - 65, '#ef4444', 4, 6);
+        this.particles.emitSparks(gustave.position.x, gustave.position.y - 65, '#ffffff', 4, 5);
       }
     }
-    // Fase 4: 3.1s em diante -> Feixe se dissipa, Gustave cai ao chão desacordado em definitivo
-    else if (sc.timer >= 3.1) {
+    // FASE 5 (9.0s em diante): Dissipação do feixe e colapso de Gustave
+    else if (sc.timer >= 9.0) {
       sc.beamActive = false;
       if (sc.phase !== 'COLLAPSE') {
         sc.phase = 'COLLAPSE';
-        gustave.isWeakenedSway = false;
         gustave.state = FIGHTER_STATE.KNOCKDOWN;
-        gustave.velocity.x = -gustave.facing * 3;
+        gustave.velocity.x = -gustave.facing * 3.5;
         gustave.velocity.y = -4;
         gustave.isDead = true;
         sounds.playKO();
@@ -642,36 +706,83 @@ export class GameEngine {
   }
 
   drawCinematicBeam(ctx) {
-    if (!this.specialCinematic || !this.specialCinematic.beamActive || !this.specialCinematic.beamStart) return;
-    const { beamStart, beamEnd } = this.specialCinematic;
+    if (!this.specialCinematic || !this.specialCinematic.active) return;
+    const sc = this.specialCinematic;
+
+    // 1. Desenha a trilha "fantasma" de Renoir
+    if (sc.ghostTrail && sc.ghostTrail.length > 0 && sc.renoir) {
+      ctx.save();
+      for (const ghost of sc.ghostTrail) {
+        ctx.globalAlpha = ghost.alpha * 0.55;
+        ctx.save();
+        ctx.translate(ghost.x, ghost.y);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+        ctx.beginPath();
+        ctx.ellipse(0, -60, 24, 65, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    // 2. Desenha o feixe de perfuração detalhado de 3 segundos
+    if (!sc.beamActive || !sc.beamStart || !sc.beamEnd) return;
+    const { beamStart, beamEnd } = sc;
+    const strikeTime = sc.timer >= 6.0 ? (sc.timer - 6.0) : 0;
 
     ctx.save();
     // Borda exterior branca brilhante de rasgo dimensional
     ctx.shadowColor = '#ffffff';
-    ctx.shadowBlur = 30;
+    ctx.shadowBlur = 35;
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.lineWidth = 16;
+    ctx.lineWidth = 22;
     ctx.beginPath();
     ctx.moveTo(beamStart.x, beamStart.y);
     ctx.lineTo(beamEnd.x, beamEnd.y);
     ctx.stroke();
 
-    // Centro abissal preto como extensão da bengala
+    // Centro abissal preto como sombra na luz
     ctx.shadowBlur = 0;
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 8;
+    ctx.strokeStyle = '#050505';
+    ctx.lineWidth = 12;
     ctx.beginPath();
     ctx.moveTo(beamStart.x, beamStart.y);
     ctx.lineTo(beamEnd.x, beamEnd.y);
     ctx.stroke();
 
-    // Faixa branca fina de luz pura no miolo
+    // Faixa fina de luz pura no miolo
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(beamStart.x, beamStart.y);
     ctx.lineTo(beamEnd.x, beamEnd.y);
     ctx.stroke();
+
+    // Pigmentos pretos de sombra ondulando dentro do feixe branco
+    const dx = beamEnd.x - beamStart.x;
+    const dy = beamEnd.y - beamStart.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const particleCount = 14;
+
+    for (let p = 0; p < particleCount; p++) {
+      const pT = ((p / particleCount) + strikeTime * 1.5) % 1.0;
+      const curX = beamStart.x + dx * pT;
+      const curY = beamStart.y + dy * pT;
+      const waveOffset = Math.sin(strikeTime * 15 + p * 1.8) * 5;
+
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.arc(curX + waveOffset, curY - waveOffset, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pétala escura/vermelha em suspensão
+      if (p % 2 === 0) {
+        ctx.fillStyle = 'rgba(185, 28, 28, 0.75)';
+        ctx.beginPath();
+        ctx.ellipse(curX - waveOffset * 1.5, curY + waveOffset, 4, 2, strikeTime * 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
 
     ctx.restore();
   }

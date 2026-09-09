@@ -632,8 +632,49 @@ export class ExpeditionRenderer {
       // Gotas de tinta caindo
       ctx.fillStyle = '#09090b';
       ctx.beginPath();
-      ctx.arc(hx + 54 * f, hy - 34, 3, 0, Math.PI * 2);
+    } else if (vis.weaponType === 'sith_lightsaber') {
+      // Sabre de Luz Vermelho de Darth Vader
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = 18;
+      // Empunhadura
+      ctx.strokeStyle = '#18181b';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(hx + 12 * f, hy - 8);
+      ctx.stroke();
+      // Lâmina de plasma escarlate com núcleo branco
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(hx + 12 * f, hy - 8);
+      ctx.lineTo(hx + 50 * f, hy - 32);
+      ctx.stroke();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    } else if (vis.weaponType === 'batarang') {
+      // Batarangue empunhado por Batman
+      ctx.fillStyle = '#09090b';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(hx + 8 * f, hy, 8, 0, Math.PI * 2);
       ctx.fill();
+      ctx.stroke();
+    } else if (vis.weaponType === 'pirate_saber') {
+      // Sabre de pirata curvo de Jack Sparrow
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.quadraticCurveTo(hx + 28 * f, hy - 20, hx + 36 * f, hy - 14);
+      ctx.stroke();
+      ctx.strokeStyle = '#d4af37';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(hx + 4 * f, hy, 5, 0, Math.PI);
+      ctx.stroke();
     }
 
     ctx.restore();

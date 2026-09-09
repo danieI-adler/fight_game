@@ -82,7 +82,7 @@ export class FighterCombat {
           fighter.activeHitbox.attackerPower = fighter.attackPower;
         }
         if (fighter.stateTime >= 0.22) {
-          fighter.state = FIGHTER_STATE.CROUCH;
+          fighter.state = fighter.isCrouching ? FIGHTER_STATE.CROUCH : FIGHTER_STATE.IDLE;
         }
         break;
 
@@ -96,7 +96,7 @@ export class FighterCombat {
           fighter.activeHitbox.attackerPower = fighter.attackPower;
         }
         if (fighter.stateTime >= 0.32) {
-          fighter.state = FIGHTER_STATE.CROUCH;
+          fighter.state = fighter.isCrouching ? FIGHTER_STATE.CROUCH : FIGHTER_STATE.IDLE;
         }
         break;
 

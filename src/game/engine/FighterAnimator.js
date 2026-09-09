@@ -17,6 +17,23 @@ export class FighterAnimator {
 
     switch (fighter.state) {
       case FIGHTER_STATE.IDLE: {
+        if (fighter.isLeaningForward) {
+          // Renoir inclinado para frente solenemente
+          p.head.x = 22 * f;
+          p.head.y = -105;
+          p.chest.x = 18 * f;
+          p.chest.y = -76;
+          p.pelvis.x = 0;
+          p.pelvis.y = -48;
+          p.leftHand = { x: -14 * f, y: -65 };
+          p.rightShoulder = { x: 16 * f, y: -78 };
+          p.rightElbow = { x: 26 * f, y: -60 };
+          p.rightHand = { x: 34 * f, y: -45 };
+          p.leftFoot = { x: -22 * f, y: 0 };
+          p.rightFoot = { x: 18 * f, y: 0 };
+          break;
+        }
+
         const bounce = Math.sin(t * 7) * 3;
         p.head.y = -115 + bounce;
         p.chest.y = -80 + bounce;
@@ -68,6 +85,39 @@ export class FighterAnimator {
 
         p.leftHand = { x: 15 * f, y: -55 };
         p.rightHand = { x: 28 * f, y: -50 };
+        break;
+      }
+
+      case FIGHTER_STATE.CROUCH_PUNCH: {
+        p.head.y = -75;
+        p.chest.y = -50;
+        p.pelvis.y = -30;
+        p.leftKnee = { x: -15 * f, y: -15 };
+        p.leftFoot = { x: -18 * f, y: 0 };
+        p.rightKnee = { x: 20 * f, y: -15 };
+        p.rightFoot = { x: 22 * f, y: 0 };
+
+        const ext = Math.sin(Math.min(1, t / 0.22) * Math.PI);
+        p.leftHand = { x: 12 * f, y: -50 };
+        p.rightShoulder = { x: 12 * f, y: -55 };
+        p.rightElbow = { x: (22 + ext * 25) * f, y: -52 };
+        p.rightHand = { x: (28 + ext * 50) * f, y: -50 };
+        break;
+      }
+
+      case FIGHTER_STATE.CROUCH_KICK: {
+        p.head.y = -70;
+        p.chest.y = -45;
+        p.pelvis.y = -25;
+        p.leftKnee = { x: -18 * f, y: -12 };
+        p.leftFoot = { x: -20 * f, y: 0 };
+
+        p.leftHand = { x: 5 * f, y: -35 };
+        p.rightHand = { x: -10 * f, y: -30 };
+
+        const ext = Math.sin(Math.min(1, t / 0.32) * Math.PI);
+        p.rightKnee = { x: (20 + ext * 30) * f, y: -20 };
+        p.rightFoot = { x: (25 + ext * 65) * f, y: -8 };
         break;
       }
 

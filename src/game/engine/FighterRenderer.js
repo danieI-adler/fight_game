@@ -432,6 +432,54 @@ export class FighterRenderer {
         break;
       }
 
+      case 'bat_cowl': {
+        // Máscara com orelhas pontudas de Morcego
+        ctx.fillStyle = '#09090b';
+        ctx.beginPath();
+        ctx.arc(hx, hy - 2, 12, 0, Math.PI * 2);
+        ctx.fill();
+        // Orelhas pontudas
+        ctx.beginPath();
+        ctx.moveTo(hx - 8, hy - 8);
+        ctx.lineTo(hx - 9, hy - 22);
+        ctx.lineTo(hx - 3, hy - 11);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(hx + 3, hy - 11);
+        ctx.lineTo(hx + 9, hy - 22);
+        ctx.lineTo(hx + 8, hy - 8);
+        ctx.fill();
+        break;
+      }
+
+      case 'sith_helmet': {
+        // Capacete escuro e máscara angular de Lorde Sith
+        ctx.fillStyle = '#050505';
+        ctx.beginPath();
+        ctx.arc(hx, hy - 3, 14, -Math.PI * 0.8, Math.PI * 0.8);
+        ctx.fill();
+        // Crista e respiração
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(hx - 4, hy + 4);
+        ctx.lineTo(hx, hy + 8);
+        ctx.lineTo(hx + 4, hy + 4);
+        ctx.stroke();
+        break;
+      }
+
+      case 'racer_cap': {
+        // Boné / cúpula aerodinâmica vermelha 95
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(hx, hy - 5, 12, Math.PI, 0);
+        ctx.fill();
+        ctx.fillStyle = '#facc15';
+        ctx.fillRect(hx - 3 * f, hy - 8, 14 * f, 3);
+        break;
+      }
+
       default: {
         // Cabelo / Penteado estilizado
         ctx.beginPath();
@@ -462,7 +510,8 @@ export class FighterRenderer {
 
     switch (fighter.state) {
       case FIGHTER_STATE.LIGHT_PUNCH:
-      case FIGHTER_STATE.HEAVY_PUNCH: {
+      case FIGHTER_STATE.HEAVY_PUNCH:
+      case FIGHTER_STATE.CROUCH_PUNCH: {
         const hx = x + p.rightHand.x;
         const hy = y + p.rightHand.y;
         ctx.beginPath();
@@ -477,7 +526,8 @@ export class FighterRenderer {
       }
 
       case FIGHTER_STATE.LIGHT_KICK:
-      case FIGHTER_STATE.HEAVY_KICK: {
+      case FIGHTER_STATE.HEAVY_KICK:
+      case FIGHTER_STATE.CROUCH_KICK: {
         const fx = x + p.rightFoot.x;
         const fy = y + p.rightFoot.y;
         ctx.beginPath();

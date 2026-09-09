@@ -147,12 +147,14 @@ export class Fighter {
     this.energy = Math.min(this.maxEnergy, this.energy + amount);
   }
 
-  reset(startX) {
+  reset(startX, keepEnergy = false) {
     this.position.x = startX !== undefined ? startX : (this.isPlayer2 ? 1400 : 600);
     this.position.y = this.groundY;
     this.velocity.set(0, 0);
     this.health = this.maxHealth;
-    this.energy = 0;
+    if (!keepEnergy) {
+      this.energy = 0;
+    }
     this.state = FIGHTER_STATE.IDLE;
     this.stateTime = 0;
     this.isDead = false;
@@ -181,6 +183,13 @@ export class Fighter {
     this.gustaveBullet = null;
     this.renoirBlackHole = null;
     this.paintressRealityTear = null;
+    this.batmanBatarang = null;
+    this.vaderChokeTimer = 0;
+    this.palpatineLightning = null;
+    this.jokerGasCloud = null;
+    this.jackSparrowShot = null;
+    this.mcqueenTurboActive = false;
+    this.mcqueenTurboTimer = 0;
     this.timeFreezeTimer = 0;
     this.extraType = null;
     this.extraAttackLevel = 1;
@@ -227,7 +236,9 @@ export class Fighter {
 
     if (this.isCrouching) {
       this.velocity.x = dir * (this.getEffectiveSpeed() * 0.45);
-      this.state = FIGHTER_STATE.CROUCH;
+      if (this.state === FIGHTER_STATE.IDLE || this.state === FIGHTER_STATE.WALK_FORWARD || this.state === FIGHTER_STATE.WALK_BACK) {
+        this.state = FIGHTER_STATE.CROUCH;
+      }
       return;
     }
 
@@ -268,10 +279,30 @@ export class Fighter {
   }
 
   crouch(isCrouching) {
-    if (!this.canAct() && this.state !== FIGHTER_STATE.CROUCH) return;
     if (!this.isGrounded) return;
 
+    // Se estiver executando um ataque (ex: soco ou chute agachado), mantém isCrouching mas NÃO interrompe o golpe
+    const attackStates = [
+      FIGHTER_STATE.CROUCH_PUNCH,
+      FIGHTER_STATE.CROUCH_KICK,
+      FIGHTER_STATE.LIGHT_PUNCH,
+      FIGHTER_STATE.HEAVY_PUNCH,
+      FIGHTER_STATE.LIGHT_KICK,
+      FIGHTER_STATE.HEAVY_KICK,
+      FIGHTER_STATE.SPECIAL_1,
+      FIGHTER_STATE.SPECIAL_2,
+      FIGHTER_STATE.SUPER_MOVE,
+      FIGHTER_STATE.HURT,
+      FIGHTER_STATE.KNOCKDOWN,
+      FIGHTER_STATE.GET_UP
+    ];
+
     this.isCrouching = isCrouching;
+
+    if (attackStates.includes(this.state)) {
+      return;
+    }
+
     if (isCrouching) {
       this.lastAction = 'CROUCH';
       this.state = FIGHTER_STATE.CROUCH;
@@ -311,7 +342,8 @@ export class Fighter {
     if (!this.isGrounded) {
       this.state = FIGHTER_STATE.JUMP_PUNCH;
       sounds.playWhoosh();
-    } else if (this.isCrouching) {
+    } else if (this.isCrouching || this.state === FIGHTER_STATE.CROUCH) {
+      this.isCrouching = true;
       this.velocity.x = 0;
       this.state = FIGHTER_STATE.CROUCH_PUNCH;
       sounds.playWhoosh();
@@ -331,7 +363,8 @@ export class Fighter {
     if (!this.isGrounded) {
       this.state = FIGHTER_STATE.JUMP_KICK;
       sounds.playWhoosh();
-    } else if (this.isCrouching) {
+    } else if (this.isCrouching || this.state === FIGHTER_STATE.CROUCH) {
+      this.isCrouching = true;
       this.velocity.x = 0;
       this.state = FIGHTER_STATE.CROUCH_KICK;
       sounds.playWhoosh();
@@ -457,6 +490,105 @@ export class Fighter {
         freezeTime: level === 2 ? 2.4 : 1.2, // congela o oponente por 2.4s ou 1.2s
         active: true
       };
+    }
+    // 7. Batman: Lançamento de Batarangue veloz
+    else if (charName.includes('batman')) {
+      this.extraType = 'BATMAN_BATARANG';
+      sounds.playWhoosh();
+      const bx = this.position.x + this.facing * 30;
+      const by = this.position.y - 75;
+      this.batmanBatarang = {
+        x: bx,
+        y: by,
+        vx: this.facing * 1250,
+        damage: level === 2 ? 170 : 110,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 8. Darth Vader: Asfixia / Esmagamento da Força (Force Choke)
+    else if (charName.includes('vader')) {
+      this.extraType = 'VADER_FORCE_CHOKE';
+      sounds.playDimensionalPierce();
+      const target = this.opponent;
+      if (target && !target.isDead) {
+        target.hitstunTime = level === 2 ? 1.4 : 0.8;
+        target.velocity.x = 0;
+        target.velocity.y = -2;
+        const attackData = {
+          damage: level === 2 ? 190 : 120,
+          knockback: 6,
+          knockdown: level === 2,
+          isHeavy: level === 2,
+          attackerPower: this.attackPower
+        };
+        target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 80 }, null);
+      }
+    }
+    // 9. Palpatine: Relâmpagos da Força (Force Lightning contínuo)
+    else if (charName.includes('palpatine')) {
+      this.extraType = 'PALPATINE_FORCE_LIGHTNING';
+      sounds.playElectricZap();
+      const reach = level === 2 ? 450 : 320;
+      this.palpatineLightning = {
+        timer: level === 2 ? 0.8 : 0.45,
+        reach: reach,
+        damage: level === 2 ? 200 : 130,
+        active: true
+      };
+      const target = this.opponent;
+      if (target && !target.isDead) {
+        const dist = Math.abs(target.position.x - this.position.x);
+        const facingTarget = (target.position.x - this.position.x) * this.facing > 0;
+        if (facingTarget && dist < reach) {
+          const attackData = {
+            damage: level === 2 ? 200 : 130,
+            knockback: 12,
+            knockdown: level === 2,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 70 }, null);
+        }
+      }
+    }
+    // 10. Coringa: Bomba de Gás do Riso venenosa
+    else if (charName.includes('coringa') || charName.includes('joker')) {
+      this.extraType = 'JOKER_LAUGH_GAS';
+      sounds.playSuperCharge();
+      const gasX = this.position.x + this.facing * 120;
+      this.jokerGasCloud = {
+        x: gasX,
+        y: this.groundY - 40,
+        duration: level === 2 ? 4.0 : 2.5,
+        damage: level === 2 ? 45 : 30,
+        tick: 0,
+        active: true
+      };
+    }
+    // 11. Jack Sparrow: Disparo traiçoeiro de Pistola de Pederneira
+    else if (charName.includes('jack') || charName.includes('sparrow')) {
+      this.extraType = 'SPARROW_FLINTLOCK';
+      sounds.playGunshot();
+      const fx = this.position.x + this.facing * 35;
+      const fy = this.position.y - 75;
+      this.jackSparrowShot = {
+        x: fx,
+        y: fy,
+        vx: this.facing * 1350,
+        damage: level === 2 ? 180 : 115,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 12. Relâmpago McQueen: Arranque Turbo Ka-Chow!
+    else if (charName.includes('mcqueen') || charName.includes('relampago')) {
+      this.extraType = 'MCQUEEN_TURBO_CHARGE';
+      sounds.playSuper();
+      sounds.playDash();
+      this.mcqueenTurboActive = true;
+      this.mcqueenTurboTimer = level === 2 ? 0.65 : 0.4;
+      this.velocity.x = this.facing * (this.speed * 3.2);
     }
     // Personagens genéricos: golpe padrão fortificado
     else {
@@ -1139,6 +1271,141 @@ export class Fighter {
       }
     }
 
+    // 5.10 Batarangue do Batman (Ataque Extra)
+    if (this.batmanBatarang && this.batmanBatarang.active) {
+      this.batmanBatarang.x += this.batmanBatarang.vx * dt;
+      if (particles && Math.random() < 0.4) {
+        particles.emitSparks(this.batmanBatarang.x, this.batmanBatarang.y, '#38bdf8', 2, 2);
+      }
+      if (this.opponent && !this.batmanBatarang.hasHit && !this.opponent.isDead) {
+        const bx = this.batmanBatarang.x;
+        const by = this.batmanBatarang.y;
+        const bBox = new Box(bx - 18, by - 12, 36, 24, 'hitbox');
+        for (const hurt of this.opponent.getHurtboxes()) {
+          if (bBox.intersects(hurt)) {
+            this.batmanBatarang.hasHit = true;
+            this.batmanBatarang.active = false;
+            const attackData = {
+              damage: this.batmanBatarang.damage || 110,
+              knockback: 12,
+              knockdown: false,
+              isHeavy: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: bx, y: by }, particles);
+            sounds.playPunch(true);
+            if (particles) {
+              particles.emitShockwave(bx, by, 60, '#38bdf8');
+              particles.emitSparks(bx, by, '#0f172a', 20, 8);
+            }
+            break;
+          }
+        }
+      }
+      if (this.batmanBatarang.x < -100 || this.batmanBatarang.x > stageWidth + 100) {
+        this.batmanBatarang.active = false;
+      }
+    }
+
+    // 5.11 Relâmpagos de Palpatine (Ataque Extra)
+    if (this.palpatineLightning && this.palpatineLightning.active) {
+      this.palpatineLightning.timer -= dt;
+      if (particles && Math.random() < 0.6) {
+        const lX = this.position.x + this.facing * (Math.random() * (this.palpatineLightning.reach || 320));
+        particles.emitSparks(lX, this.position.y - 70, '#a855f7', 4, 4);
+      }
+      if (this.palpatineLightning.timer <= 0) {
+        this.palpatineLightning.active = false;
+      }
+    }
+
+    // 5.12 Nuvem de Gás do Coringa (Ataque Extra)
+    if (this.jokerGasCloud && this.jokerGasCloud.active) {
+      this.jokerGasCloud.duration -= dt;
+      this.jokerGasCloud.tick += dt;
+      if (particles && Math.random() < 0.3) {
+        particles.emitDust(this.jokerGasCloud.x + (Math.random() - 0.5) * 60, this.jokerGasCloud.y, 2, '#10b981');
+      }
+      if (this.jokerGasCloud.tick >= 0.5) {
+        this.jokerGasCloud.tick = 0;
+        if (this.opponent && !this.opponent.isDead) {
+          const dist = Math.abs(this.jokerGasCloud.x - this.opponent.position.x);
+          if (dist < 85) {
+            const attackData = {
+              damage: this.jokerGasCloud.damage || 30,
+              knockback: 0,
+              knockdown: false,
+              isHeavy: false,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
+          }
+        }
+      }
+      if (this.jokerGasCloud.duration <= 0) {
+        this.jokerGasCloud.active = false;
+      }
+    }
+
+    // 5.13 Pederneira de Jack Sparrow (Ataque Extra)
+    if (this.jackSparrowShot && this.jackSparrowShot.active) {
+      this.jackSparrowShot.x += this.jackSparrowShot.vx * dt;
+      if (particles && Math.random() < 0.5) {
+        particles.emitSparks(this.jackSparrowShot.x, this.jackSparrowShot.y, '#f59e0b', 3, 3);
+      }
+      if (this.opponent && !this.jackSparrowShot.hasHit && !this.opponent.isDead) {
+        const sx = this.jackSparrowShot.x;
+        const sy = this.jackSparrowShot.y;
+        const sBox = new Box(sx - 15, sy - 10, 30, 20, 'hitbox');
+        for (const hurt of this.opponent.getHurtboxes()) {
+          if (sBox.intersects(hurt)) {
+            this.jackSparrowShot.hasHit = true;
+            this.jackSparrowShot.active = false;
+            const attackData = {
+              damage: this.jackSparrowShot.damage || 115,
+              knockback: 14,
+              knockdown: true,
+              isHeavy: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: sx, y: sy }, particles);
+            sounds.playPunch(true);
+            break;
+          }
+        }
+      }
+      if (this.jackSparrowShot.x < -100 || this.jackSparrowShot.x > stageWidth + 100) {
+        this.jackSparrowShot.active = false;
+      }
+    }
+
+    // 5.14 Turbo Ka-Chow de McQueen (Ataque Extra)
+    if (this.mcqueenTurboActive) {
+      this.mcqueenTurboTimer -= dt;
+      if (particles && Math.random() < 0.6) {
+        particles.emitSparks(this.position.x - this.facing * 30, this.groundY - 10, '#ef4444', 4, 4);
+        particles.emitDust(this.position.x - this.facing * 20, this.groundY, 3, '#facc15');
+      }
+      if (this.opponent && !this.opponent.isDead && !this.hasHitCurrentAttack) {
+        const dist = Math.abs(this.position.x - this.opponent.position.x);
+        if (dist < 60) {
+          this.hasHitCurrentAttack = true;
+          const attackData = {
+            damage: 160,
+            knockback: 20,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
+          sounds.playPunch(true);
+        }
+      }
+      if (this.mcqueenTurboTimer <= 0) {
+        this.mcqueenTurboActive = false;
+      }
+    }
+
     // 6. Watchdog de Segurança Anti-Travamento (Golpes comuns 0.8s, Super Move 1.6s)
     const attackStates = [
       FIGHTER_STATE.LIGHT_PUNCH,
@@ -1330,6 +1597,90 @@ export class Fighter {
         ctx.fillRect(cx - 3, cy - 8, 6, 16);
         ctx.fillRect(cx - 8, cy - 3, 16, 6);
       }
+      ctx.restore();
+    }
+
+    // 5. Batarangue do Batman
+    if (this.batmanBatarang && this.batmanBatarang.active) {
+      const bx = this.batmanBatarang.x;
+      const by = this.batmanBatarang.y;
+      const rot = Date.now() * 0.02;
+      ctx.save();
+      ctx.translate(bx, by);
+      ctx.rotate(rot);
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#09090b';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-16, -4);
+      ctx.quadraticCurveTo(0, -12, 16, -4);
+      ctx.lineTo(8, 6);
+      ctx.lineTo(0, 2);
+      ctx.lineTo(-8, 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 6. Relâmpagos de Palpatine
+    if (this.palpatineLightning && this.palpatineLightning.active) {
+      const sx = this.position.x + this.facing * 30;
+      const sy = this.position.y - 75;
+      const reach = this.palpatineLightning.reach || 320;
+      ctx.save();
+      ctx.shadowColor = '#a855f7';
+      ctx.shadowBlur = 20;
+      ctx.strokeStyle = '#c084fc';
+      ctx.lineWidth = 2.5;
+
+      for (let branch = 0; branch < 3; branch++) {
+        ctx.beginPath();
+        let curX = sx;
+        let curY = sy + (branch - 1) * 15;
+        ctx.moveTo(curX, curY);
+        const steps = 7;
+        const stepLen = reach / steps;
+        for (let s = 1; s <= steps; s++) {
+          curX += this.facing * stepLen;
+          curY += (Math.random() - 0.5) * 45;
+          ctx.lineTo(curX, curY);
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 7. Nuvem de Gás do Coringa
+    if (this.jokerGasCloud && this.jokerGasCloud.active) {
+      const gx = this.jokerGasCloud.x;
+      const gy = this.jokerGasCloud.y;
+      ctx.save();
+      ctx.shadowColor = '#10b981';
+      ctx.shadowBlur = 25;
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.35)';
+      const t = Date.now() * 0.005;
+      for (let puff = 0; puff < 5; puff++) {
+        const ox = Math.sin(t + puff * 1.5) * 25;
+        const oy = Math.cos(t * 1.2 + puff) * 15;
+        ctx.beginPath();
+        ctx.arc(gx + ox, gy + oy, 32 + puff * 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // 8. Pederneira de Jack Sparrow
+    if (this.jackSparrowShot && this.jackSparrowShot.active) {
+      ctx.save();
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(this.jackSparrowShot.x, this.jackSparrowShot.y, 5, 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
     }
   }

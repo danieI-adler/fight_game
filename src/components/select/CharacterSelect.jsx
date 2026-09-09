@@ -179,8 +179,8 @@ export const CharacterSelect = ({
       <div className="flex-1 flex gap-6 my-4 items-center justify-between overflow-hidden">
         {/* Left Column: Character Grid */}
         <div className="w-7/12 flex flex-col justify-center">
-          <div className={`grid gap-2.5 max-h-[480px] ${
-            isExpedition ? 'grid-cols-3' : 'grid-cols-5'
+          <div className={`grid gap-2 max-h-[480px] overflow-y-auto pr-1 ${
+            isExpedition ? 'grid-cols-4' : 'grid-cols-5'
           }`}>
             {charList.map((char, index) => {
               const isP1 = p1Index === index;
