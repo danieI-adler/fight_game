@@ -798,22 +798,22 @@ export class FighterCombat {
         // --- 9. PALPATINE: DOIS SABRES DE LUZ GIRATÓRIOS COM FAÍSCAS NO SOLO ---
         if (fighter.superType === 'PALPATINE_DUAL_SABERS') {
           fighter.isInvulnerable = true;
-          // Avança cortando com rotação contínua
-          fighter.velocity.x = fighter.facing * (fighter.speed * 1.5);
+          // Corta apenas na frente dele, não dá dash nenhum
+          fighter.velocity.x = 0;
 
           if (particles && Math.random() < 0.8) {
-            // Faíscas jorrando do chão em ambos os lados
-            const fx = fighter.position.x + (Math.random() - 0.5) * 110;
+            // Faíscas jorrando do chão à frente dele
+            const fx = fighter.position.x + fighter.facing * (20 + Math.random() * 90);
             particles.emitSparks(fx, fighter.groundY - 10, '#ef4444', 6, 8);
             particles.emitSparks(fx, fighter.groundY - 10, '#fbbf24', 4, 6);
-            particles.emitShockwave(fighter.position.x, fighter.groundY, 60, '#ef4444');
+            particles.emitShockwave(fighter.position.x + fighter.facing * 50, fighter.groundY, 60, '#ef4444');
           }
 
-          // Múltiplos hits de corte com dois sabres
+          // Múltiplos hits de corte com dois sabres estritamente na frente
           if (fighter.stateTime > 0.15 && fighter.stateTime < 1.35) {
-            const hb = fighter.createHitbox(-60, 80, 160, 80);
+            const hb = fighter.createHitbox(10, 85, 145, 80);
             hb.damage = 38; // múltiplos hits somando dano alto
-            hb.knockback = 5;
+            hb.knockback = 4;
             hb.knockdown = false;
             hb.isHeavy = true;
             hb.attackerPower = fighter.attackPower;
@@ -821,8 +821,8 @@ export class FighterCombat {
           }
 
           if (fighter.stateTime >= 1.4) {
-            // Golpe finalizador com knockdown
-            const finHb = fighter.createHitbox(-70, 85, 180, 90);
+            // Golpe finalizador com knockdown apenas na frente
+            const finHb = fighter.createHitbox(10, 85, 155, 90);
             finHb.damage = 120;
             finHb.knockback = 24;
             finHb.knockdown = true;

@@ -118,7 +118,10 @@ export class Fighter {
     this.palpatineLightning = null; // { timer, reach, damage, active }
     this.jokerAcidBlossom = null; // { x, y, vx, timer, damage, active, hasHit }
     this.sparrowDrunkTimer = 0; // chance de esquiva aumentada
+    this.sparrowDodgeCharges = 0; // esquiva dos próximos 3 ou 5 ataques
     this.mcqueenDriftBurn = null; // { x, y, duration, active }
+    this.mcqueenSpeedBuffTimer = 0; // dobra/triplica a velocidade por 5s
+    this.mcqueenSpeedMultiplier = 1.0;
     
     // Ultimates
     this.batmanBatmobile = null; // { x, vx, active, hasHit, hitOpponent }
@@ -207,8 +210,11 @@ export class Fighter {
     this.jokerAcidBlossom = null;
     this.jokerCrowbarBeat = null;
     this.sparrowDrunkTimer = 0;
+    this.sparrowDodgeCharges = 0;
     this.sparrowBlackPearl = null;
     this.mcqueenDriftBurn = null;
+    this.mcqueenSpeedBuffTimer = 0;
+    this.mcqueenSpeedMultiplier = 1.0;
     this.mcqueenBlitz = null;
     this.batmanBatmobile = null;
     this.timeFreezeTimer = 0;
@@ -249,7 +255,11 @@ export class Fighter {
   // --- CONTROLES ---
 
   getEffectiveSpeed() {
-    return this.slowTimer > 0 ? this.speed * 0.48 : this.speed;
+    let s = this.slowTimer > 0 ? this.speed * 0.48 : this.speed;
+    if (this.mcqueenSpeedBuffTimer > 0) {
+      s *= this.mcqueenSpeedMultiplier;
+    }
+    return s;
   }
 
   move(dir) {
@@ -594,29 +604,32 @@ export class Fighter {
         hasHit: false
       };
     }
-    // 11. Jack Sparrow: Garrafa de Rum e Caminhar Bêbado de Esquiva
+    // 11. Jack Sparrow: Garrafa de Rum e Caminhar Bêbado de Esquiva (desvia dos próximos 3 ou 5 ataques)
     else if (charName.includes('jack') || charName.includes('sparrow')) {
       this.extraType = 'SPARROW_DRUNKEN_RUM';
       sounds.playHealSound();
       sounds.playWhoosh();
-      this.sparrowDrunkTimer = level === 2 ? 4.5 : 3.0; // esquiva ativa pelos próximos 3 a 4.5 segundos!
+      this.sparrowDodgeCharges = level === 2 ? 5 : 3; // desvia dos próximos 3 ou 5 ataques!
+      this.sparrowDrunkTimer = 10.0; // mantém a pose bêbada enquanto tiver cargas
     }
-    // 12. Relâmpago McQueen: Drift & Queima de Pneus
+    // 12. Relâmpago McQueen: Drift & Queima de Pneus + Dobro ou Triplo de Velocidade por 5 segundos
     else if (charName.includes('mcqueen') || charName.includes('relampago')) {
       this.extraType = 'MCQUEEN_DRIFT_BURNOUT';
       sounds.playDash();
       sounds.playThunderSlam();
+      this.mcqueenSpeedBuffTimer = 5.0; // Ganha velocidade por 5 segundos
+      this.mcqueenSpeedMultiplier = level === 2 ? 3.0 : 2.0; // Dobro no lv1, triplo no lv2!
       this.mcqueenDriftBurn = {
         x: this.position.x,
         y: this.groundY,
         facing: this.facing,
-        duration: level === 2 ? 3.5 : 2.2,
-        damage: level === 2 ? 35 : 22,
+        duration: 2.5,
+        damage: level === 2 ? 40 : 25,
         tick: 0,
         active: true
       };
-      // Dá um tranco em drift para trás/frente
-      this.velocity.x = this.facing * (this.speed * 2.0);
+      // Arranque veloz instantâneo
+      this.velocity.x = this.facing * (this.speed * 2.5);
     }
     // Personagens genéricos: golpe padrão fortificado
     else {
@@ -756,8 +769,18 @@ export class Fighter {
       this.superPhase = 'CANNON_COMMAND';
       sounds.playSuperCharge();
       sounds.playGunshot();
-      // 3 tiros de canhão: 1 a cada 5 segundos
+      // O navio existe e fica ancorado no canto em que Jack está
+      // Se Jack está na metade esquerda, navio fica no canto esquerdo (x: 110) atirando para a direita (facing: 1)
+      // Se Jack está na metade direita, navio fica no canto direito (x: 1810) atirando para a esquerda (facing: -1)
+      const shipIsLeft = this.position.x < 960;
+      const shipX = shipIsLeft ? 120 : 1800;
+      const shipFacing = shipIsLeft ? 1 : -1;
+
+      // 3 tiros de canhão na horizontal: 1 a cada 5 segundos
       this.sparrowBlackPearl = {
+        shipX: shipX,
+        shipY: this.groundY,
+        shipFacing: shipFacing,
         timer: 0,
         shotsFired: 0,
         maxShots: 3,
@@ -812,18 +835,19 @@ export class Fighter {
   receiveHit(attackData, hitPoint, particles) {
     if (this.isDead || this.isInvulnerable) return false;
 
-    // --- ESQUIVA EMBRIAGADA DE JACK SPARROW ---
-    if (this.sparrowDrunkTimer > 0) {
-      if (Math.random() < 0.70) {
-        // Esquiva bem sucedida!
-        sounds.playWhoosh();
-        this.velocity.x = -this.facing * 5; // cambaleia para longe
-        if (particles) {
-          particles.emitFloatingText('EVADED!', this.position.x, this.position.y - 85, '#fbbf24', true);
-          particles.emitSparks(this.position.x, this.position.y - 50, '#f59e0b', 8, 4);
-        }
-        return false;
+    // --- ESQUIVA EMBRIAGADA DE JACK SPARROW (Desvia dos próximos 3 ou 5 ataques) ---
+    if (this.sparrowDodgeCharges > 0) {
+      this.sparrowDodgeCharges--;
+      sounds.playWhoosh();
+      this.velocity.x = -this.facing * 6; // cambaleia para longe do golpe
+      if (particles) {
+        particles.emitFloatingText(`DODGED! (${this.sparrowDodgeCharges} left)`, this.position.x, this.position.y - 85, '#fbbf24', true);
+        particles.emitSparks(this.position.x, this.position.y - 50, '#f59e0b', 12, 6);
       }
+      if (this.sparrowDodgeCharges <= 0) {
+        this.sparrowDrunkTimer = 0;
+      }
+      return false; // Desvia completamente de graça!
     }
 
     // --- PARRY E REFLEXÃO DE MONOCO ---
@@ -1543,10 +1567,23 @@ export class Fighter {
     }
 
     // 5.14 Rum & Esquiva Bêbada de Jack Sparrow (Ataque Extra)
-    if (this.sparrowDrunkTimer > 0) {
-      this.sparrowDrunkTimer -= dt;
+    if (this.sparrowDodgeCharges > 0 || this.sparrowDrunkTimer > 0) {
+      if (this.sparrowDodgeCharges <= 0) {
+        this.sparrowDrunkTimer -= dt;
+      }
       if (particles && Math.random() < 0.25) {
         particles.emitSparks(this.position.x, this.position.y - 80, '#fbbf24', 2, 2);
+      }
+    }
+
+    // 5.14b Relâmpago McQueen: Super Velocidade (Dobro ou Triplo de Velocidade por 5s)
+    if (this.mcqueenSpeedBuffTimer > 0) {
+      this.mcqueenSpeedBuffTimer -= dt;
+      if (particles && Math.random() < 0.5) {
+        // Rastro de velocidade e faíscas nos pneus
+        particles.emitSparks(this.position.x - this.facing * 30, this.groundY - 10, '#ef4444', 3, 4);
+        particles.emitSparks(this.position.x - this.facing * 40, this.groundY - 10, '#fbbf24', 2, 3);
+        particles.emitDust(this.position.x - this.facing * 35, this.groundY, 2, '#450a0a');
       }
     }
 
@@ -1615,59 +1652,74 @@ export class Fighter {
       }
     }
 
-    // 5.17 Canhões do Pérola Negra de Jack Sparrow (Ultimate: 3 tiros, 1 a cada 5s)
+    // 5.17 Canhões do Pérola Negra de Jack Sparrow (Ultimate: o navio existe no canto e atira na horizontal a cada 5s)
     if (this.sparrowBlackPearl) {
       const bp = this.sparrowBlackPearl;
       bp.timer += dt;
 
-      // Dispara 1 tiro a cada 5 segundos até 3 tiros
+      // Dispara 1 tiro a cada 5 segundos até 3 tiros disparados na horizontal
       if (bp.shotsFired < bp.maxShots && bp.timer >= bp.shotsFired * bp.interval) {
         bp.shotsFired++;
         sounds.playGunshot();
         sounds.playThunderSlam();
-        const targetX = this.opponent ? this.opponent.position.x : this.position.x + this.facing * 200;
+
+        const spawnX = bp.shipX + bp.shipFacing * 95;
+        const spawnY = this.groundY - 60; // altura do tronco/canhão do navio
+
         bp.cannonballs.push({
-          targetX: targetX,
-          x: targetX,
-          y: -150, // Cai dos céus
-          vy: 650,
+          x: spawnX,
+          y: spawnY,
+          vx: bp.shipFacing * 1150, // Projétil atravessa a arena na horizontal
           exploded: false,
           active: true
         });
+
+        if (particles) {
+          particles.emitShockwave(spawnX, spawnY, 80, '#f59e0b');
+          particles.emitSparks(spawnX, spawnY, '#f59e0b', 20, 8);
+          particles.emitDust(spawnX, this.groundY, 15, '#451a03');
+        }
       }
 
-      // Atualiza balas de canhão caindo
+      // Atualiza balas de canhão voando na horizontal
       for (const cb of bp.cannonballs) {
         if (!cb.active) continue;
-        cb.y += cb.vy * dt;
-        if (particles && Math.random() < 0.4) {
-          particles.emitDust(cb.x, cb.y, 2, '#451a03');
+        cb.x += cb.vx * dt;
+
+        if (particles && Math.random() < 0.6) {
+          particles.emitSparks(cb.x, cb.y, '#f97316', 3, 3);
+          particles.emitDust(cb.x, cb.y + 10, 2, '#292524');
         }
-        // Impacto no chão
-        if (cb.y >= this.groundY - 10 && !cb.exploded) {
-          cb.exploded = true;
-          cb.active = false;
-          sounds.playThunderSlam();
-          if (particles) {
-            particles.emitShockwave(cb.x, this.groundY, 150, '#f59e0b');
-            particles.emitSparks(cb.x, this.groundY - 20, '#ef4444', 35, 12);
-            particles.emitDust(cb.x, this.groundY, 25, '#78350f');
-          }
-          if (this.opponent && !this.opponent.isDead) {
-            const dist = Math.abs(cb.x - this.opponent.position.x);
-            if (dist < 130) {
-              const attackData = {
-                damage: 130, // 3 tiros x 130 = 390 de dano total
-                knockback: 18,
-                knockdown: true,
-                isHeavy: true,
-                attackerPower: this.attackPower
-              };
-              this.opponent.receiveHit(attackData, { x: cb.x, y: this.groundY - 20 }, particles);
+
+        // Colisão com o oponente ou com os limites da arena
+        if (this.opponent && !this.opponent.isDead && !cb.exploded) {
+          const dist = Math.abs(cb.x - this.opponent.position.x);
+          const heightDiff = Math.abs(cb.y - (this.opponent.position.y - 50));
+          if (dist < 55 && heightDiff < 85) {
+            cb.exploded = true;
+            cb.active = false;
+            sounds.playThunderSlam();
+            if (particles) {
+              particles.emitShockwave(cb.x, cb.y, 160, '#f59e0b');
+              particles.emitSparks(cb.x, cb.y, '#ef4444', 35, 12);
+              particles.emitDust(cb.x, this.groundY, 25, '#78350f');
             }
+            const attackData = {
+              damage: 130, // 3 tiros x 130 = 390 de dano total
+              knockback: 22,
+              knockdown: true,
+              isHeavy: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: cb.x, y: cb.y }, particles);
           }
+        }
+
+        if (cb.x < -200 || cb.x > stageWidth + 200) {
+          cb.active = false;
         }
       }
+
       bp.cannonballs = bp.cannonballs.filter((cb) => cb.active);
       if (bp.shotsFired >= bp.maxShots && bp.cannonballs.length === 0 && bp.timer > 16.0) {
         this.sparrowBlackPearl = null;
@@ -2062,31 +2114,129 @@ export class Fighter {
       ctx.restore();
     }
 
-    // 12. Balas de Canhão do Pérola Negra (Jack Sparrow Ultimate)
-    if (this.sparrowBlackPearl && this.sparrowBlackPearl.cannonballs) {
-      for (const cb of this.sparrowBlackPearl.cannonballs) {
-        if (!cb.active) continue;
-        ctx.save();
-        // Sombra no chão que aumenta de tamanho conforme a bala se aproxima
-        const distToGround = Math.max(0, this.groundY - cb.y);
-        const shadowR = Math.max(8, 30 - distToGround * 0.05);
-        ctx.beginPath();
-        ctx.ellipse(cb.x, this.groundY, shadowR, shadowR * 0.35, 0, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
-        ctx.fill();
+    // 12. Pérola Negra de Jack Sparrow (Navio no canto da luta disparando na horizontal)
+    if (this.sparrowBlackPearl) {
+      const bp = this.sparrowBlackPearl;
+      ctx.save();
+      ctx.translate(bp.shipX, bp.shipY);
+      ctx.scale(bp.shipFacing, 1);
 
-        // Bola de ferro incandescente em queda
-        ctx.shadowColor = '#f59e0b';
-        ctx.shadowBlur = 16;
-        ctx.fillStyle = '#1c1917';
-        ctx.beginPath();
-        ctx.arc(cb.x, cb.y, 14, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-        ctx.restore();
+      // Casco de madeira negra do navio pirata
+      ctx.shadowColor = '#000000';
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = '#1c1917';
+      ctx.beginPath();
+      ctx.moveTo(-110, -15);
+      ctx.lineTo(95, -15);
+      ctx.lineTo(80, 0);
+      ctx.lineTo(-85, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // Detalhe das tábuas do casco
+      ctx.strokeStyle = '#44403c';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // Proa pontiaguda e cabine de popa
+      ctx.fillStyle = '#292524';
+      ctx.beginPath();
+      ctx.moveTo(-110, -15);
+      ctx.lineTo(-135, -55);
+      ctx.lineTo(-90, -50);
+      ctx.lineTo(-85, -15);
+      ctx.closePath();
+      ctx.fill();
+
+      // Mastro principal e vergas
+      ctx.fillStyle = '#292524';
+      ctx.fillRect(-15, -135, 10, 120);
+      ctx.fillRect(45, -115, 8, 100);
+
+      // Velas Negras rasgadas do Pérola Negra
+      ctx.fillStyle = 'rgba(12, 10, 9, 0.92)';
+      ctx.beginPath();
+      ctx.moveTo(-10, -130);
+      ctx.quadraticCurveTo(20, -95, -10, -60);
+      ctx.lineTo(-10, -130);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(50, -110);
+      ctx.quadraticCurveTo(75, -80, 50, -50);
+      ctx.lineTo(50, -110);
+      ctx.fill();
+      ctx.stroke();
+
+      // Bandeira Jolly Roger no topo do mastro principal
+      ctx.fillStyle = '#09090b';
+      ctx.fillRect(-22, -145, 16, 10);
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(-14, -140, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Canhão apontado para frente (horizontal)
+      ctx.fillStyle = '#0c0a09';
+      ctx.beginPath();
+      ctx.roundRect(55, -28, 48, 14, 4);
+      ctx.fill();
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.restore();
+
+      // Balas de Canhão cortando na Horizontal
+      if (bp.cannonballs) {
+        for (const cb of bp.cannonballs) {
+          if (!cb.active) continue;
+          ctx.save();
+          // Rastro horizontal incandescente
+          const trailLen = 45 * Math.sign(cb.vx);
+          const grad = ctx.createLinearGradient(cb.x, cb.y, cb.x - trailLen, cb.y);
+          grad.addColorStop(0, '#f59e0b');
+          grad.addColorStop(0.5, '#ef4444');
+          grad.addColorStop(1, 'transparent');
+
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 10;
+          ctx.beginPath();
+          ctx.moveTo(cb.x, cb.y);
+          ctx.lineTo(cb.x - trailLen, cb.y);
+          ctx.stroke();
+
+          // Projétil esférico de canhão
+          ctx.shadowColor = '#f59e0b';
+          ctx.shadowBlur = 18;
+          ctx.fillStyle = '#1c1917';
+          ctx.beginPath();
+          ctx.arc(cb.x, cb.y, 13, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#fbbf24';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+
+          ctx.restore();
+        }
       }
+    }
+
+    // 12b. Aura de Super Velocidade de McQueen (Rastro veloz contínuo)
+    if (this.mcqueenSpeedBuffTimer > 0) {
+      ctx.save();
+      ctx.strokeStyle = this.mcqueenSpeedMultiplier >= 3.0 ? 'rgba(239, 68, 68, 0.45)' : 'rgba(245, 158, 11, 0.4)';
+      ctx.lineWidth = 3;
+      const t = Date.now() * 0.02;
+      for (let i = 0; i < 3; i++) {
+        const lineOffset = ((t + i * 20) % 50) * this.facing;
+        ctx.beginPath();
+        ctx.moveTo(this.position.x - lineOffset, this.position.y - 15 - i * 14);
+        ctx.lineTo(this.position.x - lineOffset - this.facing * 35, this.position.y - 15 - i * 14);
+        ctx.stroke();
+      }
+      ctx.restore();
     }
 
     // 13. Sabres Duplos Giratórios de Palpatine (Giro helicóptero de sabres no chão)
