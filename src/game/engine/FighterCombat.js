@@ -352,7 +352,7 @@ export class FighterCombat {
             fighter.isGrounded = true;
 
             sounds.playPunch(true);
-            sounds.playSuperImpact();
+            sounds.playThunderSlam();
 
             if (particles) {
               const impactX = fighter.position.x + fighter.facing * 40;
