@@ -148,8 +148,8 @@ export class ExpeditionRenderer {
     const cx = x + p.chest.x;
     const cy = y + p.chest.y;
 
-    // 1. Gustave: Lâmina Lanceram nas costas
-    if (vis.hasLanceramBlade) {
+    // 1. Gustave: Lâmina Lanceram nas costas (oculta se estiver empunhada)
+    if (vis.hasLanceramBlade && !vis.isSwordDrawn) {
       ctx.save();
       ctx.strokeStyle = '#d4af37';
       ctx.lineWidth = 3.5;
@@ -632,6 +632,33 @@ export class ExpeditionRenderer {
       // Gotas de tinta caindo
       ctx.fillStyle = '#09090b';
       ctx.beginPath();
+    } else if (vis.isSwordDrawn || vis.hasLanceramBlade) {
+      if (vis.isSwordDrawn) {
+        // Gustave empunhando a lâmina Lanceram na mão
+        ctx.save();
+        ctx.shadowColor = '#fbbf24';
+        ctx.shadowBlur = 10;
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(hx, hy);
+        ctx.lineTo(hx + 46 * f, hy - 12);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(hx + 4 * f, hy - 1);
+        ctx.lineTo(hx + 44 * f, hy - 11);
+        ctx.stroke();
+
+        // Guarda e pomo
+        ctx.fillStyle = '#b45309';
+        ctx.beginPath();
+        ctx.arc(hx, hy, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
     } else if (vis.weaponType === 'sith_lightsaber') {
       // Sabre de Luz Vermelho de Darth Vader
       ctx.shadowColor = '#ef4444';

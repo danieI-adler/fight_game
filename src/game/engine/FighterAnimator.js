@@ -59,6 +59,29 @@ export class FighterAnimator {
 
       case FIGHTER_STATE.WALK_FORWARD:
       case FIGHTER_STATE.WALK_BACK: {
+        if (fighter.isDesperateRunning) {
+          // Corrida desesperada e rápida de Gustave empunhando a espada
+          const runCycle = Math.sin(t * 24);
+          p.head.x = 22 * f;
+          p.head.y = -98 + Math.abs(runCycle) * 5;
+          p.chest.x = 18 * f;
+          p.chest.y = -68 + Math.abs(runCycle) * 5;
+          p.pelvis.x = 8 * f;
+          p.pelvis.y = -44;
+
+          p.leftFoot = { x: runCycle * 38 * f, y: Math.max(0, -runCycle * 25) };
+          p.rightFoot = { x: -runCycle * 38 * f, y: Math.max(0, runCycle * 25) };
+          p.leftKnee = { x: p.leftFoot.x * 0.7, y: -20 };
+          p.rightKnee = { x: p.rightFoot.x * 0.7, y: -20 };
+
+          p.leftHand = { x: -runCycle * 25 * f - 10 * f, y: -65 };
+          // Mão direita estendida para a frente empunhando a lâmina
+          p.rightShoulder = { x: 22 * f, y: -72 };
+          p.rightElbow = { x: 34 * f, y: -68 };
+          p.rightHand = { x: (48 + runCycle * 6) * f, y: -65 };
+          break;
+        }
+
         const walkCycle = Math.sin(t * 12);
         p.head.y = -115 + Math.abs(walkCycle) * 3;
         p.chest.y = -80 + Math.abs(walkCycle) * 3;

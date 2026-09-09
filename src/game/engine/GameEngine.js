@@ -500,7 +500,6 @@ export class GameEngine {
 
   handleKnockout() {
     this.status = GAME_STATUS.ROUND_END;
-    this.statusMessage = 'K.O.!';
 
     const p1IsRenoir = (this.p1.charData?.name || '').toLowerCase().includes('renoir');
     const p2IsGustave = (this.p2.charData?.name || '').toLowerCase().includes('gustave');
@@ -526,7 +525,10 @@ export class GameEngine {
 
     if (renoirKiller && gustaveVictim) {
       // Ativa Cinemática Especial: Renoir eliminando Gustave na vitória definitiva (2 pontos)
-      this.statusTimer = 11.2; // Sequência estendida e dramática
+      // Não deve ter a mensagem de K.O. na tela
+      this.statusMessage = '';
+      this.statusSubMessage = '';
+      this.statusTimer = 11.5; // Sequência estendida e dramática
       this.timeScale = 1.0;
       this.specialCinematic = {
         active: true,
@@ -538,20 +540,28 @@ export class GameEngine {
         beamActive: false,
         beamProgress: 0,
         beamStart: null,
-        beamEnd: null
+        beamEnd: null,
+        initialDist: Math.abs(renoirKiller.position.x - gustaveVictim.position.x),
+        halfwayX: 0
       };
 
-      // Gustave se recupera e fica em pé se balançando atordoado inicialmente
-      gustaveVictim.state = FIGHTER_STATE.HURT;
-      gustaveVictim.isWeakenedSway = true;
+      // Gustave fica parado (imóvel) enquanto Renoir recua
+      gustaveVictim.state = FIGHTER_STATE.IDLE;
+      gustaveVictim.isWeakenedSway = false;
+      gustaveVictim.isDesperateRunning = false;
+      if (gustaveVictim.charData && gustaveVictim.charData.visual) {
+        gustaveVictim.charData.visual.isSwordDrawn = false;
+        gustaveVictim.charData.visual.hasLanceramBlade = false; // Espada oculta inicialmente
+      }
       gustaveVictim.velocity.x = 0;
       gustaveVictim.velocity.y = 0;
 
-      // Renoir começa se afastando andando para trás solenemente
+      // Renoir começa se afastando andando para trás solenemente por 5s
       const awayDir = renoirKiller.position.x < gustaveVictim.position.x ? -1 : 1;
       renoirKiller.facing = -awayDir; // olhando para Gustave enquanto recua
       renoirKiller.state = FIGHTER_STATE.WALK_BACK;
     } else {
+      this.statusMessage = 'K.O.!';
       this.statusTimer = 2.8;
       this.timeScale = 0.4;
       this.camera.addShake(16, 0.4);
@@ -570,6 +580,9 @@ export class GameEngine {
     sc.timer += dt;
     const { renoir, gustave } = sc;
 
+    // Garante que nenhuma mensagem de K.O. apareça durante a cinemática
+    this.statusMessage = '';
+
     // Atualiza partículas da trilha fantasma
     if (sc.ghostTrail && sc.ghostTrail.length > 0) {
       for (const g of sc.ghostTrail) {
@@ -578,122 +591,154 @@ export class GameEngine {
       sc.ghostTrail = sc.ghostTrail.filter((g) => g.alpha > 0);
     }
 
-    // FASE 1 (0s a 5.0s): Renoir anda 5 segundos para trás devagar
+    // FASE 1 (0s a 5.0s): Renoir caminha para trás devagar enquanto Gustave fica parado
     if (sc.timer < 5.0) {
       sc.phase = 'WALK_BACK';
       const awayDir = renoir.position.x < gustave.position.x ? -1 : 1;
       renoir.facing = -awayDir; // encara Gustave enquanto recua
       renoir.state = FIGHTER_STATE.WALK_BACK;
-      renoir.velocity.x = awayDir * (renoir.getEffectiveSpeed() * 0.45);
+      renoir.velocity.x = awayDir * (renoir.getEffectiveSpeed() * 0.42);
 
-      // A partir de 1.0s, Gustave desembainha a espada e corre na direção de Renoir até a metade do caminho
-      if (sc.timer >= 1.0) {
-        gustave.isWeakenedSway = false;
-        gustave.facing = gustave.position.x < renoir.position.x ? 1 : -1;
-        gustave.state = FIGHTER_STATE.WALK_FORWARD;
-
-        // Distância entre eles
-        const curDist = Math.abs(renoir.position.x - gustave.position.x);
-        // Corre se ainda não chegou à metade do caminho
-        if (curDist > 260) {
-          gustave.velocity.x = gustave.facing * (gustave.getEffectiveSpeed() * 0.95);
-        } else {
-          gustave.velocity.x = 0;
-          gustave.state = FIGHTER_STATE.IDLE;
-        }
-      } else {
-        gustave.state = FIGHTER_STATE.HURT;
-        gustave.isWeakenedSway = true;
-        gustave.velocity.x = 0;
-      }
+      // Gustave fica parado olhando
+      gustave.state = FIGHTER_STATE.IDLE;
+      gustave.isWeakenedSway = false;
+      gustave.velocity.x = 0;
+      gustave.velocity.y = 0;
     }
-    // FASE 2 (5.0s a 5.8s): Renoir para e se inclina para a frente
-    else if (sc.timer >= 5.0 && sc.timer < 5.8) {
-      if (sc.phase !== 'LEAN_FORWARD') {
-        sc.phase = 'LEAN_FORWARD';
+    // FASE 2 (5.0s a 5.4s): Renoir para. A espada de Gustave aparece do nada em sua mão com efeito luminoso!
+    else if (sc.timer >= 5.0 && sc.timer < 5.4) {
+      if (sc.phase !== 'SWORD_SPAWN') {
+        sc.phase = 'SWORD_SPAWN';
         renoir.velocity.x = 0;
         renoir.state = FIGHTER_STATE.IDLE;
-        renoir.isLeaningForward = true;
-        gustave.velocity.x = 0;
-        gustave.state = FIGHTER_STATE.IDLE;
+        renoir.isLeaningForward = true; // Renoir já se inclina observando
+
+        // Espada de Gustave aparece do nada na mão!
+        if (gustave.charData && gustave.charData.visual) {
+          gustave.charData.visual.isSwordDrawn = true;
+          gustave.charData.visual.hasLanceramBlade = false;
+        }
+        sounds.playRapierSlash();
+        sounds.playDimensionalPierce();
+        this.particles.emitSparks(gustave.position.x + gustave.facing * 25, gustave.position.y - 65, '#d4af37', 24, 7);
+        this.particles.emitShockwave(gustave.position.x + gustave.facing * 25, gustave.position.y - 65, 45, '#fbbf24');
+
+        // Calcula a metade do caminho entre Gustave e Renoir no momento em que Renoir parou
+        sc.halfwayX = (gustave.position.x + renoir.position.x) / 2;
+        sc.gustaveStartX = gustave.position.x;
       }
+      gustave.state = FIGHTER_STATE.IDLE;
+      gustave.velocity.x = 0;
     }
-    // FASE 3 (5.8s a 6.0s): Renoir teleporta para a frente de Gustave com trilha "fantasma"
-    else if (sc.timer >= 5.8 && sc.timer < 6.0) {
-      if (sc.phase !== 'TELEPORT') {
+    // FASE 3 (5.4s a ~6.2s): Corrida desesperada de Gustave até a metade do caminho
+    else if (sc.timer >= 5.4 && sc.phase !== 'PIERCE' && sc.phase !== 'COLLAPSE') {
+      const gustaveDir = renoir.position.x > gustave.position.x ? 1 : -1;
+      gustave.facing = gustaveDir;
+      gustave.state = FIGHTER_STATE.WALK_FORWARD;
+      gustave.isDesperateRunning = true; // animação de arrancada rápida inclinada com espada estendida
+
+      // Corrida desesperada bem rápida (3x a velocidade de caminhada do Renoir)
+      gustave.velocity.x = gustaveDir * (gustave.getEffectiveSpeed() * 1.55);
+
+      // Efeito de poeira e esforço na corrida desesperada
+      if (Math.random() < 0.35) {
+        this.particles.emitDust(gustave.position.x, gustave.groundY, 2, '#64748b');
+      }
+
+      // Verifica se Gustave cruzou ou chegou na metade do caminho
+      const reachedHalfway = gustaveDir === 1 ? (gustave.position.x >= sc.halfwayX) : (gustave.position.x <= sc.halfwayX);
+
+      if (reachedHalfway && sc.phase !== 'TELEPORT') {
         sc.phase = 'TELEPORT';
+        sc.teleportTriggerTime = sc.timer;
+        gustave.velocity.x = 0;
+        gustave.isDesperateRunning = false;
         renoir.isLeaningForward = false;
         sounds.playStaffBell();
 
-        // Cria a trilha "fantasma" ao longo do trajeto
+        // Cria a trilha "fantasma" do Renoir
         const startX = renoir.position.x;
-        const targetX = gustave.position.x + (gustave.facing * 85);
-        const steps = 7;
+        // Surge rente a Gustave (a 35px, bem colado para perfuração no peito)
+        const targetX = gustave.position.x + (gustave.facing * 35);
+        const steps = 8;
         for (let i = 0; i <= steps; i++) {
           const tPos = i / steps;
           sc.ghostTrail.push({
             x: startX + (targetX - startX) * tPos,
             y: renoir.position.y,
             facing: -gustave.facing,
-            alpha: 0.85 - (i / steps) * 0.3
+            alpha: 0.9 - (i / steps) * 0.35
           });
         }
 
         this.particles.emitSparks(renoir.position.x, renoir.position.y - 60, '#000000', 30, 8);
         this.particles.emitSparks(renoir.position.x, renoir.position.y - 60, '#ffffff', 25, 6);
 
-        // Teleporta instantaneamente à frente de Gustave
+        // Teleporta instantaneamente face a face com Gustave
         renoir.position.x = Math.max(80, Math.min(1920, targetX));
         renoir.facing = -gustave.facing;
         renoir.velocity.x = 0;
         renoir.velocity.y = 0;
 
         this.particles.emitShockwave(renoir.position.x, renoir.groundY, 110, '#ffffff');
+
+        // Imediatamente transiciona para PIERCE
+        sc.phase = 'PIERCE';
+        sc.pierceStartTime = sc.timer;
+        sounds.playDimensionalPierce();
+        sounds.playThunderSlam();
+        this.camera.addShake(24, 0.6);
+        sc.beamActive = true;
       }
     }
-    // FASE 4 (6.0s a 9.0s -> 3 Segundos): Perfura Gustave de baixo para cima com feixe dramático
-    else if (sc.timer >= 6.0 && sc.timer < 9.0) {
-      const strikeTime = sc.timer - 6.0; // 0.0s a 3.0s
+
+    // FASE 4: Perfura Gustave no meio do tronco (duração de 3 segundos a partir do teletransporte)
+    if (sc.phase === 'PIERCE') {
+      const strikeTime = sc.timer - (sc.pierceStartTime || 6.2);
       renoir.state = FIGHTER_STATE.HEAVY_PUNCH;
       gustave.state = FIGHTER_STATE.HURT;
       gustave.isWeakenedSway = false;
+      gustave.isDesperateRunning = false;
       gustave.velocity.x = 0;
       gustave.velocity.y = 0;
 
-      if (sc.phase !== 'PIERCE') {
-        sc.phase = 'PIERCE';
-        sounds.playDimensionalPierce();
-        sounds.playThunderSlam();
-        this.camera.addShake(22, 0.6);
-        sc.beamActive = true;
-      }
-
-      // O feixe é curto antes de perfurar (0 a 0.3s), depois cresce cortando aos céus (0.3s a 3.0s)
+      // O feixe é curto antes de perfurar (0 a 0.25s), depois cresce cortando aos céus (0.25s a 3.0s)
       const lengthProgress = Math.min(1.0, strikeTime / 0.35);
       sc.beamProgress = lengthProgress;
 
-      const startX = renoir.position.x + (renoir.facing * 10);
-      const startY = renoir.groundY - 12; // De baixo
-      const maxDistX = (gustave.position.x - renoir.position.x) * 2.6;
-      const endX = startX + (maxDistX * (0.3 + 0.7 * lengthProgress));
-      const endY = startY - (120 + 260 * lengthProgress); // Feixe longo e ascendente
+      // ATRAVESSAR O MEIO DO TRONCO DE GUSTAVE:
+      // O peito/tronco de Gustave fica em torno de groundY - 75px
+      const gustaveTorsoX = gustave.position.x;
+      const gustaveTorsoY = gustave.groundY - 75;
+
+      // Início do feixe: pistola de Renoir (fica um pouco antes de perfurar o peito)
+      const startX = renoir.position.x + (renoir.facing * 18);
+      const startY = gustaveTorsoY + 28; // ligeiramente ascendente de baixo
+
+      // Vetor que atravessa diretamente o centro do tronco de Gustave
+      const dirX = gustaveTorsoX - startX;
+      const dirY = gustaveTorsoY - startY;
+
+      // O feixe se estende atravessando Gustave e projetando-se além de suas costas
+      const endX = gustaveTorsoX + (dirX * (1.2 + 2.2 * lengthProgress));
+      const endY = gustaveTorsoY + (dirY * (1.2 + 2.2 * lengthProgress)) - (80 * lengthProgress);
+
       sc.beamStart = { x: startX, y: startY };
       sc.beamEnd = { x: endX, y: endY };
 
       // Emissão contínua de faíscas sombrias e fragmentos/pétalas pretos e vermelhos
-      if (Math.random() < 0.4) {
+      if (Math.random() < 0.45) {
         this.camera.addShake(4, 0.08);
       }
-      if (Math.random() < 0.6) {
-        this.particles.emitSparks(gustave.position.x, gustave.position.y - 65, '#000000', 6, 8);
-        this.particles.emitSparks(gustave.position.x, gustave.position.y - 65, '#ef4444', 4, 6);
-        this.particles.emitSparks(gustave.position.x, gustave.position.y - 65, '#ffffff', 4, 5);
+      if (Math.random() < 0.65) {
+        this.particles.emitSparks(gustaveTorsoX, gustaveTorsoY, '#000000', 6, 8);
+        this.particles.emitSparks(gustaveTorsoX, gustaveTorsoY, '#ef4444', 5, 6);
+        this.particles.emitSparks(gustaveTorsoX, gustaveTorsoY, '#ffffff', 4, 5);
       }
-    }
-    // FASE 5 (9.0s em diante): Dissipação do feixe e colapso de Gustave
-    else if (sc.timer >= 9.0) {
-      sc.beamActive = false;
-      if (sc.phase !== 'COLLAPSE') {
+
+      // Após 3 segundos cravados de perfuração, o feixe se dissipa e Gustave desaba
+      if (strikeTime >= 3.0) {
+        sc.beamActive = false;
         sc.phase = 'COLLAPSE';
         gustave.state = FIGHTER_STATE.KNOCKDOWN;
         gustave.velocity.x = -gustave.facing * 3.5;
