@@ -535,8 +535,9 @@ export class GameEngine {
         beamEnd: null
       };
 
-      // Gustave fica ajoelhado/agachado enfraquecido
-      gustaveVictim.state = FIGHTER_STATE.CROUCH;
+      // Gustave não cai de joelhos: fica em pé se balançando atordoado
+      gustaveVictim.state = FIGHTER_STATE.HURT;
+      gustaveVictim.isWeakenedSway = true;
       gustaveVictim.velocity.x = 0;
       gustaveVictim.velocity.y = 0;
 
@@ -565,9 +566,10 @@ export class GameEngine {
     sc.timer += dt;
     const { renoir, gustave } = sc;
 
-    // Gustave permanece ajoelhado/enfraquecido até ser golpeado
+    // Gustave permanece em pé se balançando atordoado até ser golpeado
     if (sc.timer < 3.2) {
-      gustave.state = FIGHTER_STATE.CROUCH;
+      gustave.state = FIGHTER_STATE.HURT;
+      gustave.isWeakenedSway = true;
       gustave.velocity.x = 0;
       gustave.velocity.y = 0;
     }
@@ -628,6 +630,7 @@ export class GameEngine {
       sc.beamActive = false;
       if (sc.phase !== 'COLLAPSE') {
         sc.phase = 'COLLAPSE';
+        gustave.isWeakenedSway = false;
         gustave.state = FIGHTER_STATE.KNOCKDOWN;
         gustave.velocity.x = -gustave.facing * 3;
         gustave.velocity.y = -4;

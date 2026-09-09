@@ -113,11 +113,36 @@ export class FighterAnimator {
       }
 
       case FIGHTER_STATE.HURT: {
-        p.head.x = -15 * f;
-        p.head.y = -110;
-        p.chest.x = -10 * f;
-        p.leftHand = { x: -20 * f, y: -60 };
-        p.rightHand = { x: -10 * f, y: -55 };
+        if (fighter.isWeakenedSway) {
+          // Gustave em pé enfraquecido se balançando atordoado (Dizzy Sway)
+          const sway = Math.sin(t * 4.5) * 12;
+          const bob = Math.sin(t * 9) * 2.5;
+          p.head = { x: (sway * 0.7 - 8) * f, y: -108 + bob };
+          p.chest = { x: (sway * 0.4 - 4) * f, y: -78 + bob };
+          p.pelvis = { x: (sway * 0.15) * f, y: -48 + bob * 0.5 };
+
+          p.leftShoulder = { x: (-10 + sway * 0.3) * f, y: -82 + bob };
+          p.leftElbow = { x: (-16 + sway * 0.5) * f, y: -58 + bob };
+          p.leftHand = { x: (-12 + sway * 0.6) * f, y: -40 + bob };
+
+          p.rightShoulder = { x: (10 + sway * 0.3) * f, y: -82 + bob };
+          p.rightElbow = { x: (18 + sway * 0.5) * f, y: -56 + bob };
+          p.rightHand = { x: (22 + sway * 0.6) * f, y: -38 + bob };
+
+          p.leftHip = { x: -10 * f, y: -48 };
+          p.leftKnee = { x: -15 * f, y: -24 };
+          p.leftFoot = { x: -16 * f, y: 0 };
+
+          p.rightHip = { x: 10 * f, y: -48 };
+          p.rightKnee = { x: 17 * f, y: -24 };
+          p.rightFoot = { x: 20 * f, y: 0 };
+        } else {
+          p.head.x = -15 * f;
+          p.head.y = -110;
+          p.chest.x = -10 * f;
+          p.leftHand = { x: -20 * f, y: -60 };
+          p.rightHand = { x: -10 * f, y: -55 };
+        }
         break;
       }
 

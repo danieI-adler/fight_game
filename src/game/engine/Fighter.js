@@ -110,6 +110,7 @@ export class Fighter {
     this.extraType = null;
     this.extraAttackLevel = 1;
     this.versoEnterUsed = false; // 1x por combate enter para Rank S
+    this.isWeakenedSway = false; // cinemática especial: balançando atordoado em pé
 
     // Articulação Esquelética
     this.pose = {
@@ -184,6 +185,7 @@ export class Fighter {
     this.extraType = null;
     this.extraAttackLevel = 1;
     this.versoEnterUsed = false;
+    this.isWeakenedSway = false;
 
     // Reinicia o rank do Verso em uma nova rodada
     if (this.isVerso) {
