@@ -328,13 +328,19 @@ export class FighterCombat {
           if (fighter.superPhase === 'CHARGE') {
             fighter.superPhase = 'LEAP';
             const targetX = fighter.opponent ? fighter.opponent.position.x : fighter.position.x + fighter.facing * 320;
+            fighter._superTargetX = targetX;
             const dist = targetX - fighter.position.x;
             fighter.facing = dist >= 0 ? 1 : -1;
             fighter.velocity.y = -15;
-            fighter.velocity.x = Math.max(-20, Math.min(20, dist / 0.35));
+            fighter.velocity.x = Math.max(-800, Math.min(800, dist / 0.35));
             fighter.isGrounded = false;
             sounds.playSuper();
             if (particles) particles.emitDust(fighter.position.x, fighter.groundY, 14, '#ef4444');
+          }
+
+          // Manter no ar durante o LEAP (sobrescrever gravidade)
+          if (!fighter.isGrounded) {
+            fighter.position.y = Math.min(fighter.position.y, fighter.groundY - 80);
           }
 
           if (particles && Math.random() < 0.7) {
@@ -346,6 +352,10 @@ export class FighterCombat {
         } else if (fighter.stateTime >= 0.85 && fighter.stateTime < 1.45) {
           if (fighter.superPhase === 'LEAP') {
             fighter.superPhase = 'IMPACT';
+
+            // Teleportar para perto do oponente para garantir o impacto
+            const landX = fighter._superTargetX || fighter.position.x;
+            fighter.position.x = landX - fighter.facing * 40;
             fighter.position.y = fighter.groundY;
             fighter.velocity.y = 0;
             fighter.velocity.x = 0;
