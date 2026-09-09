@@ -84,6 +84,17 @@ export class Fighter {
     this.blockstunTime = 0;
     this.hitstopTimer = 0;
 
+    // Habilidades Elementais e Efeitos de Status (Lune & outros)
+    this.slowTimer = 0;
+    this.burnTimer = 0;
+    this.burnTickTimer = 0;
+    this.luneElement = null; // 'ICE', 'FIRE', 'EARTH', 'WIND'
+    this.luneIceLance = null; // { x, y, vx, active, damage, hasHit }
+    this.luneFlameActive = false;
+    this.luneEarthquakeTimer = 0;
+    this.luneEarthquakeTick = 0;
+    this.luneTornado = null; // { x, y, duration, zapTick, active }
+
     // Articulação Esquelética
     this.pose = {
       head: { x: 0, y: -115 },
@@ -136,6 +147,17 @@ export class Fighter {
     this.activeHitbox = null;
     this.facing = this.isPlayer2 ? -1 : 1;
 
+    // Reinicia efeitos elementais e de status
+    this.slowTimer = 0;
+    this.burnTimer = 0;
+    this.burnTickTimer = 0;
+    this.luneElement = null;
+    this.luneIceLance = null;
+    this.luneFlameActive = false;
+    this.luneEarthquakeTimer = 0;
+    this.luneEarthquakeTick = 0;
+    this.luneTornado = null;
+
     // Reinicia o rank do Verso em uma nova rodada
     if (this.isVerso) {
       this.versoRankIndex = 0;
@@ -162,9 +184,13 @@ export class Fighter {
 
   // --- CONTROLES ---
 
+  getEffectiveSpeed() {
+    return this.slowTimer > 0 ? this.speed * 0.48 : this.speed;
+  }
+
   move(dir) {
     if (!this.canAct() || !this.isGrounded) return;
-    this.velocity.x = dir * this.speed;
+    this.velocity.x = dir * this.getEffectiveSpeed();
 
     if (dir === this.facing) {
       this.state = FIGHTER_STATE.WALK_FORWARD;
@@ -186,8 +212,9 @@ export class Fighter {
     if (!this.canAct() || !this.isGrounded || this.jumpCooldown > 0) return;
     this.isGrounded = false;
     this.jumpCooldown = 0.22; // Cooldown de pulo
-    this.velocity.y = -this.jumpForce;
-    this.velocity.x = dirX * (this.speed * 0.85);
+    const jumpPower = this.slowTimer > 0 ? this.jumpForce * 0.78 : this.jumpForce;
+    this.velocity.y = -jumpPower;
+    this.velocity.x = dirX * (this.getEffectiveSpeed() * 0.85);
     this.state = FIGHTER_STATE.JUMP;
     this.stateTime = 0;
     sounds.playJump();
@@ -220,7 +247,7 @@ export class Fighter {
   dash(dir) {
     if (!this.canAct() || !this.isGrounded) return;
     this.state = dir === this.facing ? FIGHTER_STATE.DASH_FORWARD : FIGHTER_STATE.DASH_BACK;
-    this.velocity.x = dir * (this.speed * 2.2);
+    this.velocity.x = dir * (this.getEffectiveSpeed() * 2.2);
     this.stateTime = 0;
     sounds.playDash();
   }
@@ -333,6 +360,20 @@ export class Fighter {
     } else if (this.superType === 'SCIEL_DARK_WAVE') {
       this.superPhase = 'DASH_IN';
       sounds.playWhoosh();
+    } else if (this.superType === 'LUNE_ELEMENTAL') {
+      const elements = ['ICE', 'FIRE', 'EARTH', 'WIND'];
+      this.luneElement = elements[Math.floor(Math.random() * elements.length)];
+      this.superPhase = 'CAST_' + this.luneElement;
+      sounds.playSuperCharge();
+      if (this.luneElement === 'ICE') {
+        sounds.playIceSpell();
+      } else if (this.luneElement === 'FIRE') {
+        sounds.playFireCast();
+      } else if (this.luneElement === 'EARTH') {
+        sounds.playEarthquakeSound();
+      } else if (this.luneElement === 'WIND') {
+        sounds.playWindTornado();
+      }
     } else {
       this.superType = 'GUSTAVE_SMASH';
       this.superPhase = 'CHARGE'; // 'CHARGE' (0-0.5s), 'LEAP' (0.5-0.85s), 'SLAM' (0.85-1.45s)
@@ -522,6 +563,149 @@ export class Fighter {
     // 5. Atualização de Ataques
     this.updateAttackStates(dt, particles, stageWidth);
 
+    // 5.1 Atualização de Efeitos de Status Elementais
+    if (this.slowTimer > 0) {
+      this.slowTimer -= dt;
+      if (particles && Math.random() < 0.2) {
+        particles.emitSparks(this.position.x + (Math.random() - 0.5) * 40, this.position.y - Math.random() * 80, '#38bdf8', 2, 2);
+      }
+    }
+
+    if (this.burnTimer > 0 && !this.isDead) {
+      this.burnTimer -= dt;
+      this.burnTickTimer += dt;
+      if (particles && Math.random() < 0.35) {
+        particles.emitSparks(this.position.x + (Math.random() - 0.5) * 35, this.position.y - Math.random() * 70, '#f97316', 3, 3);
+      }
+      if (this.burnTickTimer >= 0.45) {
+        this.burnTickTimer = 0;
+        const burnDmg = 25;
+        this.health = Math.max(0, this.health - burnDmg);
+        if (particles) {
+          particles.emitFloatingText(`-${burnDmg}`, this.position.x, this.position.y - 80, '#ef4444');
+          particles.emitSparks(this.position.x, this.position.y - 50, '#f97316', 6, 4);
+        }
+        if (this.health <= 0 && !this.isDead) {
+          this.health = 0;
+          this.isDead = true;
+          this.state = FIGHTER_STATE.KNOCKDOWN;
+          this.velocity.x = -this.facing * 4;
+          this.velocity.y = -6;
+          this.isGrounded = false;
+          sounds.playKO();
+        }
+      }
+    }
+
+    // 5.2 Terremoto de Lune (dano continuo no chão: bloqueio não reduz, apenas pulo salva)
+    if (this.luneEarthquakeTimer > 0) {
+      this.luneEarthquakeTimer -= dt;
+      this.luneEarthquakeTick += dt;
+      if (particles && Math.random() < 0.35) {
+        const rx = this.position.x + (Math.random() - 0.5) * 650;
+        particles.emitDust(rx, this.groundY, 4, '#a87132');
+      }
+      if (this.opponent && this.luneEarthquakeTick >= 0.38) {
+        this.luneEarthquakeTick = 0;
+        // BLOQUEIO NÃO REDUZ O DANO, APENAS PULO!
+        if (this.opponent.isGrounded && !this.opponent.isInvulnerable && !this.opponent.isDead) {
+          const earthDmg = 35;
+          this.opponent.health = Math.max(0, this.opponent.health - earthDmg);
+          if (particles) {
+            particles.emitShockwave(this.opponent.position.x, this.groundY, 70, '#b45309');
+            particles.emitDust(this.opponent.position.x, this.groundY, 5, '#78350f');
+            particles.emitFloatingText(`-${earthDmg}`, this.opponent.position.x, this.opponent.position.y - 75, '#f59e0b');
+          }
+          if (this.opponent.health <= 0 && !this.opponent.isDead) {
+            this.opponent.health = 0;
+            this.opponent.isDead = true;
+            this.opponent.state = FIGHTER_STATE.KNOCKDOWN;
+            this.opponent.velocity.x = -this.opponent.facing * 5;
+            this.opponent.velocity.y = -7;
+            this.opponent.isGrounded = false;
+            sounds.playKO();
+          }
+        }
+      }
+    }
+
+    // 5.3 Furacão de Lune (persegue o alvo e causa dano via raios)
+    if (this.luneTornado && this.luneTornado.active) {
+      this.luneTornado.duration -= dt;
+      if (this.opponent) {
+        const dx = this.opponent.position.x - this.luneTornado.x;
+        const dir = Math.sign(dx);
+        this.luneTornado.x += dir * 210 * dt;
+      }
+      this.luneTornado.zapTick += dt;
+      if (particles && Math.random() < 0.5) {
+        particles.emitDust(this.luneTornado.x + (Math.random() - 0.5) * 50, this.groundY, 3, '#cbd5e1');
+      }
+      if (this.opponent && Math.abs(this.luneTornado.x - this.opponent.position.x) < 180 && this.luneTornado.zapTick >= 0.35) {
+        this.luneTornado.zapTick = 0;
+        if (!this.opponent.isInvulnerable && !this.opponent.isDead) {
+          const zapDmg = 35;
+          const isBlocked = this.opponent.isBlocking;
+          const finalDmg = isBlocked ? Math.round(zapDmg * 0.3) : zapDmg;
+          this.opponent.health = Math.max(0, this.opponent.health - finalDmg);
+          sounds.playElectricZap();
+          if (particles) {
+            particles.emitElectricArc(this.luneTornado.x, this.groundY - 140, this.opponent.position.x, this.opponent.position.y - 60, '#00f0ff', 3);
+            particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 60, '#38bdf8', 12, 8);
+            particles.emitFloatingText(`-${finalDmg}`, this.opponent.position.x, this.opponent.position.y - 85, '#00f0ff');
+          }
+          if (this.opponent.health <= 0 && !this.opponent.isDead) {
+            this.opponent.health = 0;
+            this.opponent.isDead = true;
+            this.opponent.state = FIGHTER_STATE.KNOCKDOWN;
+            this.opponent.velocity.x = -this.opponent.facing * 5;
+            this.opponent.velocity.y = -7;
+            this.opponent.isGrounded = false;
+            sounds.playKO();
+          }
+        }
+      }
+      if (this.luneTornado.duration <= 0) {
+        this.luneTornado.active = false;
+      }
+    }
+
+    // 5.4 Estaca de Gelo de Lune (projétil voador)
+    if (this.luneIceLance && this.luneIceLance.active) {
+      this.luneIceLance.x += this.luneIceLance.vx * dt;
+      if (particles && Math.random() < 0.6) {
+        particles.emitSparks(this.luneIceLance.x, this.luneIceLance.y, '#bae6fd', 3, 3);
+      }
+      if (this.opponent && !this.luneIceLance.hasHit) {
+        const hurtboxes = this.opponent.getHurtboxes();
+        const lanceBox = new Box(this.luneIceLance.x - 45, this.luneIceLance.y - 18, 90, 36, 'hitbox');
+        for (const hurt of hurtboxes) {
+          if (lanceBox.intersects(hurt)) {
+            this.luneIceLance.hasHit = true;
+            this.luneIceLance.active = false;
+            const attackData = {
+              damage: this.luneIceLance.damage || 280,
+              knockback: 18,
+              knockdown: true,
+              isHeavy: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.takeHit(attackData, { x: this.luneIceLance.x, y: this.luneIceLance.y }, particles);
+            this.opponent.slowTimer = 4.0; // Aplica slow de 4 segundos!
+            sounds.playIceSpell();
+            if (particles) {
+              particles.emitShockwave(this.luneIceLance.x, this.luneIceLance.y, 120, '#38bdf8');
+              particles.emitSparks(this.luneIceLance.x, this.luneIceLance.y, '#e0f2fe', 30, 10);
+            }
+            break;
+          }
+        }
+      }
+      if (this.luneIceLance.x < -100 || this.luneIceLance.x > stageWidth + 100) {
+        this.luneIceLance.active = false;
+      }
+    }
+
     // 6. Watchdog de Segurança Anti-Travamento (Golpes comuns 0.8s, Super Move 1.6s)
     const attackStates = [
       FIGHTER_STATE.LIGHT_PUNCH,
@@ -537,7 +721,7 @@ export class Fighter {
       FIGHTER_STATE.DASH_BACK
     ];
     const maxLockTime = this.state === FIGHTER_STATE.SUPER_MOVE 
-      ? (this.superType === 'RENOIR_FLOWER' ? 2.0 : 1.6) 
+      ? ((this.superType === 'RENOIR_FLOWER' || this.superType === 'LUNE_ELEMENTAL') ? 2.0 : 1.6) 
       : 0.8;
     if (attackStates.includes(this.state) && this.stateTime > maxLockTime) {
       this.state = this.isGrounded ? FIGHTER_STATE.IDLE : FIGHTER_STATE.JUMP;
@@ -584,6 +768,12 @@ export class Fighter {
     if (this.superType === 'SCIEL_DARK_WAVE' && this._darkWaveCenterX != null) {
       this.drawScielDarkWave(ctx);
     }
+
+    // Renderiza os Elementos de Lune (Estaca de Gelo, Lança-Chamas, Terremoto, Furacão)
+    this.drawLuneElements(ctx);
+
+    // Renderiza efeitos de status sobre o lutador (Geada de Slow, Chamas de Burn)
+    this.drawStatusEffects(ctx);
   }
 
   drawRenoirBlackFlower(ctx) {
@@ -868,5 +1058,210 @@ export class Fighter {
     ctx.fillText(currentRank, 0, 1);
 
     ctx.restore();
+  }
+
+  drawLuneElements(ctx) {
+    // 1. Estaca de Gelo de Lune (projétil voador cristalino)
+    if (this.luneIceLance && this.luneIceLance.active) {
+      const lx = this.luneIceLance.x;
+      const ly = this.luneIceLance.y;
+      const dir = Math.sign(this.luneIceLance.vx) || 1;
+      ctx.save();
+      ctx.translate(lx, ly);
+      ctx.scale(dir, 1);
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 18;
+
+      // Corpo da estaca de gelo
+      ctx.beginPath();
+      ctx.moveTo(35, 0);
+      ctx.lineTo(-25, -13);
+      ctx.lineTo(-35, 0);
+      ctx.lineTo(-25, 13);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(-35, 0, 35, 0);
+      grad.addColorStop(0, '#0284c7');
+      grad.addColorStop(0.5, '#38bdf8');
+      grad.addColorStop(1, '#ffffff');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Reflexos cristalinos
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(-35, 0);
+      ctx.lineTo(35, 0);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 2. Lança-Chamas de Lune
+    if (this.luneFlameActive) {
+      const startX = this.position.x + this.facing * 28;
+      const startY = this.position.y - 65;
+      const reach = 320;
+      const t = this.stateTime;
+      ctx.save();
+      ctx.translate(startX, startY);
+      ctx.scale(this.facing, 1);
+
+      for (let i = 0; i < 3; i++) {
+        const spread = 24 + i * 20;
+        const wave = Math.sin(t * 25 + i * 2) * 8;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(reach * 0.45, -spread + wave, reach, -spread * 1.4);
+        ctx.quadraticCurveTo(reach * 0.7, 0, reach, spread * 1.4);
+        ctx.quadraticCurveTo(reach * 0.45, spread - wave, 0, 0);
+        ctx.closePath();
+
+        if (i === 0) {
+          ctx.fillStyle = 'rgba(254, 240, 138, 0.85)';
+          ctx.shadowColor = '#facc15';
+          ctx.shadowBlur = 22;
+        } else if (i === 1) {
+          ctx.fillStyle = 'rgba(249, 115, 22, 0.7)';
+          ctx.shadowColor = '#f97316';
+          ctx.shadowBlur = 16;
+        } else {
+          ctx.fillStyle = 'rgba(220, 38, 38, 0.45)';
+          ctx.shadowColor = '#dc2626';
+          ctx.shadowBlur = 10;
+        }
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // 3. Terremoto no Chão
+    if (this.luneEarthquakeTimer > 0) {
+      const gy = this.groundY;
+      const cx = this.position.x;
+      const pulse = (Math.sin(Date.now() * 0.03) + 1) * 0.5;
+      ctx.save();
+      ctx.shadowColor = '#d97706';
+      ctx.shadowBlur = 16 + pulse * 10;
+
+      // Fissuras no piso
+      ctx.strokeStyle = `rgba(217, 119, 6, ${0.5 + pulse * 0.4})`;
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      for (let offset = -420; offset <= 420; offset += 35) {
+        const x1 = cx + offset;
+        const yOffset = Math.sin(offset * 0.1 + Date.now() * 0.01) * 6;
+        ctx.moveTo(x1, gy);
+        ctx.lineTo(x1 + 18, gy - 10 + yOffset);
+        ctx.lineTo(x1 + 35, gy);
+      }
+      ctx.stroke();
+
+      // Linha de energia tectônica
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx - 460, gy - 2);
+      ctx.lineTo(cx + 460, gy - 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 4. Furacão (Tornado com Raios)
+    if (this.luneTornado && this.luneTornado.active) {
+      const tx = this.luneTornado.x;
+      const gy = this.groundY;
+      const now = Date.now() * 0.008;
+      ctx.save();
+      ctx.translate(tx, gy);
+
+      // Vórtice espiral de vento
+      const layers = 8;
+      for (let l = 0; l < layers; l++) {
+        const height = (l / layers) * 165;
+        const radiusX = 14 + l * 7.5;
+        const radiusY = 5 + l * 2.2;
+        const spinOffset = Math.sin(now + l * 0.8) * 8;
+
+        ctx.beginPath();
+        ctx.ellipse(spinOffset, -height, radiusX, radiusY, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(203, 213, 225, ${0.35 + (l / layers) * 0.45})`;
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#00f0ff';
+        ctx.shadowBlur = 10;
+        ctx.stroke();
+
+        if (l % 2 === 0) {
+          ctx.fillStyle = 'rgba(241, 245, 249, 0.08)';
+          ctx.fill();
+        }
+      }
+
+      // Raios elétricos crepitando no furacão
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      let rx = 0;
+      let ry = 0;
+      ctx.moveTo(rx, ry);
+      for (let s = 1; s <= 4; s++) {
+        rx += (Math.random() - 0.5) * 35;
+        ry -= 35;
+        ctx.lineTo(rx, ry);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  drawStatusEffects(ctx) {
+    // Geada de Slow
+    if (this.slowTimer > 0 && !this.isDead) {
+      ctx.save();
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 14;
+      ctx.strokeStyle = '#bae6fd';
+      ctx.lineWidth = 2;
+
+      // Anéis de gelo nos pés
+      ctx.beginPath();
+      ctx.ellipse(this.position.x, this.position.y - 4, 32, 8, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Cristal gélido sobre a cabeça
+      const hx = this.position.x + (this.pose?.head?.x || 0);
+      const hy = this.position.y + (this.pose?.head?.y || -115) - 22;
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(hx, hy - 7); ctx.lineTo(hx, hy + 7);
+      ctx.moveTo(hx - 7, hy); ctx.lineTo(hx + 7, hy);
+      ctx.moveTo(hx - 5, hy - 5); ctx.lineTo(hx + 5, hy + 5);
+      ctx.moveTo(hx - 5, hy + 5); ctx.lineTo(hx + 5, hy - 5);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Chamas de Burn (Queimando)
+    if (this.burnTimer > 0 && !this.isDead) {
+      ctx.save();
+      const cx = this.position.x;
+      const cy = this.position.y - 60;
+      const t = Date.now() * 0.015;
+      ctx.shadowColor = '#f97316';
+      ctx.shadowBlur = 16;
+      for (let f = 0; f < 3; f++) {
+        const ox = (f - 1) * 14 + Math.sin(t + f) * 4;
+        const oy = Math.cos(t * 1.5 + f) * 6;
+        ctx.beginPath();
+        ctx.moveTo(cx + ox - 8, cy + 10);
+        ctx.quadraticCurveTo(cx + ox, cy - 25 + oy, cx + ox, cy - 35 + oy);
+        ctx.quadraticCurveTo(cx + ox + 6, cy - 20 + oy, cx + ox + 8, cy + 10);
+        ctx.closePath();
+        ctx.fillStyle = f === 1 ? 'rgba(254, 240, 138, 0.85)' : 'rgba(239, 68, 68, 0.75)';
+        ctx.fill();
+      }
+      ctx.restore();
+    }
   }
 }

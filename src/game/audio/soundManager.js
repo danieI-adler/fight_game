@@ -545,6 +545,112 @@ class SoundManager {
       console.warn('Erro ao tocar fala do Gustave:', e);
     }
   }
+
+  // --- ELEMENTOS DE LUNE (GELO, FOGO, TERRA, AR) ---
+
+  playIceSpell() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1600, t);
+    osc.frequency.exponentialRampToValueAtTime(3200, t + 0.08);
+    osc.frequency.exponentialRampToValueAtTime(600, t + 0.35);
+
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(1000, t);
+
+    gain.gain.setValueAtTime(0.7, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.38);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.38);
+    this.playNoise(0.2, 0.45, 3500);
+  }
+
+  playFireCast() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(140, t);
+    osc.frequency.linearRampToValueAtTime(320, t + 0.2);
+    osc.frequency.exponentialRampToValueAtTime(80, t + 0.6);
+
+    gain.gain.setValueAtTime(0.65, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.65);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.65);
+    this.playNoise(0.55, 0.6, 800);
+  }
+
+  playEarthquakeSound() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(90, t);
+    osc.frequency.exponentialRampToValueAtTime(35, t + 0.7);
+
+    gain.gain.setValueAtTime(0.85, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.75);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.75);
+    this.playNoise(0.6, 0.5, 450);
+  }
+
+  playWindTornado() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(300, t);
+    osc.frequency.linearRampToValueAtTime(750, t + 0.25);
+    osc.frequency.exponentialRampToValueAtTime(180, t + 0.6);
+
+    gain.gain.setValueAtTime(0.5, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.65);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.65);
+    this.playNoise(0.5, 0.4, 2200);
+  }
 }
 
 export const sounds = new SoundManager();

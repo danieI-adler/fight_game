@@ -90,6 +90,7 @@ export const EXPEDITION_33_CHARACTERS = [
       paintTrailColor: '#c084fc',
       weaponType: 'astral_orbs'
     },
+    superType: 'LUNE_ELEMENTAL',
     description: 'Pesquisadora dedicada a desvendar a maldição da Pintora. Canaliza orbes astrais, feitiços de luz estelar e prismas de tinta.'
   },
   {

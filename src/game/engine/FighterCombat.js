@@ -416,7 +416,135 @@ export class FighterCombat {
           break;
         }
 
-        // --- 4. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
+        // --- 4. LUNE: MAGIA ELEMENTAL ASTRAL (Gelo, Fogo, Terra, Ar) ---
+        if (fighter.superType === 'LUNE_ELEMENTAL') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          fighter.velocity.y = 0;
+
+          const elem = fighter.luneElement || 'ICE';
+          const target = fighter.opponent;
+
+          // 1. GELO (ICE): Dispara estaca veloz de gelo que causa dano e slow de 4s
+          if (elem === 'ICE') {
+            if (particles && Math.random() < 0.5) {
+              particles.emitSparks(fighter.position.x + fighter.facing * 25, fighter.position.y - 60, '#38bdf8', 3, 5);
+            }
+            if (fighter.stateTime >= 0.32 && !fighter.luneIceLance) {
+              sounds.playIceSpell();
+              fighter.luneIceLance = {
+                x: fighter.position.x + fighter.facing * 35,
+                y: fighter.position.y - 65,
+                vx: fighter.facing * 1200,
+                active: true,
+                hasHit: false,
+                damage: 280
+              };
+              if (particles) {
+                particles.emitShockwave(fighter.position.x + fighter.facing * 35, fighter.position.y - 65, 80, '#38bdf8');
+              }
+            }
+            if (fighter.stateTime >= 0.8) {
+              fighter.isInvulnerable = false;
+              fighter.superPhase = null;
+              fighter.superType = null;
+              fighter.state = FIGHTER_STATE.IDLE;
+            }
+          }
+
+          // 2. FOGO (FIRE): Lança-chamas continuo que causa dano frontal e queimação (DoT)
+          else if (elem === 'FIRE') {
+            if (fighter.stateTime >= 0.22 && fighter.stateTime < 0.9) {
+              fighter.luneFlameActive = true;
+              if (particles) {
+                const flameOriginX = fighter.position.x + fighter.facing * 30;
+                for (let i = 0; i < 4; i++) {
+                  const dist = 30 + Math.random() * 280;
+                  const fx = flameOriginX + fighter.facing * dist;
+                  const fy = fighter.position.y - 65 + (Math.random() - 0.5) * 45;
+                  particles.emitSparks(fx, fy, Math.random() < 0.5 ? '#f97316' : '#ef4444', 3, 6);
+                }
+              }
+
+              if (fighter.stateTime >= 0.28 && fighter.stateTime < 0.75 && !fighter.hasHitCurrentAttack) {
+                const reach = 320;
+                const boxX = fighter.facing === 1 ? fighter.position.x + 20 : fighter.position.x - 20 - reach;
+                const hb = new Box(boxX, fighter.position.y - 110, reach, 95, 'hitbox');
+                hb.damage = 220;
+                hb.knockback = 12;
+                hb.knockdown = false;
+                hb.isHeavy = true;
+                hb.attackerPower = fighter.attackPower;
+                fighter.activeHitbox = hb;
+                if (target) {
+                  target.burnTimer = 3.5;
+                  target.burnTickTimer = 0;
+                }
+              }
+            } else {
+              fighter.luneFlameActive = false;
+            }
+
+            if (fighter.stateTime >= 1.05) {
+              fighter.isInvulnerable = false;
+              fighter.superPhase = null;
+              fighter.superType = null;
+              fighter.luneFlameActive = false;
+              fighter.state = FIGHTER_STATE.IDLE;
+            }
+          }
+
+          // 3. TERRA (EARTH): Terremoto no chão (bloqueio não reduz, apenas pulo)
+          else if (elem === 'EARTH') {
+            if (fighter.stateTime >= 0.38 && fighter.superPhase === 'CAST_EARTH') {
+              fighter.superPhase = 'EARTH_BURST';
+              sounds.playEarthquakeSound();
+              sounds.playThunderSlam();
+              fighter.luneEarthquakeTimer = 4.0;
+              fighter.luneEarthquakeTick = 0;
+
+              if (particles) {
+                particles.emitGroundLightningExplosion(fighter.position.x + fighter.facing * 60, fighter.groundY, 260, '#b45309');
+                particles.emitShockwave(fighter.position.x, fighter.groundY, 220, '#d97706');
+                particles.emitDust(fighter.position.x, fighter.groundY, 30, '#78350f');
+              }
+            }
+
+            if (fighter.stateTime >= 0.85) {
+              fighter.isInvulnerable = false;
+              fighter.superPhase = null;
+              fighter.superType = null;
+              fighter.state = FIGHTER_STATE.IDLE;
+            }
+          }
+
+          // 4. AR (WIND): Furacão perseguidor que causa dano contínuo via raios
+          else if (elem === 'WIND') {
+            if (fighter.stateTime >= 0.3 && !fighter.luneTornado) {
+              sounds.playWindTornado();
+              fighter.luneTornado = {
+                x: fighter.position.x + fighter.facing * 75,
+                active: true,
+                duration: 4.5,
+                zapTick: 0
+              };
+              if (particles) {
+                particles.emitShockwave(fighter.position.x + fighter.facing * 75, fighter.groundY, 140, '#94a3b8');
+                particles.emitDust(fighter.position.x + fighter.facing * 75, fighter.groundY, 20, '#cbd5e1');
+              }
+            }
+
+            if (fighter.stateTime >= 0.75) {
+              fighter.isInvulnerable = false;
+              fighter.superPhase = null;
+              fighter.superType = null;
+              fighter.state = FIGHTER_STATE.IDLE;
+            }
+          }
+          break;
+        }
+
+        // --- 5. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
         if (fighter.stateTime < 0.5) {
           fighter.velocity.x = 0;
           fighter.isInvulnerable = true;
