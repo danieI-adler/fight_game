@@ -50,10 +50,18 @@ export const CharacterSelect = ({
 
       f1.charData = selectedCharP1;
       f2.charData = selectedCharP2;
-      f1.update(0.016);
-      f2.update(0.016);
-      f1.draw(ctx, false, graphicsMode, isExpedition);
-      f2.draw(ctx, false, graphicsMode, isExpedition);
+      try {
+        f1.update(0.016);
+        f1.draw(ctx, false, graphicsMode, isExpedition);
+      } catch (err) {
+        console.error("Error rendering P1 preview:", err);
+      }
+      try {
+        f2.update(0.016);
+        f2.draw(ctx, false, graphicsMode, isExpedition);
+      } catch (err) {
+        console.error("Error rendering P2 preview:", err);
+      }
 
       animId = requestAnimationFrame(renderLoop);
     };

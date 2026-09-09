@@ -513,13 +513,13 @@ export class ExpeditionRenderer {
 
     // 4. Armas Oficiais
     if (isFront) {
-      this.drawWeapon(ctx, hx, hy, f, vis, time);
+      this.drawWeapon(ctx, hx, hy, f, vis, time, state);
     }
 
     ctx.restore();
   }
 
-  static drawWeapon(ctx, hx, hy, f, vis, time) {
+  static drawWeapon(ctx, hx, hy, f, vis, time, state = '') {
     ctx.save();
 
     if (vis.weaponType === 'rapier') {
