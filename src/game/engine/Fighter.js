@@ -330,6 +330,9 @@ export class Fighter {
       this.superPhase = 'SUMMON_FLOWER';
       sounds.playWhoosh();
       sounds.playSuperCharge();
+    } else if (this.superType === 'SCIEL_DARK_WAVE') {
+      this.superPhase = 'DASH_IN';
+      sounds.playWhoosh();
     } else {
       this.superType = 'GUSTAVE_SMASH';
       this.superPhase = 'CHARGE'; // 'CHARGE' (0-0.5s), 'LEAP' (0.5-0.85s), 'SLAM' (0.85-1.45s)
@@ -576,6 +579,11 @@ export class Fighter {
     if (this.superType === 'RENOIR_FLOWER' && this.state === FIGHTER_STATE.SUPER_MOVE) {
       this.drawRenoirBlackFlower(ctx);
     }
+
+    // Renderiza o rasgo Dark Wave da Sciel
+    if (this.superType === 'SCIEL_DARK_WAVE' && this._darkWaveCenterX != null) {
+      this.drawScielDarkWave(ctx);
+    }
   }
 
   drawRenoirBlackFlower(ctx) {
@@ -680,6 +688,120 @@ export class Fighter {
     ctx.fill();
 
     ctx.restore();
+    ctx.restore();
+  }
+
+  drawScielDarkWave(ctx) {
+    const cx = this._darkWaveCenterX;
+    const cy = this._darkWaveCenterY;
+    const t = this._darkWaveTime || 0;
+
+    // Tamanho dos cortes (crescem rapidamente, depois mantêm)
+    const maxLen = 180;
+    const fadeStart = 0.6; // começa a desaparecer
+    const fadeEnd = 1.05;   // totalmente invisível
+
+    if (t >= fadeEnd) return;
+
+    ctx.save();
+
+    // Opacidade global do efeito (fade out)
+    let alpha = 1.0;
+    if (t >= fadeStart) {
+      alpha = 1.0 - (t - fadeStart) / (fadeEnd - fadeStart);
+    }
+    alpha = Math.max(0, Math.min(1, alpha));
+
+    // --- CORTE HORIZONTAL (aparece a partir de t=0) ---
+    if (t >= 0) {
+      const hProgress = Math.min(1, t / 0.08); // cresce em 80ms
+      const hLen = maxLen * hProgress;
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      // Distorção visual: rasgo negro com borda branca brilhante
+      // Borda externa branca (glow)
+      ctx.shadowColor = '#ffffff';
+      ctx.shadowBlur = 25;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.lineWidth = 12;
+      ctx.beginPath();
+      ctx.moveTo(cx - hLen, cy);
+      ctx.lineTo(cx + hLen, cy);
+      ctx.stroke();
+
+      // Centro negro (o rasgo em si)
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(cx - hLen, cy);
+      ctx.lineTo(cx + hLen, cy);
+      ctx.stroke();
+
+      // Borda interna branca fina
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - hLen, cy);
+      ctx.lineTo(cx + hLen, cy);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // --- CORTE VERTICAL (aparece a partir de t=0.3) ---
+    if (t >= 0.3) {
+      const vProgress = Math.min(1, (t - 0.3) / 0.08);
+      const vLen = maxLen * vProgress;
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      // Borda externa branca (glow)
+      ctx.shadowColor = '#ffffff';
+      ctx.shadowBlur = 25;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.lineWidth = 12;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - vLen);
+      ctx.lineTo(cx, cy + vLen);
+      ctx.stroke();
+
+      // Centro negro
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - vLen);
+      ctx.lineTo(cx, cy + vLen);
+      ctx.stroke();
+
+      // Borda interna branca fina
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - vLen);
+      ctx.lineTo(cx, cy + vLen);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // Centro do + : flash branco no cruzamento
+    if (t >= 0.3 && alpha > 0.2) {
+      ctx.save();
+      ctx.globalAlpha = alpha * 0.8;
+      ctx.shadowColor = '#ffffff';
+      ctx.shadowBlur = 30;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 8 * alpha, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
     ctx.restore();
   }
 

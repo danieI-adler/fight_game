@@ -314,7 +314,109 @@ export class FighterCombat {
           break;
         }
 
-        // --- 3. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
+        // --- 3. SCIEL: DARK WAVE (Rasgo no Espaço/Tempo em +) ---
+        if (fighter.superType === 'SCIEL_DARK_WAVE') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          fighter.velocity.y = 0;
+
+          const target = fighter.opponent;
+          const targetX = target ? target.position.x : fighter.position.x + fighter.facing * 150;
+          const targetY = target ? target.position.y - 60 : fighter.position.y - 60;
+
+          // Fase 1: Dash até o oponente (0 - 0.25s)
+          if (fighter.stateTime < 0.25) {
+            if (fighter.superPhase === 'DASH_IN') {
+              const dist = targetX - fighter.position.x;
+              fighter.facing = dist >= 0 ? 1 : -1;
+              // Deslizar suavemente até a posição do oponente
+              fighter.position.x += (targetX - fighter.facing * 60 - fighter.position.x) * 0.15;
+            }
+
+            if (particles && Math.random() < 0.5) {
+              particles.emitSparks(fighter.position.x, fighter.position.y - 50, '#fbbf24', 3, 5);
+            }
+          }
+
+          // Fase 2: Corte Horizontal (0.25 - 0.55s)
+          if (fighter.stateTime >= 0.25 && fighter.stateTime < 0.55) {
+            if (fighter.superPhase === 'DASH_IN') {
+              fighter.superPhase = 'HORIZONTAL_CUT';
+              fighter.hasHitCurrentAttack = false;
+              // Posicionar ao lado do oponente
+              fighter.position.x = targetX - fighter.facing * 60;
+              // Salvar centro do corte para o renderer visual
+              fighter._darkWaveCenterX = targetX;
+              fighter._darkWaveCenterY = targetY;
+              fighter._darkWaveTime = 0;
+              sounds.playRapierSlash();
+
+              if (particles) {
+                // Slash horizontal (esquerda → direita)
+                particles.emitSwordSlash(targetX - 160, targetY, targetX + 160, targetY, '#ffffff', 5);
+                particles.emitSparks(targetX, targetY, '#ffffff', 15, 8);
+              }
+            }
+            fighter._darkWaveTime = fighter.stateTime - 0.25;
+
+            // Hitbox do corte horizontal (larga e baixa)
+            if (fighter.stateTime >= 0.28 && fighter.stateTime < 0.48 && !fighter.hasHitCurrentAttack) {
+              const hb = new Box(targetX - 150, targetY - 25, 300, 50, 'hitbox');
+              hb.damage = 200;
+              hb.knockback = 8;
+              hb.knockdown = false;
+              hb.isHeavy = false;
+              hb.attackerPower = fighter.attackPower;
+              fighter.activeHitbox = hb;
+            }
+          }
+
+          // Fase 3: Corte Vertical (0.55 - 0.85s)
+          if (fighter.stateTime >= 0.55 && fighter.stateTime < 0.85) {
+            if (fighter.superPhase === 'HORIZONTAL_CUT') {
+              fighter.superPhase = 'VERTICAL_CUT';
+              fighter.hasHitCurrentAttack = false;
+              sounds.playRapierFinisher();
+
+              if (particles) {
+                // Slash vertical (cima → baixo)
+                particles.emitSwordSlash(targetX, targetY - 150, targetX, targetY + 150, '#ffffff', 5);
+                particles.emitSparks(targetX, targetY, '#fbbf24', 20, 10);
+                particles.emitShockwave(targetX, targetY, 120, '#ffffff');
+              }
+            }
+            fighter._darkWaveTime = fighter.stateTime - 0.25;
+
+            // Hitbox do corte vertical (estreita e alta)
+            if (fighter.stateTime >= 0.58 && fighter.stateTime < 0.78 && !fighter.hasHitCurrentAttack) {
+              const hb = new Box(targetX - 30, targetY - 140, 60, 280, 'hitbox');
+              hb.damage = 220;
+              hb.knockback = 22;
+              hb.knockdown = true;
+              hb.isHeavy = true;
+              hb.attackerPower = fighter.attackPower;
+              fighter.activeHitbox = hb;
+            }
+          }
+
+          // Fase 4: Recuperação (0.85 - 1.3s)
+          if (fighter.stateTime >= 0.85) {
+            fighter._darkWaveTime = fighter.stateTime - 0.25;
+          }
+          if (fighter.stateTime >= 1.3) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter._darkWaveCenterX = null;
+            fighter._darkWaveCenterY = null;
+            fighter._darkWaveTime = null;
+            fighter.activeHitbox = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 4. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
         if (fighter.stateTime < 0.5) {
           fighter.velocity.x = 0;
           fighter.isInvulnerable = true;

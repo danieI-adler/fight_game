@@ -119,6 +119,7 @@ export const EXPEDITION_33_CHARACTERS = [
       paintTrailColor: '#fbbf24',
       weaponType: 'dual_curved_blades'
     },
+    superType: 'SCIEL_DARK_WAVE',
     description: 'Guerreira errante e serena. Empunha lâminas duplas curvas com precisão fluida e fitas de ouro que dançam no combate.'
   },
   {
