@@ -215,7 +215,7 @@ export class FighterCombat {
             if (fighter.stateTime >= strikeStartTime && fighter.stateTime < strikeStartTime + 0.08) {
               const isFinisher = i === 5;
               fighter.activeHitbox = fighter.createHitbox(10, 80, 80, 50);
-              fighter.activeHitbox.damage = isFinisher ? 140 : 45;
+              fighter.activeHitbox.damage = isFinisher ? 250 : 75;
               fighter.activeHitbox.knockback = isFinisher ? 24 : 3;
               fighter.activeHitbox.knockdown = isFinisher;
               fighter.activeHitbox.isHeavy = isFinisher;
@@ -431,13 +431,21 @@ export class FighterCombat {
             fighter.superPhase = 'LEAP';
             const targetX = fighter.opponent ? fighter.opponent.position.x : fighter.position.x + fighter.facing * 320;
             fighter._superTargetX = targetX;
+            fighter._superStartX = fighter.position.x;
             const dist = targetX - fighter.position.x;
             fighter.facing = dist >= 0 ? 1 : -1;
             fighter.velocity.y = -15;
-            fighter.velocity.x = Math.max(-800, Math.min(800, dist / 0.35));
+            fighter.velocity.x = 0; // Sem velocidade horizontal — interpolação controlada
             fighter.isGrounded = false;
             sounds.playSuper();
             if (particles) particles.emitDust(fighter.position.x, fighter.groundY, 14, '#ef4444');
+          }
+
+          // Interpolar posição horizontal em direção ao alvo durante o LEAP
+          if (fighter._superTargetX != null && fighter._superStartX != null) {
+            const leapProgress = Math.min(1, (fighter.stateTime - 0.5) / 0.35);
+            const landX = fighter._superTargetX - fighter.facing * 40;
+            fighter.position.x = fighter._superStartX + (landX - fighter._superStartX) * leapProgress;
           }
 
           // Manter no ar durante o LEAP (sobrescrever gravidade)
