@@ -1,4 +1,5 @@
 import { FIGHTER_STATE } from './Fighter';
+import { Box } from './Collision';
 import { sounds } from '../audio/soundManager';
 
 /**
@@ -291,18 +292,14 @@ export class FighterCombat {
             if (fighter.stateTime >= 1.25 && fighter.stateTime < 1.48 && !fighter.hasHitCurrentAttack) {
               const boxWidth = 260;
               const boxLeft = targetX - boxWidth / 2;
-              fighter.activeHitbox = {
-                x: boxLeft,
-                y: groundY - 140,
-                width: boxWidth,
-                height: 150,
-                damage: 380,
-                knockback: 25,
-                knockdown: true,
-                isHeavy: true,
-                unblockable: false,
-                attackerPower: fighter.attackPower
-              };
+              const hb = new Box(boxLeft, groundY - 140, boxWidth, 150, 'hitbox');
+              hb.damage = 380;
+              hb.knockback = 25;
+              hb.knockdown = true;
+              hb.isHeavy = true;
+              hb.unblockable = false;
+              hb.attackerPower = fighter.attackPower;
+              fighter.activeHitbox = hb;
             }
           }
 
