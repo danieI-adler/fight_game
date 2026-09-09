@@ -340,7 +340,6 @@ export class Fighter {
       sounds.playBlock();
       if (particles) {
         particles.emitSparks(hitPoint.x, hitPoint.y, '#38bdf8', 8, 4);
-        particles.emitFloatingText('DEFESA!', hitPoint.x, hitPoint.y - 30, '#38bdf8');
       }
 
       // Defender não dá energia

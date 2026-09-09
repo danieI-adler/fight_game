@@ -173,13 +173,17 @@ export class ParticleManager {
   }
 
   update(dt = 1) {
-    // Atualizar partículas
+    // Normaliza dt para a taxa padrão de 60 FPS (dt normal em loop é ~0.016s)
+    // Se dt for passado como frames (ex: 1), mantém 1. Se for segundos (~0.016), multiplica por 60.
+    const step = dt < 0.2 ? dt * 60 : dt;
+
+    // Atualizar partículas (faíscas, poeira)
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      p.vy += p.gravity * dt;
-      p.alpha -= p.decay * dt;
+      p.x += p.vx * step;
+      p.y += p.vy * step;
+      p.vy += p.gravity * step;
+      p.alpha -= p.decay * step;
       if (p.alpha <= 0) {
         this.particles.splice(i, 1);
       }
@@ -188,7 +192,7 @@ export class ParticleManager {
     // Atualizar arcos elétricos
     for (let i = this.lightningArcs.length - 1; i >= 0; i--) {
       const arc = this.lightningArcs[i];
-      arc.alpha -= arc.decay * dt;
+      arc.alpha -= arc.decay * step;
       if (arc.alpha <= 0) {
         this.lightningArcs.splice(i, 1);
       }
@@ -197,7 +201,7 @@ export class ParticleManager {
     // Atualizar ondas de choque
     for (let i = this.shockwaves.length - 1; i >= 0; i--) {
       const s = this.shockwaves[i];
-      s.radius += s.speed * dt;
+      s.radius += s.speed * step;
       s.alpha = Math.max(0, 1 - (s.radius / s.maxRadius));
       if (s.radius >= s.maxRadius || s.alpha <= 0) {
         this.shockwaves.splice(i, 1);
@@ -207,8 +211,8 @@ export class ParticleManager {
     // Atualizar textos flutuantes
     for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
       const ft = this.floatingTexts[i];
-      ft.y += ft.vy * dt;
-      ft.alpha -= ft.decay * dt;
+      ft.y += ft.vy * step;
+      ft.alpha -= ft.decay * step;
       if (ft.alpha <= 0) {
         this.floatingTexts.splice(i, 1);
       }
@@ -217,7 +221,7 @@ export class ParticleManager {
     // Atualizar rastros de movimento
     for (let i = this.motionTrails.length - 1; i >= 0; i--) {
       const t = this.motionTrails[i];
-      t.alpha -= t.decay * dt;
+      t.alpha -= t.decay * step;
       if (t.alpha <= 0) {
         this.motionTrails.splice(i, 1);
       }
@@ -226,7 +230,7 @@ export class ParticleManager {
     // Atualizar cortes de espada
     for (let i = this.slashLines.length - 1; i >= 0; i--) {
       const s = this.slashLines[i];
-      s.alpha -= s.decay * dt;
+      s.alpha -= s.decay * step;
       if (s.alpha <= 0) {
         this.slashLines.splice(i, 1);
       }

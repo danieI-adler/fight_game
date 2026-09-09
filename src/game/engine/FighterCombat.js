@@ -205,7 +205,6 @@ export class FighterCombat {
                   particles.emitSwordSlash(slashStartX, slashEndY, slashEndX, slashStartY, '#38bdf8', 4.5);
                   particles.emitShockwave(targetX, targetY - 60, 180, '#38bdf8');
                   particles.emitSparks(targetX, targetY - 60, '#fbbf24', 30, 12);
-                  particles.emitFloatingText('VALSA DAS LÂMINAS! (6 HITS)', targetX, targetY - 120, '#38bdf8', true);
                 } else {
                   particles.emitSparks(targetX, targetY - 60, '#38bdf8', 10, 6);
                 }
@@ -280,7 +279,6 @@ export class FighterCombat {
               particles.emitShockwave(impactX, fighter.groundY, 150, '#fbbf24');
               particles.emitSparks(impactX, fighter.groundY - 20, '#ef4444', 45, 16);
               particles.emitDust(impactX, fighter.groundY, 25, '#fbbf24');
-              particles.emitFloatingText('OVERCHARGE CRUSH!', impactX, fighter.groundY - 140, '#ef4444', true);
             }
           }
 
