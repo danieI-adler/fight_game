@@ -334,7 +334,7 @@ export class Fighter {
       this.superType = 'GUSTAVE_SMASH';
       this.superPhase = 'CHARGE'; // 'CHARGE' (0-0.5s), 'LEAP' (0.5-0.85s), 'SLAM' (0.85-1.45s)
       sounds.playSuperCharge();
-      this.checkGustaveVoice();
+      this.playCharacterVoice();
     }
   }
 
