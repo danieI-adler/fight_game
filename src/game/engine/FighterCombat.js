@@ -135,22 +135,57 @@ export class FighterCombat {
 
       case FIGHTER_STATE.SPECIAL_1:
       case FIGHTER_STATE.SPECIAL_2:
-        if (fighter.stateTime > 0.08 && fighter.stateTime < 0.3) {
-          fighter.activeHitbox = fighter.createHitbox(25, 80, 100, 55);
-          fighter.activeHitbox.damage = 140;
-          fighter.activeHitbox.knockback = 16;
-          fighter.activeHitbox.knockdown = true;
-          fighter.activeHitbox.isHeavy = true;
-          fighter.activeHitbox.attackerPower = fighter.attackPower;
+        // Monoco: Giro de 360° com cajado cobrindo frente e trás
+        if (fighter.extraType === 'MONOCO_STAFF_SPIN') {
+          if (fighter.stateTime > 0.05 && fighter.stateTime < 0.32) {
+            const spinDamage = fighter.extraAttackLevel === 2 ? 180 : 110;
+            // Hitbox estendida para trás e para frente
+            fighter.activeHitbox = fighter.createHitbox(-85, 80, 190, 60);
+            fighter.activeHitbox.damage = spinDamage;
+            fighter.activeHitbox.knockback = 15;
+            fighter.activeHitbox.knockdown = true;
+            fighter.activeHitbox.isHeavy = true;
+            fighter.activeHitbox.attackerPower = fighter.attackPower;
 
-          if (particles && Math.random() < 0.5) {
-            const startX = fighter.position.x + (fighter.facing * 15);
-            const endX = fighter.position.x + (fighter.facing * 110);
-            particles.emitElectricArc(startX, fighter.position.y - 70, endX, fighter.position.y - 70, fighter.charData.themeColor);
+            if (particles && Math.random() < 0.6) {
+              const ang = Math.random() * Math.PI * 2;
+              const px = fighter.position.x + Math.cos(ang) * 75;
+              const py = fighter.position.y - 65 + Math.sin(ang) * 40;
+              particles.emitSparks(px, py, '#f59e0b', 3, 3);
+            }
+          }
+          if (fighter.stateTime >= 0.42) {
+            fighter.state = FIGHTER_STATE.IDLE;
+            fighter.extraType = null;
           }
         }
-        if (fighter.stateTime >= 0.45) {
-          fighter.state = FIGHTER_STATE.IDLE;
+        // Maelle, Gustave, Lune, Renoir, Peintresse já tratam seus efeitos em tempo real
+        else if (fighter.extraType === 'GUSTAVE_GUN' || fighter.extraType === 'MAELLE_BLINK_DASH' || fighter.extraType === 'LUNE_HEAL' || fighter.extraType === 'RENOIR_BLACK_HOLE' || fighter.extraType === 'PAINTRESS_REALITY_TEAR') {
+          if (fighter.stateTime >= 0.35) {
+            fighter.isInvulnerable = false;
+            fighter.state = FIGHTER_STATE.IDLE;
+            fighter.extraType = null;
+          }
+        } else {
+          // Genérico
+          if (fighter.stateTime > 0.08 && fighter.stateTime < 0.3) {
+            fighter.activeHitbox = fighter.createHitbox(25, 80, 100, 55);
+            fighter.activeHitbox.damage = 140;
+            fighter.activeHitbox.knockback = 16;
+            fighter.activeHitbox.knockdown = true;
+            fighter.activeHitbox.isHeavy = true;
+            fighter.activeHitbox.attackerPower = fighter.attackPower;
+
+            if (particles && Math.random() < 0.5) {
+              const startX = fighter.position.x + (fighter.facing * 15);
+              const endX = fighter.position.x + (fighter.facing * 110);
+              particles.emitElectricArc(startX, fighter.position.y - 70, endX, fighter.position.y - 70, fighter.charData.themeColor);
+            }
+          }
+          if (fighter.stateTime >= 0.45) {
+            fighter.state = FIGHTER_STATE.IDLE;
+            fighter.extraType = null;
+          }
         }
         break;
 

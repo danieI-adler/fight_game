@@ -13,7 +13,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(14, 165, 233, 0.8)',
     energyColor: '#7dd3fc',
     style: 'Belle Époque Rapier & Fist',
-    stats: { health: 1000, speed: 7.2, jumpForce: 13.8, attackPower: 1.05, defense: 1.0 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'trenchcoat',
       headgear: 'tricorne',
@@ -38,7 +38,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(225, 29, 72, 0.8)',
     energyColor: '#fda4af',
     style: 'Crimson Brawler',
-    stats: { health: 1050, speed: 6.8, jumpForce: 13.5, attackPower: 1.15, defense: 1.05 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'duster',
       headgear: 'fedora',
@@ -63,7 +63,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(168, 85, 247, 0.8)',
     energyColor: '#d8b4fe',
     style: 'Phantom Striker',
-    stats: { health: 930, speed: 8.2, jumpForce: 14.5, attackPower: 0.95, defense: 0.9 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'capelet',
       headgear: 'hood',
@@ -88,7 +88,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(217, 119, 6, 0.8)',
     energyColor: '#fde68a',
     style: 'Heavy Armored Vanguard',
-    stats: { health: 1200, speed: 5.6, jumpForce: 12.8, attackPower: 1.28, defense: 1.2 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'overcoat',
       headgear: 'gilded_visor',
@@ -113,7 +113,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(16, 185, 129, 0.8)',
     energyColor: '#a7f3d0',
     style: 'Arcane Machinist',
-    stats: { health: 980, speed: 7.0, jumpForce: 13.8, attackPower: 1.05, defense: 1.0 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'trenchcoat',
       headgear: 'beret',
@@ -138,7 +138,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(6, 182, 212, 0.8)',
     energyColor: '#a5f3fc',
     style: 'Frostborne Duelist',
-    stats: { health: 960, speed: 7.5, jumpForce: 14.0, attackPower: 1.0, defense: 0.95 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'mantle',
       headgear: 'feather_cap',
@@ -163,7 +163,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(245, 158, 11, 0.8)',
     energyColor: '#fef3c7',
     style: 'Solar Monastic',
-    stats: { health: 1020, speed: 6.9, jumpForce: 13.6, attackPower: 1.1, defense: 1.05 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'duster',
       headgear: 'hood',
@@ -188,7 +188,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(236, 72, 153, 0.8)',
     energyColor: '#fbcfe8',
     style: 'Acrobatic Blade Dancer',
-    stats: { health: 910, speed: 8.6, jumpForce: 14.8, attackPower: 0.92, defense: 0.88 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'capelet',
       headgear: 'feather_cap',
@@ -213,7 +213,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(99, 102, 241, 0.8)',
     energyColor: '#c7d2fe',
     style: 'Royal Fencer',
-    stats: { health: 990, speed: 7.4, jumpForce: 13.9, attackPower: 1.08, defense: 0.98 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'overcoat',
       headgear: 'tricorne',
@@ -238,7 +238,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(100, 116, 139, 0.8)',
     energyColor: '#cbd5e1',
     style: 'Ironclad Boxer',
-    stats: { health: 1150, speed: 6.0, jumpForce: 13.0, attackPower: 1.22, defense: 1.15 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'trenchcoat',
       headgear: 'gilded_visor',
@@ -263,7 +263,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(132, 204, 22, 0.8)',
     energyColor: '#d9f99d',
     style: 'Wildwood Skirmisher',
-    stats: { health: 970, speed: 7.7, jumpForce: 14.1, attackPower: 1.02, defense: 0.95 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'duster',
       headgear: 'hood',
@@ -288,7 +288,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(185, 28, 28, 0.8)',
     energyColor: '#fca5a5',
     style: 'Vampiric Aristocrat',
-    stats: { health: 1040, speed: 7.1, jumpForce: 13.7, attackPower: 1.12, defense: 1.02 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'mantle',
       headgear: 'tricorne',
@@ -313,7 +313,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(124, 58, 237, 0.8)',
     energyColor: '#ddd6fe',
     style: 'Void Assassin',
-    stats: { health: 920, speed: 8.4, jumpForce: 14.6, attackPower: 0.98, defense: 0.88 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'trenchcoat',
       headgear: 'fedora',
@@ -338,7 +338,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(234, 88, 12, 0.8)',
     energyColor: '#ffedd5',
     style: 'Solar Commander',
-    stats: { health: 1080, speed: 6.6, jumpForce: 13.4, attackPower: 1.16, defense: 1.08 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'overcoat',
       headgear: 'feather_cap',
@@ -363,7 +363,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(2, 132, 199, 0.8)',
     energyColor: '#bae6fd',
     style: 'Skyborne Lancer',
-    stats: { health: 950, speed: 8.0, jumpForce: 14.4, attackPower: 1.0, defense: 0.92 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'capelet',
       headgear: 'beret',
@@ -388,7 +388,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(71, 85, 105, 0.8)',
     energyColor: '#e2e8f0',
     style: 'Spectral Brawler',
-    stats: { health: 1100, speed: 6.4, jumpForce: 13.2, attackPower: 1.2, defense: 1.1 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'duster',
       headgear: 'hood',
@@ -413,7 +413,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(234, 179, 8, 0.8)',
     energyColor: '#fef08a',
     style: 'Dawnlight Monk',
-    stats: { health: 1010, speed: 7.3, jumpForce: 13.8, attackPower: 1.06, defense: 1.0 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'mantle',
       headgear: 'tricorne',
@@ -438,7 +438,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(153, 27, 27, 0.8)',
     energyColor: '#fecaca',
     style: 'Bloodletter Vanguard',
-    stats: { health: 1120, speed: 6.3, jumpForce: 13.1, attackPower: 1.24, defense: 1.12 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'overcoat',
       headgear: 'gilded_visor',
@@ -463,7 +463,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(21, 128, 61, 0.8)',
     energyColor: '#bbf7d0',
     style: 'Verdant Striker',
-    stats: { health: 960, speed: 7.9, jumpForce: 14.2, attackPower: 1.01, defense: 0.94 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'trenchcoat',
       headgear: 'feather_cap',
@@ -488,7 +488,7 @@ export const CHARACTERS = [
     glowColor: 'rgba(59, 130, 246, 0.9)',
     energyColor: '#93c5fd',
     style: 'Grand Expedition Master',
-    stats: { health: 1060, speed: 7.4, jumpForce: 14.0, attackPower: 1.14, defense: 1.05 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'duster',
       headgear: 'tricorne',

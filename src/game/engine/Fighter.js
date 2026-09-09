@@ -99,9 +99,17 @@ export class Fighter {
     this.luneFlameActive = false;
     this.luneEarthquakeTimer = 0;
     this.luneEarthquakeTick = 0;
-    this.luneTornado = null; // { x, y, duration, zapTick, active }
     this.lastAction = null; // 'BLOCK', 'JUMP', 'ATTACK', 'CROUCH'
     this.chromaticWaves = []; // La Peintresse: ondas cromáticas de energia no chão
+
+    // Ataques Extras (33% ou 66% de energia)
+    this.gustaveBullet = null; // { x, y, vx, damage, active }
+    this.renoirBlackHole = null; // { x, y, timer, damage, active }
+    this.paintressRealityTear = null; // { x, y, duration, freezeTime, active }
+    this.timeFreezeTimer = 0; // tempo que o lutador fica congelado no tempo
+    this.extraType = null;
+    this.extraAttackLevel = 1;
+    this.versoEnterUsed = false; // 1x por combate enter para Rank S
 
     // Articulação Esquelética
     this.pose = {
@@ -168,6 +176,15 @@ export class Fighter {
     this.lastAction = null;
     this.chromaticWaves = [];
 
+    // Reset de Ataques Extras
+    this.gustaveBullet = null;
+    this.renoirBlackHole = null;
+    this.paintressRealityTear = null;
+    this.timeFreezeTimer = 0;
+    this.extraType = null;
+    this.extraAttackLevel = 1;
+    this.versoEnterUsed = false;
+
     // Reinicia o rank do Verso em uma nova rodada
     if (this.isVerso) {
       this.versoRankIndex = 0;
@@ -205,6 +222,13 @@ export class Fighter {
 
   move(dir) {
     if (!this.canAct() || !this.isGrounded) return;
+
+    if (this.isCrouching) {
+      this.velocity.x = dir * (this.getEffectiveSpeed() * 0.45);
+      this.state = FIGHTER_STATE.CROUCH;
+      return;
+    }
+
     this.velocity.x = dir * this.getEffectiveSpeed();
 
     if (dir === this.facing) {
@@ -217,6 +241,10 @@ export class Fighter {
   }
 
   stopMoving() {
+    if (this.isCrouching) {
+      this.velocity.x = 0;
+      return;
+    }
     if (this.state === FIGHTER_STATE.WALK_FORWARD || this.state === FIGHTER_STATE.WALK_BACK) {
       this.velocity.x = 0;
       this.isBlocking = false;
@@ -244,7 +272,6 @@ export class Fighter {
     this.isCrouching = isCrouching;
     if (isCrouching) {
       this.lastAction = 'CROUCH';
-      this.velocity.x = 0;
       this.state = FIGHTER_STATE.CROUCH;
     } else if (this.state === FIGHTER_STATE.CROUCH) {
       this.state = FIGHTER_STATE.IDLE;
@@ -271,69 +298,55 @@ export class Fighter {
     sounds.playDash();
   }
 
-  // --- ATAQUES ---
+  // --- 2 ATAQUES PADRÃO: SOCO E CHUTE (EM PÉ, AGACHADO E NO AR) ---
 
-  lightPunch() {
+  punch() {
     if (!this.canAct()) return;
     this.lastAction = 'ATTACK';
-    this.velocity.x *= 0.3;
-    this.state = !this.isGrounded ? FIGHTER_STATE.JUMP_PUNCH : (this.isCrouching ? FIGHTER_STATE.CROUCH_PUNCH : FIGHTER_STATE.LIGHT_PUNCH);
-    this.stateTime = 0;
     this.hasHitCurrentAttack = false;
-    sounds.playWhoosh();
+    this.stateTime = 0;
+
+    if (!this.isGrounded) {
+      this.state = FIGHTER_STATE.JUMP_PUNCH;
+      sounds.playWhoosh();
+    } else if (this.isCrouching) {
+      this.velocity.x = 0;
+      this.state = FIGHTER_STATE.CROUCH_PUNCH;
+      sounds.playWhoosh();
+    } else {
+      this.velocity.x *= 0.25;
+      this.state = FIGHTER_STATE.LIGHT_PUNCH;
+      sounds.playWhoosh();
+    }
   }
 
-  heavyPunch() {
+  kick() {
     if (!this.canAct()) return;
     this.lastAction = 'ATTACK';
-    this.velocity.x *= 0.2;
-    this.state = !this.isGrounded ? FIGHTER_STATE.JUMP_PUNCH : FIGHTER_STATE.HEAVY_PUNCH;
-    this.stateTime = 0;
     this.hasHitCurrentAttack = false;
-    sounds.playWhoosh();
+    this.stateTime = 0;
+
+    if (!this.isGrounded) {
+      this.state = FIGHTER_STATE.JUMP_KICK;
+      sounds.playWhoosh();
+    } else if (this.isCrouching) {
+      this.velocity.x = 0;
+      this.state = FIGHTER_STATE.CROUCH_KICK;
+      sounds.playWhoosh();
+    } else {
+      this.velocity.x *= 0.25;
+      this.state = FIGHTER_STATE.HEAVY_KICK;
+      sounds.playWhoosh();
+    }
   }
 
-  lightKick() {
-    if (!this.canAct()) return;
-    this.lastAction = 'ATTACK';
-    this.velocity.x *= 0.3;
-    this.state = !this.isGrounded ? FIGHTER_STATE.JUMP_KICK : (this.isCrouching ? FIGHTER_STATE.CROUCH_KICK : FIGHTER_STATE.LIGHT_KICK);
-    this.stateTime = 0;
-    this.hasHitCurrentAttack = false;
-    sounds.playWhoosh();
-  }
-
-  heavyKick() {
-    if (!this.canAct()) return;
-    this.lastAction = 'ATTACK';
-    this.velocity.x *= 0.2;
-    this.state = !this.isGrounded ? FIGHTER_STATE.JUMP_KICK : FIGHTER_STATE.HEAVY_KICK;
-    this.stateTime = 0;
-    this.hasHitCurrentAttack = false;
-    sounds.playWhoosh();
-  }
-
-  crouchPunch() {
-    if (!this.canAct() || !this.isGrounded) return;
-    this.lastAction = 'ATTACK';
-    this.isCrouching = true;
-    this.velocity.x = 0;
-    this.state = FIGHTER_STATE.CROUCH_PUNCH;
-    this.stateTime = 0;
-    this.hasHitCurrentAttack = false;
-    sounds.playWhoosh();
-  }
-
-  crouchKick() {
-    if (!this.canAct() || !this.isGrounded) return;
-    this.lastAction = 'ATTACK';
-    this.isCrouching = true;
-    this.velocity.x = 0;
-    this.state = FIGHTER_STATE.CROUCH_KICK;
-    this.stateTime = 0;
-    this.hasHitCurrentAttack = false;
-    sounds.playWhoosh();
-  }
+  // Aliases retrocompatíveis
+  lightPunch() { this.punch(); }
+  heavyPunch() { this.punch(); }
+  lightKick() { this.kick(); }
+  heavyKick() { this.kick(); }
+  crouchPunch() { this.punch(); }
+  crouchKick() { this.kick(); }
 
   playCharacterVoice() {
     if (!this.charData) return;
@@ -342,32 +355,136 @@ export class Fighter {
     }
   }
 
-  special1() {
-    if (this.charData?.hasNoSkills || this.isVerso) return;
-    if (!this.canAct() || this.energy < 25) return;
+  // --- ATAQUE EXTRA (Gasta 33% ou 66% de energia causando mais efeito/dano se 66%) ---
+  specialAttack() {
+    if (!this.canAct()) return;
+    if (this.energy < 33) return;
+
+    // Determina se usa 66% ou 33%
+    const isLevel2 = this.energy >= 66;
+    const energyCost = isLevel2 ? 66 : 33;
+    this.energy -= energyCost;
+    const level = isLevel2 ? 2 : 1;
+
     this.lastAction = 'ATTACK';
-    this.energy -= 25;
     this.state = FIGHTER_STATE.SPECIAL_1;
     this.stateTime = 0;
     this.hasHitCurrentAttack = false;
-    sounds.playElectricZap();
-    this.playCharacterVoice();
+    this.extraAttackLevel = level;
+
+    const charName = (this.charData?.name || '').toLowerCase();
+
+    // 1. Gustave: tiro de pistola de longo alcance
+    if (charName.includes('gustave')) {
+      this.extraType = 'GUSTAVE_GUN';
+      sounds.playGunshot();
+      const gunX = this.position.x + this.facing * 35;
+      const gunY = this.position.y - 82;
+      this.gustaveBullet = {
+        x: gunX,
+        y: gunY,
+        vx: this.facing * 1400, // projétil extremamente veloz
+        damage: level === 2 ? 160 : 100,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 2. Maelle: dash relâmpago atravessando o inimigo e se reposicionando do outro lado
+    else if (charName.includes('maelle')) {
+      this.extraType = 'MAELLE_BLINK_DASH';
+      sounds.playRapierSlash();
+      sounds.playDash();
+      this.isInvulnerable = true;
+      const op = this.opponent;
+      const targetX = op ? op.position.x + (this.facing * 100) : this.position.x + (this.facing * 250);
+      this.position.x = Math.max(70, Math.min(1930, targetX));
+      if (op) {
+        this.facing = (op.position.x - this.position.x) >= 0 ? 1 : -1;
+      }
+      // Dano aplicado no corte do dash
+      if (op && !op.isDead) {
+        const attackData = {
+          damage: level === 2 ? 180 : 110,
+          knockback: 12,
+          knockdown: level === 2,
+          isHeavy: level === 2,
+          attackerPower: this.attackPower
+        };
+        op.receiveHit(attackData, { x: this.position.x, y: this.position.y - 70 }, null);
+      }
+    }
+    // 3. Lune: cura percentual do HP com efeito visual verde
+    else if (charName.includes('lune')) {
+      this.extraType = 'LUNE_HEAL';
+      sounds.playHealSound();
+      const healPercent = level === 2 ? 0.30 : 0.15;
+      const healAmount = Math.round(this.maxHealth * healPercent);
+      this.health = Math.min(this.maxHealth, this.health + healAmount);
+    }
+    // 4. Renoir: bate a bengala no chão, buraco negro surge sob o alvo (exige pulo no timing correto)
+    else if (charName.includes('renoir')) {
+      this.extraType = 'RENOIR_BLACK_HOLE';
+      sounds.playBlackHoleSound();
+      const target = this.opponent;
+      const holeX = target ? target.position.x : this.position.x + this.facing * 180;
+      this.renoirBlackHole = {
+        x: holeX,
+        y: this.groundY,
+        timer: 0.65, // tempo de delay até a eclosão
+        hasExploded: false,
+        damage: level === 2 ? 220 : 140,
+        active: true,
+        level: level
+      };
+    }
+    // 5. Monoco: giro com cajado 360° causando dano ao redor
+    else if (charName.includes('monoco')) {
+      this.extraType = 'MONOCO_STAFF_SPIN';
+      sounds.playStaffBell();
+      sounds.playWhoosh();
+    }
+    // 6. La Peintresse: corte na realidade no chão paralisando quem pisar
+    else if (charName.includes('peintresse') || charName.includes('paintress')) {
+      this.extraType = 'PAINTRESS_REALITY_TEAR';
+      sounds.playDimensionalPierce();
+      const tearX = this.position.x + this.facing * 140;
+      this.paintressRealityTear = {
+        x: tearX,
+        y: this.groundY,
+        duration: 5.0, // permanece no chão por 5s
+        freezeTime: level === 2 ? 2.4 : 1.2, // congela o oponente por 2.4s ou 1.2s
+        active: true
+      };
+    }
+    // Personagens genéricos: golpe padrão fortificado
+    else {
+      this.extraType = 'GENERIC_EXTRA';
+      sounds.playElectricZap();
+    }
+  }
+
+  special1() {
+    this.specialAttack();
   }
 
   special2() {
-    if (this.charData?.hasNoSkills || this.isVerso) return;
-    if (!this.canAct() || this.energy < 35) return;
-    this.lastAction = 'ATTACK';
-    this.energy -= 35;
-    this.state = FIGHTER_STATE.SPECIAL_2;
-    this.stateTime = 0;
-    this.hasHitCurrentAttack = false;
-    sounds.playElectricZap();
-    this.playCharacterVoice();
+    this.specialAttack();
   }
 
   superMove() {
-    if (this.charData?.hasNoSkills || this.isVerso) return;
+    // Verso: Tecla Enter 1x por combate ascende diretamente para o Rank S!
+    if (this.isVerso) {
+      if (!this.versoEnterUsed) {
+        this.versoEnterUsed = true;
+        this.versoRankIndex = this.versoRanks.length - 1; // Rank 'S'
+        this.attackPower = this.baseAttackPower * this.versoRankMultipliers[this.versoRankIndex];
+        sounds.playSuperCharge();
+        sounds.playSuper();
+      }
+      return;
+    }
+
+    if (this.charData?.hasNoSkills) return;
     if (!this.canAct() || this.energy < 100) return;
     this.energy = 0;
     this.state = FIGHTER_STATE.SUPER_MOVE;
@@ -433,6 +550,8 @@ export class Fighter {
   }
 
   canAct() {
+    if (this.timeFreezeTimer > 0) return false;
+
     const lockStates = [
       FIGHTER_STATE.LIGHT_PUNCH,
       FIGHTER_STATE.HEAVY_PUNCH,
@@ -906,6 +1025,117 @@ export class Fighter {
       }
       this.chromaticWaves = this.chromaticWaves.filter((w) => w.active);
     }
+    // 5.6 Congelamento Temporal (La Peintresse Reality Tear)
+    if (this.timeFreezeTimer > 0) {
+      this.timeFreezeTimer -= dt;
+      this.velocity.x = 0;
+      this.velocity.y = 0;
+      if (particles && Math.random() < 0.3) {
+        particles.emitSparks(this.position.x + (Math.random() - 0.5) * 30, this.position.y - 60, '#fbbf24', 2, 2);
+      }
+    }
+
+    // 5.7 Bala de Pistola de Gustave (Ataque Extra)
+    if (this.gustaveBullet && this.gustaveBullet.active) {
+      this.gustaveBullet.x += this.gustaveBullet.vx * dt;
+      if (particles && Math.random() < 0.5) {
+        particles.emitSparks(this.gustaveBullet.x, this.gustaveBullet.y, '#f59e0b', 2, 3);
+      }
+      if (this.opponent && !this.gustaveBullet.hasHit && !this.opponent.isDead) {
+        const bX = this.gustaveBullet.x;
+        const bY = this.gustaveBullet.y;
+        const bulletBox = new Box(bX - 15, bY - 10, 30, 20, 'hitbox');
+        for (const hurt of this.opponent.getHurtboxes()) {
+          if (bulletBox.intersects(hurt)) {
+            this.gustaveBullet.hasHit = true;
+            this.gustaveBullet.active = false;
+            const attackData = {
+              damage: this.gustaveBullet.damage || 120,
+              knockback: 10,
+              knockdown: false,
+              isHeavy: false,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: bX, y: bY }, particles);
+            sounds.playPunch(false);
+            if (particles) {
+              particles.emitSparks(bX, bY, '#f59e0b', 16, 7);
+              particles.emitShockwave(bX, bY, 45, '#fbbf24');
+            }
+            break;
+          }
+        }
+      }
+      if (this.gustaveBullet.x < -100 || this.gustaveBullet.x > stageWidth + 100) {
+        this.gustaveBullet.active = false;
+      }
+    }
+
+    // 5.8 Buraco Negro de Renoir (Ataque Extra)
+    if (this.renoirBlackHole && this.renoirBlackHole.active) {
+      this.renoirBlackHole.timer -= dt;
+      if (particles && Math.random() < 0.3) {
+        particles.emitDust(this.renoirBlackHole.x + (Math.random() - 0.5) * 50, this.groundY, 3, '#18181b');
+      }
+      if (this.renoirBlackHole.timer <= 0 && !this.renoirBlackHole.hasExploded) {
+        this.renoirBlackHole.hasExploded = true;
+        sounds.playThunderSlam();
+        if (particles) {
+          particles.emitShockwave(this.renoirBlackHole.x, this.groundY, 160, '#000000');
+          particles.emitShockwave(this.renoirBlackHole.x, this.groundY, 110, '#f59e0b');
+          particles.emitSparks(this.renoirBlackHole.x, this.groundY - 30, '#000000', 30, 10);
+        }
+        // Colisão: precisa acertar o timing do pulo para desviar!
+        if (this.opponent && !this.opponent.isDead && !this.opponent.isInvulnerable) {
+          const dist = Math.abs(this.renoirBlackHole.x - this.opponent.position.x);
+          if (dist < 110) {
+            // Se o oponente pulou e está no ar (!isGrounded), desvia com sucesso!
+            if (!this.opponent.isGrounded) {
+              if (particles) {
+                particles.emitFloatingText('EVADED!', this.opponent.position.x, this.opponent.position.y - 70, '#22c55e');
+              }
+            } else {
+              // No chão: engolido pelo buraco negro
+              const attackData = {
+                damage: this.renoirBlackHole.damage || 150,
+                knockback: 18,
+                knockdown: true,
+                isHeavy: true,
+                attackerPower: this.attackPower
+              };
+              this.opponent.receiveHit(attackData, { x: this.renoirBlackHole.x, y: this.groundY - 20 }, particles);
+            }
+          }
+        }
+      }
+      if (this.renoirBlackHole.timer <= -0.4) {
+        this.renoirBlackHole.active = false;
+      }
+    }
+
+    // 5.9 Fenda na Realidade de La Peintresse (Ataque Extra)
+    if (this.paintressRealityTear && this.paintressRealityTear.active) {
+      this.paintressRealityTear.duration -= dt;
+      if (particles && Math.random() < 0.25) {
+        particles.emitSparks(this.paintressRealityTear.x + (Math.random() - 0.5) * 40, this.groundY - 15, '#fbbf24', 2, 2);
+      }
+      if (this.opponent && !this.opponent.isDead && this.opponent.timeFreezeTimer <= 0) {
+        const dist = Math.abs(this.paintressRealityTear.x - this.opponent.position.x);
+        if (dist < 55 && this.opponent.isGrounded) {
+          // Oponente pisou na fenda: fica paralisado pelo tempo definido!
+          this.opponent.timeFreezeTimer = this.paintressRealityTear.freezeTime || 1.2;
+          sounds.playTimeFreeze();
+          if (particles) {
+            particles.emitShockwave(this.paintressRealityTear.x, this.groundY, 90, '#fbbf24');
+            particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 50, '#ffffff', 20, 8);
+            particles.emitFloatingText('PARALYZED!', this.opponent.position.x, this.opponent.position.y - 85, '#fbbf24', true);
+          }
+        }
+      }
+      if (this.paintressRealityTear.duration <= 0) {
+        this.paintressRealityTear.active = false;
+      }
+    }
 
     // 6. Watchdog de Segurança Anti-Travamento (Golpes comuns 0.8s, Super Move 1.6s)
     const attackStates = [
@@ -982,6 +1212,123 @@ export class Fighter {
     // Renderiza a Cúpula de Parry do Monoco
     if (this.isMonoco && this.state === FIGHTER_STATE.SUPER_MOVE && this.superPhase === 'PARRY_STANCE') {
       this.drawMonocoParryDome(ctx);
+    }
+
+    // Renderiza projéteis e áreas de Ataques Extras
+    this.drawExtraAttacks(ctx);
+  }
+
+  drawExtraAttacks(ctx) {
+    // 1. Bala de Pistola de Gustave
+    if (this.gustaveBullet && this.gustaveBullet.active) {
+      ctx.save();
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 15;
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.ellipse(this.gustaveBullet.x, this.gustaveBullet.y, 8, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Rastro veloz da bala
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.6)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(this.gustaveBullet.x, this.gustaveBullet.y);
+      ctx.lineTo(this.gustaveBullet.x - Math.sign(this.gustaveBullet.vx) * 35, this.gustaveBullet.y);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 2. Buraco Negro de Renoir
+    if (this.renoirBlackHole && this.renoirBlackHole.active) {
+      const bh = this.renoirBlackHole;
+      ctx.save();
+      ctx.translate(bh.x, bh.y);
+      const pulse = Math.sin(Date.now() * 0.015) * 0.15 + 0.85;
+
+      // Vórtice negro abissal no chão
+      ctx.shadowColor = '#000000';
+      ctx.shadowBlur = 30;
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 60 * pulse, 18 * pulse, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Borda vermelha/púrpura de aviso
+      ctx.strokeStyle = bh.timer < 0.2 ? '#ef4444' : '#7c3aed';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Espirais de sucção
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < 3; i++) {
+        const ang = (Date.now() * 0.006) + (i * Math.PI * 2 / 3);
+        ctx.beginPath();
+        ctx.arc(0, 0, 35 * pulse, ang, ang + 1.2);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 3. Fenda da Realidade de La Peintresse
+    if (this.paintressRealityTear && this.paintressRealityTear.active) {
+      const pt = this.paintressRealityTear;
+      ctx.save();
+      ctx.translate(pt.x, pt.y);
+      ctx.shadowColor = '#fbbf24';
+      ctx.shadowBlur = 20;
+
+      // Rasgo dourado cósmico no piso
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(-45, 0);
+      ctx.lineTo(0, -8);
+      ctx.lineTo(45, 0);
+      ctx.stroke();
+
+      // Interior negro do rasgo
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-40, 0);
+      ctx.lineTo(0, -6);
+      ctx.lineTo(40, 0);
+      ctx.stroke();
+
+      // Partículas verticais de distorção
+      const now = Date.now() * 0.01;
+      ctx.fillStyle = '#fef08a';
+      for (let p = 0; p < 4; p++) {
+        const px = (p - 1.5) * 20;
+        const py = -Math.abs(Math.sin(now + p)) * 30;
+        ctx.fillRect(px, py, 2.5, 7);
+      }
+      ctx.restore();
+    }
+
+    // 4. Efeito Visual de Cura de Lune (Aura Verde)
+    if (this.extraType === 'LUNE_HEAL' && this.state === FIGHTER_STATE.SPECIAL_1 && this.stateTime < 0.6) {
+      ctx.save();
+      ctx.shadowColor = '#22c55e';
+      ctx.shadowBlur = 25;
+      ctx.strokeStyle = 'rgba(34, 197, 94, 0.75)';
+      ctx.lineWidth = 3;
+      const hPulse = Math.sin(this.stateTime * 18) * 10;
+      ctx.beginPath();
+      ctx.ellipse(this.position.x, this.position.y - 65, 45 + hPulse, 65 + hPulse, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Cruzes verdes de cura subindo
+      ctx.fillStyle = '#4ade80';
+      for (let c = 0; c < 3; c++) {
+        const cx = this.position.x + (c - 1) * 28;
+        const cy = this.position.y - 40 - (this.stateTime * 90) - (c * 15);
+        ctx.fillRect(cx - 3, cy - 8, 6, 16);
+        ctx.fillRect(cx - 8, cy - 3, 16, 6);
+      }
+      ctx.restore();
     }
   }
 

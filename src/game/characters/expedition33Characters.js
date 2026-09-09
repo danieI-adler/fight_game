@@ -12,7 +12,7 @@ export const EXPEDITION_33_CHARACTERS = [
     secondaryColor: '#0369a1',
     glowColor: 'rgba(14, 165, 233, 0.85)',
     energyColor: '#7dd3fc',
-    stats: { health: 1050, speed: 7.0, jumpForce: 13.8, attackPower: 1.15, defense: 1.05 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     superType: 'GUSTAVE_SLAM',
     voiceAbility: 'gustave_ability',
     visual: {
@@ -43,7 +43,7 @@ export const EXPEDITION_33_CHARACTERS = [
     secondaryColor: '#0284c7',
     glowColor: 'rgba(56, 189, 248, 0.85)',
     energyColor: '#bae6fd',
-    stats: { health: 920, speed: 8.5, jumpForce: 14.5, attackPower: 0.98, defense: 0.9 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     superType: 'MAELLE_WALTZ',
     visual: {
       coatType: 'capelet',
@@ -71,7 +71,7 @@ export const EXPEDITION_33_CHARACTERS = [
     secondaryColor: '#6b21a8',
     glowColor: 'rgba(168, 85, 247, 0.85)',
     energyColor: '#e9d5ff',
-    stats: { health: 940, speed: 7.4, jumpForce: 14.0, attackPower: 1.1, defense: 0.92 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'mantle',
       headgear: 'none',
@@ -101,7 +101,7 @@ export const EXPEDITION_33_CHARACTERS = [
     secondaryColor: '#b45309',
     glowColor: 'rgba(245, 158, 11, 0.85)',
     energyColor: '#fef3c7',
-    stats: { health: 980, speed: 8.0, jumpForce: 14.2, attackPower: 1.05, defense: 0.95 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'duster',
       headgear: 'none',
@@ -131,7 +131,7 @@ export const EXPEDITION_33_CHARACTERS = [
     secondaryColor: '#44403c',
     glowColor: 'rgba(120, 113, 108, 0.85)',
     energyColor: '#e7e5e4',
-    stats: { health: 1200, speed: 5.8, jumpForce: 12.6, attackPower: 1.25, defense: 1.2 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     superType: 'RENOIR_FLOWER',
     visual: {
       coatType: 'draped_overcoat',
@@ -160,7 +160,7 @@ export const EXPEDITION_33_CHARACTERS = [
     secondaryColor: '#4338ca',
     glowColor: 'rgba(99, 102, 241, 0.85)',
     energyColor: '#c7d2fe',
-    stats: { health: 950, speed: 8.3, jumpForce: 14.4, attackPower: 1.02, defense: 0.92 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     isVerso: true,
     hasNoSkills: true,
     visual: {
@@ -190,7 +190,7 @@ export const EXPEDITION_33_CHARACTERS = [
     secondaryColor: '#78350f',
     glowColor: 'rgba(217, 119, 6, 0.85)',
     energyColor: '#fef3c7',
-    stats: { health: 1280, speed: 5.4, jumpForce: 12.2, attackPower: 1.32, defense: 1.25 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'stone_shell',
       headgear: 'none',
@@ -221,7 +221,7 @@ export const EXPEDITION_33_CHARACTERS = [
     secondaryColor: '#d97706',
     glowColor: 'rgba(251, 191, 36, 0.95)',
     energyColor: '#ffffff',
-    stats: { health: 1350, speed: 6.5, jumpForce: 13.5, attackPower: 1.35, defense: 1.15 },
+    stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     visual: {
       coatType: 'baroque_gown',
       headgear: 'halo_mask',

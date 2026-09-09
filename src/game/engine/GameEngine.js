@@ -62,6 +62,9 @@ export class GameEngine {
     this.hitstopFrames = 0;
     this.timeScale = 1.0;
 
+    // Cinemática Especial: Renoir KO Gustave
+    this.specialCinematic = null; // { active, timer, renoir, gustave, phase, beamProgress }
+
     // Configurações
     this.showHitboxes = false;
     this.isTraining = false;
@@ -174,6 +177,7 @@ export class GameEngine {
   }
 
   resetRound() {
+    this.specialCinematic = null;
     this.p1.reset(650);
     this.p2.reset(1350);
     if (this.isTraining) {
@@ -343,6 +347,7 @@ export class GameEngine {
       }
     } else if (this.status === GAME_STATUS.ROUND_END) {
       this.statusTimer -= dt;
+      this.updateCinematic(dt);
       this.p1.update(dt, this.stage.width, this.particles);
       this.p2.update(dt, this.stage.width, this.particles);
 
@@ -496,17 +501,176 @@ export class GameEngine {
   handleKnockout() {
     this.status = GAME_STATUS.ROUND_END;
     this.statusMessage = 'K.O.!';
-    this.statusTimer = 2.8;
-    this.timeScale = 0.4;
-    this.camera.addShake(16, 0.4);
 
-    if (this.p1.isDead) {
-      this.p2Wins++;
-      this.p2.state = FIGHTER_STATE.VICTORY;
-    } else {
+    const p1IsRenoir = (this.p1.charData?.name || '').toLowerCase().includes('renoir');
+    const p2IsGustave = (this.p2.charData?.name || '').toLowerCase().includes('gustave');
+    const p2IsRenoir = (this.p2.charData?.name || '').toLowerCase().includes('renoir');
+    const p1IsGustave = (this.p1.charData?.name || '').toLowerCase().includes('gustave');
+
+    let renoirKiller = null;
+    let gustaveVictim = null;
+
+    if (this.p2.isDead && p1IsRenoir && p2IsGustave) {
+      renoirKiller = this.p1;
+      gustaveVictim = this.p2;
       this.p1Wins++;
-      this.p1.state = FIGHTER_STATE.VICTORY;
+    } else if (this.p1.isDead && p2IsRenoir && p1IsGustave) {
+      renoirKiller = this.p2;
+      gustaveVictim = this.p1;
+      this.p2Wins++;
     }
+
+    if (renoirKiller && gustaveVictim) {
+      // Ativa Cinemática Especial: Renoir eliminando Gustave
+      this.statusTimer = 5.2; // tempo estendido para a cinemática completa
+      this.timeScale = 1.0;
+      this.specialCinematic = {
+        active: true,
+        timer: 0,
+        renoir: renoirKiller,
+        gustave: gustaveVictim,
+        phase: 'WALK_AWAY',
+        beamActive: false,
+        beamStart: null,
+        beamEnd: null
+      };
+
+      // Gustave fica ajoelhado/agachado enfraquecido
+      gustaveVictim.state = FIGHTER_STATE.CROUCH;
+      gustaveVictim.velocity.x = 0;
+      gustaveVictim.velocity.y = 0;
+
+      // Renoir começa se afastando andando
+      const walkDir = renoirKiller.position.x < gustaveVictim.position.x ? -1 : 1;
+      renoirKiller.facing = -walkDir; // olha pra frente do recuo ou costas
+      renoirKiller.state = FIGHTER_STATE.WALK_FORWARD;
+    } else {
+      this.statusTimer = 2.8;
+      this.timeScale = 0.4;
+      this.camera.addShake(16, 0.4);
+
+      if (this.p1.isDead) {
+        this.p2Wins++;
+        this.p2.state = FIGHTER_STATE.VICTORY;
+      } else {
+        this.p1Wins++;
+        this.p1.state = FIGHTER_STATE.VICTORY;
+      }
+    }
+  }
+
+  updateCinematic(dt) {
+    if (!this.specialCinematic || !this.specialCinematic.active) return;
+    const sc = this.specialCinematic;
+    sc.timer += dt;
+    const { renoir, gustave } = sc;
+
+    // Gustave permanece ajoelhado/enfraquecido até ser golpeado
+    if (sc.timer < 3.2) {
+      gustave.state = FIGHTER_STATE.CROUCH;
+      gustave.velocity.x = 0;
+      gustave.velocity.y = 0;
+    }
+
+    // Fase 1: 0s a 1.6s -> Renoir se afasta andando devagar
+    if (sc.timer < 1.6) {
+      sc.phase = 'WALK_AWAY';
+      const awayDir = renoir.position.x < gustave.position.x ? -1 : 1;
+      renoir.velocity.x = awayDir * (renoir.getEffectiveSpeed() * 0.4);
+      renoir.state = awayDir === renoir.facing ? FIGHTER_STATE.WALK_FORWARD : FIGHTER_STATE.WALK_BACK;
+    }
+    // Fase 2: 1.6s -> Teletransporte instantâneo PARA A FRENTE de Gustave!
+    else if (sc.timer >= 1.6 && sc.timer < 1.7) {
+      if (sc.phase !== 'TELEPORT') {
+        sc.phase = 'TELEPORT';
+        sounds.playStaffBell();
+        this.particles.emitSparks(renoir.position.x, renoir.position.y - 60, '#000000', 30, 8);
+        this.particles.emitSparks(renoir.position.x, renoir.position.y - 60, '#ffffff', 20, 6);
+
+        // Teleporta para a frente do rosto de Gustave
+        const frontX = gustave.position.x + (gustave.facing * 90);
+        renoir.position.x = Math.max(80, Math.min(1920, frontX));
+        renoir.facing = -gustave.facing; // encara Gustave de frente
+        renoir.velocity.x = 0;
+        renoir.velocity.y = 0;
+
+        this.particles.emitShockwave(renoir.position.x, renoir.groundY, 90, '#ffffff');
+        this.particles.emitSparks(renoir.position.x, renoir.position.y - 60, '#000000', 30, 8);
+      }
+    }
+    // Fase 3: 1.7s a 3.1s -> Golpe de baixo para cima atravessando Gustave com feixe preto e bordas brancas bem longo
+    else if (sc.timer >= 1.7 && sc.timer < 3.1) {
+      if (sc.phase !== 'STRIKE') {
+        sc.phase = 'STRIKE';
+        sounds.playDimensionalPierce();
+        sounds.playThunderSlam();
+        this.camera.addShake(18, 0.4);
+        renoir.state = FIGHTER_STATE.HEAVY_PUNCH;
+        sc.beamActive = true;
+
+        // Configura o feixe de baixo para cima atravessando Gustave
+        const startX = renoir.position.x + (renoir.facing * 10);
+        const startY = renoir.groundY - 10; // bem de baixo
+        // Diagonal ascendente atravessando o peito/cabeça de Gustave em direção ao céu
+        const beamDirX = (gustave.position.x - renoir.position.x) * 1.8;
+        const endX = startX + beamDirX;
+        const endY = startY - 260; // sobe alto rasgando o espaço
+        sc.beamStart = { x: startX, y: startY };
+        sc.beamEnd = { x: endX, y: endY };
+
+        this.particles.emitElectricArc(startX, startY, endX, endY, '#ffffff', 5);
+        this.particles.emitSparks(gustave.position.x, gustave.position.y - 60, '#000000', 40, 12);
+        this.particles.emitSparks(gustave.position.x, gustave.position.y - 60, '#ffffff', 30, 10);
+      }
+    }
+    // Fase 4: 3.1s em diante -> Feixe se dissipa, Gustave cai ao chão desacordado em definitivo
+    else if (sc.timer >= 3.1) {
+      sc.beamActive = false;
+      if (sc.phase !== 'COLLAPSE') {
+        sc.phase = 'COLLAPSE';
+        gustave.state = FIGHTER_STATE.KNOCKDOWN;
+        gustave.velocity.x = -gustave.facing * 3;
+        gustave.velocity.y = -4;
+        gustave.isDead = true;
+        sounds.playKO();
+        renoir.state = FIGHTER_STATE.VICTORY;
+      }
+    }
+  }
+
+  drawCinematicBeam(ctx) {
+    if (!this.specialCinematic || !this.specialCinematic.beamActive || !this.specialCinematic.beamStart) return;
+    const { beamStart, beamEnd } = this.specialCinematic;
+
+    ctx.save();
+    // Borda exterior branca brilhante de rasgo dimensional
+    ctx.shadowColor = '#ffffff';
+    ctx.shadowBlur = 30;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.lineWidth = 16;
+    ctx.beginPath();
+    ctx.moveTo(beamStart.x, beamStart.y);
+    ctx.lineTo(beamEnd.x, beamEnd.y);
+    ctx.stroke();
+
+    // Centro abissal preto como extensão da bengala
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(beamStart.x, beamStart.y);
+    ctx.lineTo(beamEnd.x, beamEnd.y);
+    ctx.stroke();
+
+    // Faixa branca fina de luz pura no miolo
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(beamStart.x, beamStart.y);
+    ctx.lineTo(beamEnd.x, beamEnd.y);
+    ctx.stroke();
+
+    ctx.restore();
   }
 
   handleTimeUp() {
@@ -554,6 +718,7 @@ export class GameEngine {
       }
       this.p1.draw(ctx, this.showHitboxes, this.graphicsMode, this.isExpedition);
       this.p2.draw(ctx, this.showHitboxes, this.graphicsMode, this.isExpedition);
+      this.drawCinematicBeam(ctx);
       this.particles.draw(ctx);
       this.camera.restoreTransform(ctx);
     }

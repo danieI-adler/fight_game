@@ -759,6 +759,134 @@ class SoundManager {
     osc.stop(t + 0.5);
     this.playNoise(0.2, 0.5, 3000);
   }
+
+  // --- NOVOS SONS DE ATAQUES EXTRAS E FINALIZAÇÃO ---
+
+  playGunshot() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    // Disparo de pistola seco e potente
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(600, t);
+    osc.frequency.exponentialRampToValueAtTime(80, t + 0.15);
+
+    gain.gain.setValueAtTime(0.9, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.18);
+    this.playNoise(0.18, 0.7, 4500);
+  }
+
+  playHealSound() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    // Acorde ascendente mágico de cura
+    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f, t + i * 0.06);
+
+      gain.gain.setValueAtTime(0.3, t + i * 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5 + i * 0.08);
+
+      osc.connect(gain);
+      gain.connect(this.sfxGain);
+
+      osc.start(t + i * 0.06);
+      osc.stop(t + 0.5 + i * 0.08);
+    });
+  }
+
+  playBlackHoleSound() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    // Sucção e vácuo gravitacional
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(80, t);
+    osc.frequency.linearRampToValueAtTime(260, t + 0.5);
+    osc.frequency.exponentialRampToValueAtTime(40, t + 0.75);
+
+    gain.gain.setValueAtTime(0.6, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.8);
+    this.playNoise(0.6, 0.4, 600);
+  }
+
+  playTimeFreeze() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    // Estalo de parada temporal e eco
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(1200, t);
+    osc.frequency.exponentialRampToValueAtTime(150, t + 0.35);
+
+    gain.gain.setValueAtTime(0.5, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.4);
+    this.playNoise(0.3, 0.3, 2800);
+  }
+
+  playDimensionalPierce() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    // Som estrondoso de feixe dimensional rasgando o espaço
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(880, t);
+    osc.frequency.exponentialRampToValueAtTime(55, t + 0.7);
+
+    gain.gain.setValueAtTime(1.0, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.75);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.75);
+    this.playNoise(0.65, 0.65, 1800);
+  }
 }
 
 export const sounds = new SoundManager();

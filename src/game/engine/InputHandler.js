@@ -112,8 +112,8 @@ export class InputHandler {
     // Bloqueio
     fighter.block(block);
 
-    // Movimentação horizontal
-    if (!down && !block) {
+    // Movimentação horizontal (permite andar em pé ou andar agachado!)
+    if (!block) {
       if (left && !right) {
         fighter.move(-1);
       } else if (right && !left) {
@@ -129,12 +129,10 @@ export class InputHandler {
       fighter.jump(dirX);
     }
 
-    // Golpes (Disparo Único)
+    // Golpes (2 Ataques Padrão: Soco e Chute + Ataque Extra + Super)
     if (justPressed.superMove) fighter.superMove();
-    else if (justPressed.special1) fighter.special1();
-    else if (justPressed.heavyPunch) fighter.heavyPunch();
-    else if (justPressed.lightPunch) fighter.lightPunch();
-    else if (justPressed.heavyKick) fighter.heavyKick();
-    else if (justPressed.lightKick) fighter.lightKick();
+    else if (justPressed.special1) fighter.specialAttack();
+    else if (justPressed.punch || justPressed.lightPunch || justPressed.heavyPunch) fighter.punch();
+    else if (justPressed.kick || justPressed.lightKick || justPressed.heavyKick) fighter.kick();
   }
 }
