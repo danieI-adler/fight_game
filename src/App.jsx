@@ -278,6 +278,7 @@ export function App() {
         <OnlineLobby
           initialRoomCode={initialOnlineRoom}
           graphicsMode={graphicsMode}
+          isExpedition={isExpedition}
           onStartOnlineMatch={handleStartOnlineMatch}
           onBackToMenu={() => {
             setInitialOnlineRoom('');
