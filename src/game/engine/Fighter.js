@@ -71,6 +71,14 @@ export class Fighter {
       this.energy = this.maxEnergy; // Monoco sempre tem a skill pronta!
     }
 
+    // Identificação de Relâmpago McQueen: dano escala com velocidade
+    this.isMcQueen = Boolean(
+      (charData.name || '').toLowerCase().includes('mcqueen') ||
+      (charData.name || '').toLowerCase().includes('relampago') ||
+      charData.visual?.isVehicle ||
+      charData.visual?.isMcQueen
+    );
+
     // Estado e Animação
     this.state = FIGHTER_STATE.IDLE;
     this.stateTime = 0;
@@ -1101,6 +1109,21 @@ export class Fighter {
       }
     }
 
+    // 4.1 RELÂMPAGO MCQUEEN: DANO ESCALA PROPORCIONAL À SUA VELOCIDADE ATUAL!
+    if (this.isMcQueen) {
+      const currentSpeed = Math.abs(this.velocity.x);
+      const baseSpd = this.speed || 7.0;
+      const speedRatio = currentSpeed / baseSpd;
+      // Multiplicador de velocidade dinâmica: parte da base e sobe proporcionalmente à velocidade
+      // Em repouso: 1.0x. Correndo normal: 1.25x. Correndo em buff de turbo (2x/3x) ou blitz: até 2.5x - 4.0x!
+      let dynamicSpeedMult = 1.0 + Math.max(0, speedRatio) * 0.45;
+      if (this.mcqueenSpeedBuffTimer > 0) {
+        dynamicSpeedMult *= (this.mcqueenSpeedMultiplier || 1.0);
+      }
+      this.attackPower = this.baseAttackPower * dynamicSpeedMult;
+      this.mcqueenCurrentDamageMultiplier = dynamicSpeedMult;
+    }
+
     // 5. Atualização de Ataques
     this.updateAttackStates(dt, particles, stageWidth);
 
@@ -1777,6 +1800,11 @@ export class Fighter {
     // Renderiza a insígnia de Rank de Estilo sobre a cabeça de Verso (E, D, C, B, A ou S)
     if (this.isVerso && !this.isDead) {
       this.drawVersoStyleRank(ctx);
+    }
+
+    // Renderiza indicador de dano/velocidade sobre Relâmpago McQueen
+    if (this.isMcQueen && !this.isDead) {
+      this.drawMcQueenSpeedBadge(ctx);
     }
 
     // Renderiza a Flor Negra Titânica de Renoir
@@ -2545,6 +2573,44 @@ export class Fighter {
     ctx.shadowColor = style.glow;
     ctx.shadowBlur = isMaxRank ? 12 : 6;
     ctx.fillText(currentRank, 0, 1);
+
+    ctx.restore();
+  }
+
+  drawMcQueenSpeedBadge(ctx) {
+    const badgeX = this.position.x;
+    const badgeY = this.groundY - 78;
+
+    const mult = this.mcqueenCurrentDamageMultiplier || 1.0;
+    const pct = Math.round(mult * 100);
+
+    ctx.save();
+    ctx.translate(badgeX, badgeY);
+
+    // Cor dinâmica: se estiver acima de 120% brilha amarelo/vermelho fogo
+    const isTurbo = mult >= 1.5;
+    const glowColor = isTurbo ? '#ef4444' : '#facc15';
+    const textColor = isTurbo ? '#fef08a' : '#ffffff';
+
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = isTurbo ? 14 : 6;
+
+    // Fundo da plaquinha de velocidade
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+    ctx.beginPath();
+    ctx.roundRect(-28, -10, 56, 18, 5);
+    ctx.fill();
+
+    ctx.strokeStyle = isTurbo ? '#ef4444' : '#ca8a04';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Texto: porcentagem de dano
+    ctx.font = '900 11px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = textColor;
+    ctx.fillText(`⚡ ${pct}%`, 0, 0);
 
     ctx.restore();
   }

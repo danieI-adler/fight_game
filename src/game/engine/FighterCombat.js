@@ -809,27 +809,17 @@ export class FighterCombat {
             particles.emitShockwave(fighter.position.x + fighter.facing * 50, fighter.groundY, 60, '#ef4444');
           }
 
-          // Múltiplos hits de corte com dois sabres estritamente na frente
-          if (fighter.stateTime > 0.15 && fighter.stateTime < 1.35) {
-            const hb = fighter.createHitbox(10, 85, 145, 80);
-            hb.damage = 38; // múltiplos hits somando dano alto
-            hb.knockback = 4;
-            hb.knockdown = false;
-            hb.isHeavy = true;
-            hb.attackerPower = fighter.attackPower;
-            fighter.activeHitbox = hb;
-          }
-
-          if (fighter.stateTime >= 1.4) {
-            // Golpe finalizador com knockdown apenas na frente
-            const finHb = fighter.createHitbox(10, 85, 155, 90);
-            finHb.damage = 120;
-            finHb.knockback = 24;
-            finHb.knockdown = true;
-            finHb.isHeavy = true;
-            finHb.attackerPower = fighter.attackPower;
-            fighter.activeHitbox = finHb;
-            sounds.playThunderSlam();
+          // Apenas o PRIMEIRO HIT causa dano! Uma vez acertado o oponente, o giro continua estético sem dar dano repetido
+          if (fighter.stateTime > 0.15 && fighter.stateTime < 1.4) {
+            if (!fighter.hasHitCurrentAttack) {
+              const hb = fighter.createHitbox(10, 85, 150, 85);
+              hb.damage = 380; // Dano total concentrado no primeiro hit do golpe
+              hb.knockback = 20;
+              hb.knockdown = true;
+              hb.isHeavy = true;
+              hb.attackerPower = fighter.attackPower;
+              fighter.activeHitbox = hb;
+            }
           }
 
           if (fighter.stateTime >= 1.55) {
