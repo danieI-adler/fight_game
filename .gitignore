@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Unity Project (desacoplado da stack web)
+UnityProject/
+
+# Arquivos de mídia pesados locais
+public/assets/audio/

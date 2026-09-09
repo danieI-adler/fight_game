@@ -13,6 +13,8 @@ export const EXPEDITION_33_CHARACTERS = [
     glowColor: 'rgba(14, 165, 233, 0.85)',
     energyColor: '#7dd3fc',
     stats: { health: 1050, speed: 7.0, jumpForce: 13.8, attackPower: 1.15, defense: 1.05 },
+    superType: 'GUSTAVE_SLAM',
+    voiceAbility: 'gustave_ability',
     visual: {
       coatType: 'trenchcoat',
       headgear: 'none',
@@ -42,6 +44,7 @@ export const EXPEDITION_33_CHARACTERS = [
     glowColor: 'rgba(56, 189, 248, 0.85)',
     energyColor: '#bae6fd',
     stats: { health: 920, speed: 8.5, jumpForce: 14.5, attackPower: 0.98, defense: 0.9 },
+    superType: 'MAELLE_WALTZ',
     visual: {
       coatType: 'capelet',
       headgear: 'none',
