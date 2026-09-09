@@ -544,7 +544,68 @@ export class FighterCombat {
           break;
         }
 
-        // --- 5. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
+        // --- 5. LA PEINTRESSE: ONDAS CROMÁTICAS (Padrões Rítmicos que Exigem Pulo) ---
+        if (fighter.superType === 'PAINTRESS_CHROMATIC_WAVES') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          fighter.velocity.y = 0;
+
+          if (!fighter._wavesSpawned) {
+            fighter._wavesSpawned = [false, false, false];
+          }
+
+          // Partículas cósmicas ao redor da deusa durante a pintura das ondas
+          if (particles && Math.random() < 0.6) {
+            const bx = fighter.position.x + fighter.facing * 35;
+            const by = fighter.position.y - 120;
+            particles.emitSparks(bx, by, '#fbbf24', 4, 5);
+            particles.emitSparks(fighter.position.x, fighter.position.y - 60, '#d946ef', 2, 4);
+          }
+
+          const waveConfigs = [
+            { time: 0.35, color: '#fbbf24', secondary: '#fef08a', speed: 780, name: 'WAVE_1' },
+            { time: 0.75, color: '#d946ef', secondary: '#f5d0fe', speed: 850, name: 'WAVE_2' },
+            { time: 1.15, color: '#ef4444', secondary: '#fca5a5', speed: 920, name: 'WAVE_3' }
+          ];
+
+          for (let i = 0; i < 3; i++) {
+            const cfg = waveConfigs[i];
+            if (fighter.stateTime >= cfg.time && !fighter._wavesSpawned[i]) {
+              fighter._wavesSpawned[i] = true;
+              fighter.superPhase = cfg.name;
+              sounds.playChromaticWaveCast();
+
+              const startX = fighter.position.x + fighter.facing * 50;
+              fighter.chromaticWaves.push({
+                x: startX,
+                vx: fighter.facing * cfg.speed,
+                color: cfg.color,
+                secondary: cfg.secondary,
+                damage: 230,
+                hasHit: false,
+                active: true,
+                waveIndex: i,
+                timeAlive: 0
+              });
+
+              if (particles) {
+                particles.emitShockwave(startX, fighter.groundY, 120, cfg.color);
+                particles.emitSparks(startX, fighter.groundY - 20, cfg.color, 18, 8);
+              }
+            }
+          }
+
+          if (fighter.stateTime >= 1.55) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter._wavesSpawned = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 6. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
         if (fighter.stateTime < 0.5) {
           fighter.velocity.x = 0;
           fighter.isInvulnerable = true;

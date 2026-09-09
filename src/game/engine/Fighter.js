@@ -95,6 +95,7 @@ export class Fighter {
     this.luneEarthquakeTick = 0;
     this.luneTornado = null; // { x, y, duration, zapTick, active }
     this.lastAction = null; // 'BLOCK', 'JUMP', 'ATTACK', 'CROUCH'
+    this.chromaticWaves = []; // La Peintresse: ondas cromáticas de energia no chão
 
     // Articulação Esquelética
     this.pose = {
@@ -159,6 +160,7 @@ export class Fighter {
     this.luneEarthquakeTick = 0;
     this.luneTornado = null;
     this.lastAction = null;
+    this.chromaticWaves = [];
 
     // Reinicia o rank do Verso em uma nova rodada
     if (this.isVerso) {
@@ -403,6 +405,10 @@ export class Fighter {
       } else if (this.luneElement === 'WIND') {
         sounds.playWindTornado();
       }
+    } else if (this.superType === 'PAINTRESS_CHROMATIC_WAVES') {
+      this.superPhase = 'SUMMON_WAVES';
+      sounds.playSuperCharge();
+      sounds.playChromaticWaveCast();
     } else {
       this.superType = 'GUSTAVE_SMASH';
       this.superPhase = 'CHARGE'; // 'CHARGE' (0-0.5s), 'LEAP' (0.5-0.85s), 'SLAM' (0.85-1.45s)
@@ -735,6 +741,55 @@ export class Fighter {
       }
     }
 
+    // 5.5 Ondas Cromáticas de La Peintresse (viajam no chão em padrões rítmicos; salto desvia)
+    if (this.chromaticWaves && this.chromaticWaves.length > 0) {
+      for (const wave of this.chromaticWaves) {
+        if (!wave.active) continue;
+        wave.x += wave.vx * dt;
+
+        if (particles && Math.random() < 0.4) {
+          particles.emitDust(wave.x, this.groundY, 3, wave.color);
+        }
+
+        // Detecção de colisão com oponente
+        if (this.opponent && !wave.hasHit && !this.opponent.isDead) {
+          const dist = Math.abs(wave.x - this.opponent.position.x);
+          if (dist < 42) {
+            // EXIGÊNCIA DE SALTO: se o oponente pular e estiver no ar (!isGrounded), a onda passa por baixo!
+            if (!this.opponent.isGrounded) {
+              // Passou por baixo do oponente em segurança pelo pulo!
+              if (particles && Math.random() < 0.3) {
+                particles.emitSparks(wave.x, this.groundY - 15, '#ffffff', 4, 3);
+              }
+            } else {
+              // Oponente estava no chão -> Toma dano massivo da onda cromática!
+              wave.hasHit = true;
+              const isFinisher = wave.waveIndex === 2;
+              const attackData = {
+                damage: wave.damage || 230,
+                knockback: isFinisher ? 22 : 10,
+                knockdown: isFinisher,
+                isHeavy: true,
+                attackerPower: this.attackPower
+              };
+              this.opponent.receiveHit(attackData, { x: wave.x, y: this.groundY - 30 }, particles);
+              sounds.playChromaticWaveHit();
+              if (particles) {
+                particles.emitShockwave(wave.x, this.groundY, isFinisher ? 170 : 130, wave.color);
+                particles.emitSparks(wave.x, this.groundY - 25, wave.color, isFinisher ? 35 : 22, 10);
+                particles.emitDust(wave.x, this.groundY, 12, '#1e293b');
+              }
+            }
+          }
+        }
+
+        if (wave.x < -200 || wave.x > stageWidth + 200) {
+          wave.active = false;
+        }
+      }
+      this.chromaticWaves = this.chromaticWaves.filter((w) => w.active);
+    }
+
     // 6. Watchdog de Segurança Anti-Travamento (Golpes comuns 0.8s, Super Move 1.6s)
     const attackStates = [
       FIGHTER_STATE.LIGHT_PUNCH,
@@ -750,7 +805,7 @@ export class Fighter {
       FIGHTER_STATE.DASH_BACK
     ];
     const maxLockTime = this.state === FIGHTER_STATE.SUPER_MOVE 
-      ? ((this.superType === 'RENOIR_FLOWER' || this.superType === 'LUNE_ELEMENTAL') ? 2.0 : 1.6) 
+      ? ((this.superType === 'RENOIR_FLOWER' || this.superType === 'LUNE_ELEMENTAL' || this.superType === 'PAINTRESS_CHROMATIC_WAVES') ? 2.0 : 1.6) 
       : 0.8;
     if (attackStates.includes(this.state) && this.stateTime > maxLockTime) {
       this.state = this.isGrounded ? FIGHTER_STATE.IDLE : FIGHTER_STATE.JUMP;
@@ -803,6 +858,9 @@ export class Fighter {
 
     // Renderiza efeitos de status sobre o lutador (Geada de Slow, Chamas de Burn)
     this.drawStatusEffects(ctx);
+
+    // Renderiza as Ondas Cromáticas de La Peintresse
+    this.drawChromaticWaves(ctx);
   }
 
   drawRenoirBlackFlower(ctx) {
@@ -1290,6 +1348,75 @@ export class Fighter {
         ctx.fillStyle = f === 1 ? 'rgba(254, 240, 138, 0.85)' : 'rgba(239, 68, 68, 0.75)';
         ctx.fill();
       }
+      ctx.restore();
+    }
+  }
+
+  drawChromaticWaves(ctx) {
+    if (!this.chromaticWaves || this.chromaticWaves.length === 0) return;
+
+    const gy = this.groundY;
+    const now = Date.now() * 0.01;
+
+    for (const wave of this.chromaticWaves) {
+      if (!wave.active) continue;
+
+      const wx = wave.x;
+      const dir = Math.sign(wave.vx) || 1;
+      const waveHeight = 65;
+
+      ctx.save();
+      ctx.translate(wx, gy);
+      ctx.scale(dir, 1);
+
+      ctx.shadowColor = wave.color;
+      ctx.shadowBlur = 22;
+
+      // 1. Rastro luminoso de tinta cósmica no chão
+      const trailGrad = ctx.createLinearGradient(0, 0, -80, 0);
+      trailGrad.addColorStop(0, wave.color);
+      trailGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = trailGrad;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-80, 0);
+      ctx.lineTo(-60, -15);
+      ctx.lineTo(0, -waveHeight * 0.4);
+      ctx.closePath();
+      ctx.fill();
+
+      // 2. Lâmina / Onda Crescente de Tinta Cósmica (exige salto)
+      ctx.beginPath();
+      ctx.moveTo(25, 0); // Ponta frontal rente ao chão
+      ctx.quadraticCurveTo(15, -waveHeight * 0.7, 0, -waveHeight); // Crista superior
+      ctx.quadraticCurveTo(-15, -waveHeight * 0.6, -20, 0); // Cauda traseira
+      ctx.closePath();
+
+      const waveGrad = ctx.createLinearGradient(0, -waveHeight, 0, 0);
+      waveGrad.addColorStop(0, wave.secondary || '#ffffff');
+      waveGrad.addColorStop(0.5, wave.color);
+      waveGrad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = waveGrad;
+      ctx.fill();
+
+      // 3. Borda luminosa reluzente da onda
+      ctx.strokeStyle = wave.secondary || '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(25, 0);
+      ctx.quadraticCurveTo(15, -waveHeight * 0.7, 0, -waveHeight);
+      ctx.stroke();
+
+      // 4. Pingos de tinta cósmica cintilantes na crista
+      ctx.fillStyle = '#ffffff';
+      for (let d = 0; d < 3; d++) {
+        const dropX = -5 + Math.sin(now + d * 2) * 12;
+        const dropY = -waveHeight + Math.cos(now + d * 1.5) * 10;
+        ctx.beginPath();
+        ctx.arc(dropX, dropY, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
       ctx.restore();
     }
   }

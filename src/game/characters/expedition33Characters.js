@@ -238,6 +238,7 @@ export const EXPEDITION_33_CHARACTERS = [
       weaponType: 'colossal_brush',
       isPaintress: true
     },
+    superType: 'PAINTRESS_CHROMATIC_WAVES',
     description: 'A deusa misteriosa que acorda a cada ano para pintar um número no Monólito e apagar toda uma geração. Luta com um pincel monumental e arcos de tinta viva.'
   }
 ];

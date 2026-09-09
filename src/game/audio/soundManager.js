@@ -651,6 +651,59 @@ class SoundManager {
     osc.stop(t + 0.65);
     this.playNoise(0.5, 0.4, 2200);
   }
+
+  // --- LA PEINTRESSE: ONDAS CROMÁTICAS ---
+
+  playChromaticWaveCast() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    // Tom orquestral profundo e sino místico
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(220, t);
+    osc.frequency.linearRampToValueAtTime(550, t + 0.3);
+    osc.frequency.exponentialRampToValueAtTime(110, t + 0.9);
+
+    gain.gain.setValueAtTime(0.75, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.95);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.95);
+    this.playNoise(0.4, 0.35, 1600);
+  }
+
+  playChromaticWaveHit() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    // Impacto pesado de onda cromática
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(320, t);
+    osc.frequency.exponentialRampToValueAtTime(45, t + 0.45);
+
+    gain.gain.setValueAtTime(0.9, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.5);
+    this.playNoise(0.35, 0.6, 600);
+  }
 }
 
 export const sounds = new SoundManager();
