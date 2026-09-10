@@ -373,7 +373,7 @@ export class Fighter {
   dash(dir) {
     if (!this.canAct() || !this.isGrounded) return;
     this.state = dir === this.facing ? FIGHTER_STATE.DASH_FORWARD : FIGHTER_STATE.DASH_BACK;
-    this.velocity.x = dir * (this.getEffectiveSpeed() * 2.2);
+    this.velocity.x = dir * (this.getEffectiveSpeed() * 3.8);
     this.stateTime = 0;
     sounds.playDash();
   }
@@ -1890,7 +1890,7 @@ export class Fighter {
       FIGHTER_STATE.DASH_BACK
     ];
     const maxLockTime = this.state === FIGHTER_STATE.SUPER_MOVE 
-      ? ((this.superType === 'RENOIR_FLOWER' || this.superType === 'LUNE_ELEMENTAL' || this.superType === 'PAINTRESS_CHROMATIC_WAVES') ? 2.0 : 1.6) 
+      ? ((this.superType === 'RENOIR_FLOWER' || this.superType === 'LUNE_ELEMENTAL' || this.superType === 'PAINTRESS_CHROMATIC_WAVES' || this.superType === 'JOKER_GRAND_FINALE' || this.superType === 'JOKER_CROWBAR') ? 2.2 : 1.6) 
       : 0.8;
     if (attackStates.includes(this.state) && this.stateTime > maxLockTime) {
       // Se Vader estava no meio do choke e foi interrompido ou atingiu o watchdog, libera o oponente imediatamente
@@ -2513,65 +2513,108 @@ export class Fighter {
     }
 
     // 14. Coringa: Revólver "BANG!" e Dinamite Jack-in-the-box (Grand Finale)
+    // 14. Coringa: Gran Finale (Revólver BANG -> Bomba Arremessada -> Pé de Cabra)
     if (this.state === FIGHTER_STATE.SUPER_MOVE && (this.superType === 'JOKER_GRAND_FINALE' || this.superType === 'JOKER_CROWBAR')) {
       const t = this.stateTime;
-      const gunX = this.position.x + this.facing * 48;
-      const gunY = this.position.y - 75;
+      const target = this.opponent;
 
-      ctx.save();
-      // Revólver cômico
-      ctx.translate(gunX, gunY);
-      ctx.scale(this.facing, 1);
+      // 14.1 Revólver cômico com bandeirinha BANG (0.0s - 0.70s)
+      if (t < 0.70) {
+        const gunX = this.position.x + this.facing * 48;
+        const gunY = this.position.y - 75;
 
-      // Cano longo dourado/roxo
-      ctx.fillStyle = '#581c87';
-      ctx.fillRect(0, -6, 24, 8);
-      ctx.fillStyle = '#f59e0b';
-      ctx.fillRect(0, 0, 10, 12); // empunhadura
+        ctx.save();
+        ctx.translate(gunX, gunY);
+        ctx.scale(this.facing, 1);
 
-      // Bandeirinha BANG se t >= 0.35
-      if (t >= 0.35 && t < 0.7) {
-        ctx.fillStyle = '#fef08a';
-        ctx.strokeStyle = '#dc2626';
-        ctx.lineWidth = 2;
+        ctx.fillStyle = '#581c87';
+        ctx.fillRect(0, -6, 24, 8);
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(0, 0, 10, 12);
+
+        if (t >= 0.35) {
+          ctx.fillStyle = '#fef08a';
+          ctx.strokeStyle = '#dc2626';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.rect(24, -14, 52, 22);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#dc2626';
+          ctx.font = 'bold 11px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('BANG!', 50, 2);
+        }
+        ctx.restore();
+      }
+
+      // 14.2 Bomba esférica de desenho animado voando em parábola (0.70s - 1.05s)
+      if (t >= 0.70 && t < 1.05) {
+        const pProgress = (t - 0.70) / 0.35; // 0 a 1
+        const startX = this.position.x + this.facing * 40;
+        const startY = this.position.y - 70;
+        const targetX = target ? target.position.x : this.position.x + this.facing * 200;
+        const targetY = this.groundY - 30;
+
+        const currentX = startX + (targetX - startX) * pProgress;
+        const currentY = startY + (targetY - startY) * pProgress - Math.sin(pProgress * Math.PI) * 110;
+
+        ctx.save();
+        ctx.translate(currentX, currentY);
+        ctx.shadowColor = '#10b981';
+        ctx.shadowBlur = 15;
+
+        // Bola negra da bomba
+        ctx.fillStyle = '#18181b';
         ctx.beginPath();
-        ctx.rect(24, -14, 52, 22);
+        ctx.arc(0, 0, 15, 0, Math.PI * 2);
         ctx.fill();
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2;
         ctx.stroke();
 
-        ctx.fillStyle = '#dc2626';
-        ctx.font = 'bold 11px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('BANG!', 50, 2);
-      }
-      ctx.restore();
-
-      // Caixa de Dinamite Surpresa que explode em t >= 0.65
-      if (t >= 0.55 && t < 1.25) {
-        const boxX = this.position.x + this.facing * 115;
-        const boxY = this.groundY;
-        ctx.save();
-        ctx.translate(boxX, boxY);
-        ctx.shadowColor = '#10b981';
-        ctx.shadowBlur = 20;
-
-        // Caixa de madeira com TNT
-        ctx.fillStyle = '#7c2d12';
-        ctx.fillRect(-22, -40, 44, 40);
+        // Pavio e faísca
         ctx.strokeStyle = '#f59e0b';
         ctx.lineWidth = 2;
-        ctx.strokeRect(-22, -40, 44, 40);
-
-        // Dinamites vermelhas
-        ctx.fillStyle = '#dc2626';
-        ctx.fillRect(-16, -52, 10, 14);
-        ctx.fillRect(6, -52, 10, 14);
-
-        // Pavio faiscando
-        ctx.fillStyle = '#fbbf24';
         ctx.beginPath();
-        ctx.arc(0, -56, 4, 0, Math.PI * 2);
+        ctx.moveTo(0, -15);
+        ctx.quadraticCurveTo(8, -22, 12, -26);
+        ctx.stroke();
+
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(12, -26, 4, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
+      }
+
+      // 14.3 Pé de Cabra na mão durante a corrida e pancada final (1.15s - 1.95s)
+      if (t >= 1.15 && t < 1.90) {
+        const handX = this.position.x + this.facing * (t >= 1.45 ? 55 : 40);
+        const handY = this.position.y - (t >= 1.45 ? 65 : 70);
+        const swingRot = t >= 1.45 ? (this.facing * 0.9) : (this.facing * -0.6);
+
+        ctx.save();
+        ctx.translate(handX, handY);
+        ctx.rotate(swingRot);
+        ctx.shadowColor = '#10b981';
+        ctx.shadowBlur = 12;
+
+        // Haste de metal do pé de cabra
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(-10, -25);
+        ctx.lineTo(25, 20);
+        // Gancho curvado
+        ctx.lineTo(35, 12);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#7c3aed';
+        ctx.lineWidth = 2;
+        ctx.stroke();
         ctx.restore();
       }
     }
