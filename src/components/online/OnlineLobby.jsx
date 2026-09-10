@@ -63,6 +63,12 @@ export const OnlineLobby = ({
 
   // Setup de Listeners do NetworkManager
   useEffect(() => {
+    const unsubConnFailed = network.on('connection_failed', (info) => {
+      console.log('[Lobby] Conexão falhou:', info);
+      setIsConnecting(false);
+      setErrorMsg(`Falha de conexão (${info.reason}). Tente novamente.`);
+    });
+
     const unsubConnected = network.on('connected', (hostStatus) => {
       console.log('[Lobby] Conectado! Host:', hostStatus);
       setIsConnected(true);
@@ -140,6 +146,7 @@ export const OnlineLobby = ({
     }, 1000);
 
     return () => {
+      unsubConnFailed();
       unsubConnected();
       unsubData();
       unsubDisconnected();
@@ -482,6 +489,19 @@ export const OnlineLobby = ({
             {errorMsg && (
               <div className="mt-4 p-2.5 rounded bg-red-950/60 border border-red-800 text-red-300 text-xs text-center">
                 {errorMsg}
+                <button
+                  onClick={() => {
+                    setErrorMsg('');
+                    if (tab === 'CREATE') {
+                      handleCreateRoom();
+                    } else {
+                      handleJoinRoom();
+                    }
+                  }}
+                  className="mt-2 block w-full py-1 bg-red-800 hover:bg-red-700 text-xs font-bold rounded"
+                >
+                  Tentar novamente
+                </button>
               </div>
             )}
           </div>

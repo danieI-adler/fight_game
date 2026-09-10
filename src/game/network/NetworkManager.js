@@ -69,7 +69,9 @@ class NetworkManager {
       { urls: 'stun:stun3.l.google.com:19302' },
       { urls: 'stun:stun4.l.google.com:19302' },
       { urls: 'stun:stun.services.mozilla.com' },
-      { urls: 'stun:global.stun.twilio.com:3478' }
+      { urls: 'stun:global.stun.twilio.com:3478' },
+      // Public TURN server (openrelay.metered.ca) – free for testing
+      { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
     ];
   }
 
@@ -127,22 +129,50 @@ class NetworkManager {
           }
         });
 
+        // Overall timeout for establishing the full connection (30 seconds)
+        const overallTimeout = setTimeout(() => {
+          this.emit('connection_failed', { reason: 'timeout', isHost: false });
+          this.disconnect();
+          reject(new Error('Connection timeout'));
+        }, 30000);
+
         this.peer.on('open', (id) => {
           console.log(`[Client] Conectando ao host ${targetPeerId} com ID local: ${id}`);
-          this.conn = this.peer.connect(targetPeerId, {
-            reliable: true // Garante abertura correta do DataChannel WebRTC
+          const dataConn = this.peer.connect(targetPeerId, { reliable: true });
+
+          // Wait for the data channel to open before proceeding
+          const connTimeout = setTimeout(() => {
+            this.emit('connection_failed', { reason: 'datachannel_timeout', isHost: false });
+            dataConn.close();
+            clearTimeout(overallTimeout);
+            reject(new Error('DataChannel open timeout'));
+          }, 15000);
+
+          dataConn.on('open', () => {
+            clearTimeout(connTimeout);
+            clearTimeout(overallTimeout);
+            this.conn = dataConn;
+            this.setupConnection();
+            resolve(this.roomCode);
           });
 
-          this.setupConnection();
-          resolve(this.roomCode);
+          dataConn.on('error', (err) => {
+            console.error('[Client] DataConnection error:', err);
+            this.emit('error', err);
+            clearTimeout(connTimeout);
+            clearTimeout(overallTimeout);
+            reject(err);
+          });
         });
 
         this.peer.on('error', (err) => {
           console.error('[Client] Peer erro:', err);
           this.emit('error', err);
+          clearTimeout(overallTimeout);
           reject(err);
         });
       } catch (err) {
+        clearTimeout(overallTimeout);
         reject(err);
       }
     });
