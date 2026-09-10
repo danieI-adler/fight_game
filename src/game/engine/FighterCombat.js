@@ -144,28 +144,55 @@ export class FighterCombat {
 
       case FIGHTER_STATE.SPECIAL_1:
       case FIGHTER_STATE.SPECIAL_2:
-        // Monoco: Giro de 360° com cajado cobrindo frente e trás
+        // Monoco: Turbilhão 360° Contínuo com Cajado (Estilo E do Garen / R do Wukong)
+        // Permite mobilidade e atinge continuamente em múltiplos golpes enquanto gira!
         if (fighter.extraType === 'MONOCO_STAFF_SPIN') {
-          if (fighter.stateTime > 0.05 && fighter.stateTime < 0.32) {
-            const spinDamage = fighter.extraAttackLevel === 2 ? 180 : 110;
-            // Hitbox estendida para trás e para frente
-            fighter.activeHitbox = fighter.createHitbox(-85, 80, 190, 60);
-            fighter.activeHitbox.damage = spinDamage;
-            fighter.activeHitbox.knockback = 15;
-            fighter.activeHitbox.knockdown = true;
-            fighter.activeHitbox.isHeavy = true;
-            fighter.activeHitbox.attackerPower = fighter.attackPower;
+          // Permite que Monoco se mova enquanto gira em turbilhão (Garen E / Wukong R)
+          const spinDuration = fighter.extraAttackLevel === 2 ? 1.5 : 1.1;
+          const hitInterval = 0.16;
 
-            if (particles && Math.random() < 0.6) {
-              const ang = Math.random() * Math.PI * 2;
-              const px = fighter.position.x + Math.cos(ang) * 75;
-              const py = fighter.position.y - 65 + Math.sin(ang) * 40;
-              particles.emitSparks(px, py, '#f59e0b', 3, 3);
+          // Efeitos sonoros e faíscas periódicas do giro
+          if (particles && Math.random() < 0.7) {
+            const ang = Math.random() * Math.PI * 2;
+            const px = fighter.position.x + Math.cos(ang) * 90;
+            const py = fighter.position.y - 65 + Math.sin(ang) * 45;
+            particles.emitSparks(px, py, '#d97706', 4, 4);
+            particles.emitSparks(px, py, '#fef3c7', 3, 3);
+            particles.emitDust(fighter.position.x, fighter.groundY, 2, '#78350f');
+          }
+
+          if (fighter.stateTime < spinDuration) {
+            const currentHitIndex = Math.floor(fighter.stateTime / hitInterval);
+            const expectedPhase = `SPIN_HIT_${currentHitIndex}`;
+
+            if (fighter.superPhase !== expectedPhase) {
+              fighter.superPhase = expectedPhase;
+              fighter.hasHitCurrentAttack = false; // Permite novo golpe conectar!
+              sounds.playStaffBell();
+              sounds.playWhoosh();
+
+              const hitDmg = fighter.extraAttackLevel === 2 ? 40 : 28; // Múltiplos hits somando alto dano total
+              const isFinal = fighter.stateTime + hitInterval >= spinDuration;
+
+              // Hitbox estendida cobrindo frente, trás e o próprio corpo (raio de 120px)
+              fighter.activeHitbox = fighter.createHitbox(-100, 85, 200, 65);
+              fighter.activeHitbox.damage = hitDmg;
+              fighter.activeHitbox.knockback = isFinal ? 18 : 5;
+              fighter.activeHitbox.knockdown = isFinal;
+              fighter.activeHitbox.isHeavy = isFinal;
+              fighter.activeHitbox.attackerPower = fighter.attackPower;
+
+              if (particles) {
+                particles.emitShockwave(fighter.position.x, fighter.position.y - 65, 120, '#f59e0b');
+              }
             }
           }
-          if (fighter.stateTime >= 0.42) {
+
+          if (fighter.stateTime >= spinDuration) {
             fighter.state = FIGHTER_STATE.IDLE;
             fighter.extraType = null;
+            fighter.activeHitbox = null;
+            fighter.superPhase = null;
           }
         }
         // Maelle, Gustave, Lune, Renoir, Peintresse já tratam seus efeitos em tempo real
@@ -842,11 +869,12 @@ export class FighterCombat {
 
             if (fighter.superPhase !== expectedPhase) {
               fighter.superPhase = expectedPhase;
+              fighter.hasHitCurrentAttack = false; // CRUCIAL: Reseta hasHitCurrentAttack para que o novo golpe cause dano!
               sounds.playRapierSlash();
               sounds.playPunch(false);
 
               const hb = fighter.createHitbox(15, 80, 140, 55);
-              hb.damage = 38;
+              hb.damage = 42;
               hb.knockback = 4;
               hb.knockdown = currentHitIndex >= 7;
               hb.isHeavy = currentHitIndex >= 7;

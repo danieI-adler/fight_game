@@ -2618,6 +2618,47 @@ export class Fighter {
         ctx.restore();
       }
     }
+
+    // 15. Monoco: Turbilhão de Cajado com Efeito Giratório Contínuo (Garen E / Wukong R)
+    if (this.extraType === 'MONOCO_STAFF_SPIN' && (this.state === FIGHTER_STATE.SPECIAL_1 || this.state === FIGHTER_STATE.SPECIAL_2)) {
+      const rot = this.stateTime * 36;
+      const px = this.position.x;
+      const py = this.position.y - 65;
+
+      ctx.save();
+      ctx.translate(px, py);
+
+      // Trilha de vento/energia circular
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.45)';
+      ctx.lineWidth = 14;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 95, 38, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(254, 243, 199, 0.7)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 105, 42, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Cajado Gestral girando em alta velocidade
+      ctx.rotate(rot);
+      ctx.shadowColor = '#d97706';
+      ctx.shadowBlur = 18;
+
+      // Haste de madeira do cajado
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-90, -4, 180, 8);
+
+      // Sino de bronze e extremidades douradas
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(-88, 0, 8, 0, Math.PI * 2);
+      ctx.arc(88, 0, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
   }
 
   drawRenoirBlackFlower(ctx) {

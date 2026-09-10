@@ -162,17 +162,26 @@ export class InputHandler {
     fighter.block(block);
 
     // Movimentação horizontal e Dash por Duplo Toque
-    if (!block && !attackInitiated) {
-      if (justPressed.dashLeft) {
-        fighter.dash(-1);
-      } else if (justPressed.dashRight) {
-        fighter.dash(1);
-      } else if (left && !right) {
-        fighter.move(-1);
-      } else if (right && !left) {
-        fighter.move(1);
+    if (!block && (!attackInitiated || fighter.extraType === 'MONOCO_STAFF_SPIN')) {
+      if (fighter.extraType === 'MONOCO_STAFF_SPIN') {
+        // Monoco se move com velocidade de turbilhão (Garen E / Wukong R)
+        if (left && !right) {
+          fighter.velocity.x = -fighter.getEffectiveSpeed() * 0.95;
+        } else if (right && !left) {
+          fighter.velocity.x = fighter.getEffectiveSpeed() * 0.95;
+        }
       } else {
-        fighter.stopMoving();
+        if (justPressed.dashLeft) {
+          fighter.dash(-1);
+        } else if (justPressed.dashRight) {
+          fighter.dash(1);
+        } else if (left && !right) {
+          fighter.move(-1);
+        } else if (right && !left) {
+          fighter.move(1);
+        } else {
+          fighter.stopMoving();
+        }
       }
     }
 
