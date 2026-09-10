@@ -39,6 +39,31 @@ export class InputHandler {
 
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
+
+    // Sistema de Esquiva Rápida (Dash) por Toque Duplo
+    let savedDashToggle = true;
+    try {
+      const stored = localStorage.getItem('fightgame_double_tap_dash');
+      if (stored !== null) {
+        savedDashToggle = stored === 'true';
+      }
+    } catch (e) {}
+
+    this.doubleTapDashEnabled = savedDashToggle;
+    this.lastTapTime = {};
+    this.doubleTapWindow = 260; // Janela de tempo em ms para registrar duplo toque
+  }
+
+  toggleDoubleTapDash(forceState = null) {
+    if (forceState !== null) {
+      this.doubleTapDashEnabled = !!forceState;
+    } else {
+      this.doubleTapDashEnabled = !this.doubleTapDashEnabled;
+    }
+    try {
+      localStorage.setItem('fightgame_double_tap_dash', String(this.doubleTapDashEnabled));
+    } catch (e) {}
+    return this.doubleTapDashEnabled;
   }
 
   attach() {
@@ -136,9 +161,13 @@ export class InputHandler {
     // Bloqueio
     fighter.block(block);
 
-    // Movimentação horizontal (permite andar em pé ou andar agachado quando não estiver executando um golpe)
+    // Movimentação horizontal e Dash por Duplo Toque
     if (!block && !attackInitiated) {
-      if (left && !right) {
+      if (justPressed.dashLeft) {
+        fighter.dash(-1);
+      } else if (justPressed.dashRight) {
+        fighter.dash(1);
+      } else if (left && !right) {
         fighter.move(-1);
       } else if (right && !left) {
         fighter.move(1);

@@ -35,6 +35,10 @@ export const ControlsGuide = ({ onClose }) => {
                 <span className="font-mono">[A] / [D]</span>
               </div>
               <div className="flex justify-between py-0.5 border-b border-slate-900">
+                <span className="text-emerald-400 font-medium">Dash Rápido:</span>
+                <span className="font-mono text-emerald-300 font-bold">[A][A] ou [D][D]</span>
+              </div>
+              <div className="flex justify-between py-0.5 border-b border-slate-900">
                 <span className="text-slate-400">Pular:</span>
                 <span className="font-mono font-bold text-white">[Espaço] ou [W]</span>
               </div>
@@ -74,6 +78,10 @@ export const ControlsGuide = ({ onClose }) => {
               <div className="flex justify-between py-0.5 border-b border-slate-900">
                 <span className="text-slate-400">Mover:</span>
                 <span className="font-mono">[←] / [→]</span>
+              </div>
+              <div className="flex justify-between py-0.5 border-b border-slate-900">
+                <span className="text-emerald-400 font-medium">Dash Rápido:</span>
+                <span className="font-mono text-emerald-300 font-bold">[←][←] ou [→][→]</span>
               </div>
               <div className="flex justify-between py-0.5 border-b border-slate-900">
                 <span className="text-slate-400">Pular:</span>

@@ -65,53 +65,133 @@ export class FighterAI {
 
     // Nível de precisão / dificuldade
     const isCrazy = this.difficulty === 'crazy' || (this.difficulty === 'tournament' && this.tournamentLevel === 10);
+    const isHighTournament = this.difficulty === 'tournament' && this.tournamentLevel >= 6;
     const isTournament = this.difficulty === 'tournament';
     const profile = this.playerProfile;
 
-    // 1. Reação a Ataques do Oponente (Defesa Perfeita / Adaptativa)
+    // Detecta se o oponente está executando ataque agora
+    const opponentState = opponent.state;
+    const isOpponentInAttackState = [
+      'LIGHT_KICK', 'HEAVY_KICK', 'LIGHT_PUNCH', 'HEAVY_PUNCH',
+      'CROUCH_KICK', 'CROUCH_PUNCH', 'JUMP_KICK', 'JUMP_PUNCH'
+    ].includes(opponentState);
+
+    // Detecta padrão de spam de kick (seja pelo histórico do torneio ou pelo estado atual)
+    const isKickSpammer = Boolean(
+      (profile && (profile.raw?.attacks?.lightKick > 8 || profile.raw?.attacks?.crouchKick > 8) &&
+        (profile.raw?.attacks?.lightKick + (profile.raw?.attacks?.crouchKick || 0)) / Math.max(1, profile.raw?.totalActions) > 0.35) ||
+      (opponentState === 'LIGHT_KICK' || opponentState === 'CROUCH_KICK')
+    );
+
+    // =========================================================================
+    // 1. REAÇÃO PRIORITÁRIA ANTI-SPAM DE KICK & FRAME-TRAP (CRAZY & HIGH TOURNAMENT)
+    // =========================================================================
+    if ((isCrazy || isHighTournament) && isOpponentInAttackState) {
+      // (A) Startup Interruption: Oponente está no início do golpe (stateTime < 0.07 para chutes)
+      // O soco (punch) tem startup de 0.03s, superando o chute de 0.07s instantaneamente!
+      if (opponent.stateTime < 0.07 && dist < 85) {
+        if (fighter.energy >= 100) {
+          fighter.superMove();
+          return;
+        } else if (fighter.energy >= 33 && rng < 0.7) {
+          fighter.specialAttack();
+          return;
+        } else {
+          fighter.punch();
+          return;
+        }
+      }
+
+      // (B) Whiff & Recovery Punish: Oponente terminou a janela ativa e está se recuperando (stateTime >= 0.18s)
+      if (opponent.stateTime >= 0.18 && dist < 130) {
+        if (fighter.isBlocking) fighter.block(false);
+
+        if (fighter.energy >= 100) {
+          fighter.superMove();
+          return;
+        } else if (fighter.energy >= 33 && rng < 0.85) {
+          fighter.specialAttack();
+          return;
+        } else {
+          // Punição com soco rápido que gera frame advantage
+          fighter.punch();
+          return;
+        }
+      }
+
+      // (C) Spacing Trap: Se o oponente spamma chutes mas está entre 75px e 140px
+      // A IA dá um backdash para fazer o chute errar (whiff) ou pula aplicando jump-attack
+      if (isKickSpammer && dist >= 70 && dist <= 140 && rng < 0.6) {
+        if (rng < 0.35) {
+          // Salta por cima do chute baixo
+          fighter.jump(opponent.position.x > fighter.position.x ? 1 : -1);
+          return;
+        } else {
+          // Recua com dash invulnerável e imediatamente pune
+          fighter.dash(opponent.position.x > fighter.position.x ? -1 : 1);
+          return;
+        }
+      }
+    }
+
+    // =========================================================================
+    // 2. DEFESA ADAPTATIVA E BLOQUEIO DE HITBOXES ATIVAS
+    // =========================================================================
     if (isOpponentAttacking && dist < 170) {
       let blockChance = 0.5;
       if (isCrazy) {
-        blockChance = 0.995; // 99.5% de bloqueio
+        blockChance = 0.998; // 99.8% de bloqueio
       } else if (isTournament) {
-        blockChance = Math.min(0.95, 0.25 + (this.tournamentLevel - 1) * 0.08);
+        blockChance = Math.min(0.96, 0.25 + (this.tournamentLevel - 1) * 0.08);
       } else {
         blockChance = {
           easy: 0.2,
           medium: 0.55,
           hard: 0.85,
           boss: 0.95,
-          crazy: 0.995
+          crazy: 0.998
         }[this.difficulty] || 0.5;
       }
 
       if (rng < blockChance) {
         fighter.block(true);
 
-        const shouldCrouchBlock = opponent.isCrouching || (profile && profile.lowAttackRatio > 0.45 && Math.random() < 0.8);
-        if (shouldCrouchBlock) {
+        // Agacha na defesa se o golpe for baixo ou oponente crouch
+        const isLowAttack = opponent.state === 'CROUCH_KICK' || opponent.isCrouching ||
+          (profile && profile.lowAttackRatio > 0.4 && rng < 0.8);
+        if (isLowAttack) {
           fighter.crouch(true);
+        }
+
+        // GUARD CANCEL IMEDIATO PARA CRAZY / LVL 10:
+        // No momento em que o ataque atinge ou logo em seguida, se a IA tiver energia, contra-ataca!
+        if (isCrazy && fighter.energy >= 33 && rng < 0.45) {
+          fighter.block(false);
+          fighter.specialAttack();
+          return;
         }
         return;
       }
     } else {
-      // Libera bloqueio imediatamente se o oponente parou de atacar para poder bater
+      // Libera bloqueio imediatamente se o oponente parou de atacar para nunca ficar travado!
       if (fighter.isBlocking) {
         fighter.block(false);
       }
     }
 
-    // 2. Anti-Air Implacável (Punição de pulo)
-    if (!opponent.isGrounded && dist < 150) {
+    // =========================================================================
+    // 3. ANTI-AIR IMPLACÁVEL (Punição de pulo)
+    // =========================================================================
+    if (!opponent.isGrounded && dist < 155) {
       const antiAirChance = isCrazy
-        ? 0.98
+        ? 0.99
         : (isTournament
-            ? Math.min(0.95, 0.3 + (this.tournamentLevel - 1) * 0.08 + (profile?.jumpSpamRatio || 0) * 0.3)
-            : (this.difficulty === 'boss' ? 0.85 : (this.difficulty === 'hard' ? 0.7 : 0.2)));
+            ? Math.min(0.96, 0.35 + (this.tournamentLevel - 1) * 0.08 + (profile?.jumpSpamRatio || 0) * 0.3)
+            : (this.difficulty === 'boss' ? 0.88 : (this.difficulty === 'hard' ? 0.75 : 0.25)));
 
       if (rng < antiAirChance) {
-        if (fighter.energy >= 25 && rng < 0.5) {
-          fighter.special1();
+        if (fighter.energy >= 33 && rng < 0.6) {
+          fighter.specialAttack();
         } else {
           fighter.punch();
         }
@@ -119,22 +199,26 @@ export class FighterAI {
       }
     }
 
-    // 3. Punição Imediata de Whiff & Pressão Constante
-    if (isCrazy && !isOpponentAttacking && dist < 125) {
+    // =========================================================================
+    // 4. PUNIÇÃO IMEDIATA DE WHIFF & PRESSÃO CONSTANTE
+    // =========================================================================
+    if (isCrazy && !isOpponentAttacking && dist < 130) {
       if (fighter.energy >= 100) {
         fighter.superMove();
         return;
-      } else if (fighter.energy >= 25 && Math.random() < 0.75) {
-        fighter.special1();
+      } else if (fighter.energy >= 33 && Math.random() < 0.8) {
+        fighter.specialAttack();
         return;
       } else {
-        if (Math.random() < 0.6) fighter.punch();
+        if (Math.random() < 0.65) fighter.punch();
         else fighter.kick();
         return;
       }
     }
 
-    // 4. Super Move Otimizado
+    // =========================================================================
+    // 5. SUPER MOVE OTIMIZADO
+    // =========================================================================
     if (fighter.energy >= 100 && dist < 260) {
       const superChance = isCrazy
         ? 0.99
@@ -148,20 +232,22 @@ export class FighterAI {
       }
     }
 
-    // 5. Ataque Especial / Projétil
-    if (fighter.energy >= 25 && dist < 220 && dist > 50) {
-      const specialChance = isCrazy ? 0.92 : (isTournament ? 0.2 + (this.tournamentLevel * 0.06) : 0.45);
+    // =========================================================================
+    // 6. ATAQUE ESPECIAL / PROJÉTIL
+    // =========================================================================
+    if (fighter.energy >= 33 && dist < 240 && dist > 55) {
+      const specialChance = isCrazy ? 0.94 : (isTournament ? 0.25 + (this.tournamentLevel * 0.07) : 0.5);
       if (rng < specialChance) {
-        fighter.special1();
+        fighter.specialAttack();
         return;
       }
     }
 
-    // 6. Curta Distância (< 100px) - Agressão Máxima
+    // 7. Curta Distância (< 100px) - Agressão Máxima
     if (dist < 100) {
       if (isCrazy) {
-        if (fighter.energy >= 25 && Math.random() < 0.5) {
-          fighter.special1();
+        if (fighter.energy >= 33 && Math.random() < 0.5) {
+          fighter.specialAttack();
         } else if (Math.random() < 0.55) {
           fighter.punch();
         } else {

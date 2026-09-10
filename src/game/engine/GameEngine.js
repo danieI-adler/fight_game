@@ -95,6 +95,8 @@ export class GameEngine {
     window.addEventListener('keydown', (e) => {
       if (this.status !== GAME_STATUS.FIGHTING && this.status !== GAME_STATUS.INTRO) return;
 
+      const now = performance.now();
+
       // P1 Just Pressed (Usado localmente por P1 no Versus/Arcade e pelo jogador local no Online)
       if (this.inputHandler.p1Binds.up.includes(e.code)) this.justPressedP1.jump = true;
       if (this.inputHandler.p1Binds.lightPunch.includes(e.code)) this.justPressedP1.lightPunch = true;
@@ -103,6 +105,27 @@ export class GameEngine {
       if (this.inputHandler.p1Binds.heavyKick.includes(e.code)) this.justPressedP1.heavyKick = true;
       if (this.inputHandler.p1Binds.special1.includes(e.code)) this.justPressedP1.special1 = true;
       if (this.inputHandler.p1Binds.superMove.includes(e.code)) this.justPressedP1.superMove = true;
+
+      // Detecção de Duplo Toque para Dash (P1 - A / D)
+      if (this.inputHandler.doubleTapDashEnabled) {
+        if (this.inputHandler.p1Binds.left.includes(e.code)) {
+          const last = this.inputHandler.lastTapTime['p1_left'] || 0;
+          if (now - last < this.inputHandler.doubleTapWindow && now - last > 40) {
+            this.justPressedP1.dashLeft = true;
+            this.inputHandler.lastTapTime['p1_left'] = 0;
+          } else {
+            this.inputHandler.lastTapTime['p1_left'] = now;
+          }
+        } else if (this.inputHandler.p1Binds.right.includes(e.code)) {
+          const last = this.inputHandler.lastTapTime['p1_right'] || 0;
+          if (now - last < this.inputHandler.doubleTapWindow && now - last > 40) {
+            this.justPressedP1.dashRight = true;
+            this.inputHandler.lastTapTime['p1_right'] = 0;
+          } else {
+            this.inputHandler.lastTapTime['p1_right'] = now;
+          }
+        }
+      }
 
       // P2 Just Pressed (Modo Versus Local)
       if (this.mode === 'VERSUS') {
@@ -113,6 +136,26 @@ export class GameEngine {
         if (this.inputHandler.p2Binds.heavyKick.includes(e.code)) this.justPressedP2.heavyKick = true;
         if (this.inputHandler.p2Binds.special1.includes(e.code)) this.justPressedP2.special1 = true;
         if (this.inputHandler.p2Binds.superMove.includes(e.code)) this.justPressedP2.superMove = true;
+
+        if (this.inputHandler.doubleTapDashEnabled) {
+          if (this.inputHandler.p2Binds.left.includes(e.code)) {
+            const last = this.inputHandler.lastTapTime['p2_left'] || 0;
+            if (now - last < this.inputHandler.doubleTapWindow && now - last > 40) {
+              this.justPressedP2.dashLeft = true;
+              this.inputHandler.lastTapTime['p2_left'] = 0;
+            } else {
+              this.inputHandler.lastTapTime['p2_left'] = now;
+            }
+          } else if (this.inputHandler.p2Binds.right.includes(e.code)) {
+            const last = this.inputHandler.lastTapTime['p2_right'] || 0;
+            if (now - last < this.inputHandler.doubleTapWindow && now - last > 40) {
+              this.justPressedP2.dashRight = true;
+              this.inputHandler.lastTapTime['p2_right'] = 0;
+            } else {
+              this.inputHandler.lastTapTime['p2_right'] = now;
+            }
+          }
+        }
       }
     });
   }
@@ -152,6 +195,8 @@ export class GameEngine {
 
     this.p1 = new Fighter(c1, false, this.stage.groundY);
     this.p2 = new Fighter(c2, true, this.stage.groundY);
+    this.p2.aiDifficulty = actualDiff;
+    this.p2.aiTournamentLevel = tournamentLevel;
     this.p1.setOpponent(this.p2);
     this.p2.setOpponent(this.p1);
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { sounds } from '../../game/audio/soundManager';
 
-export const PauseMenu = ({ onResume, onRestart, onSelectCharacter, onMainMenu, currentTrack, onNextMusic }) => {
+export const PauseMenu = ({ onResume, onRestart, onSelectCharacter, onMainMenu, currentTrack, onNextMusic, dashEnabled, onToggleDash }) => {
   return (
     <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-50 select-none">
       <div className="w-80 bg-slate-900 border border-slate-700 rounded-lg p-6 shadow-2xl flex flex-col items-center">
@@ -30,6 +30,23 @@ export const PauseMenu = ({ onResume, onRestart, onSelectCharacter, onMainMenu, 
             <span>🎵 Música</span>
             <span className="text-[10px] text-amber-400/90 truncate max-w-[140px]">
               {currentTrack?.title || 'Trocar'}
+            </span>
+          </button>
+
+          <button
+            onClick={() => {
+              sounds.playSelect();
+              if (onToggleDash) onToggleDash();
+            }}
+            className={`py-2 px-4 rounded border text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-between ${
+              dashEnabled
+                ? 'bg-emerald-950/70 hover:bg-emerald-900/90 border-emerald-500/70 text-emerald-300'
+                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-400'
+            }`}
+          >
+            <span>⚡ Dash Duplo Toque</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${dashEnabled ? 'bg-emerald-500 text-black' : 'bg-slate-700 text-slate-300'}`}>
+              {dashEnabled ? 'ATIVADO' : 'DESATIVADO'}
             </span>
           </button>
 

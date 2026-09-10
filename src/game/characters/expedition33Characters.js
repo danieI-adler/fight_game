@@ -335,7 +335,7 @@ export const EXPEDITION_33_CHARACTERS = [
     glowColor: 'rgba(16, 185, 129, 0.85)',
     energyColor: '#f43f5e',
     stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
-    superType: 'JOKER_CROWBAR',
+    superType: 'JOKER_GRAND_FINALE',
     visual: {
       coatType: 'trenchcoat',
       headgear: 'fedora',
@@ -352,7 +352,7 @@ export const EXPEDITION_33_CHARACTERS = [
       paintTrailColor: '#10b981',
       weaponType: 'clown_cards'
     },
-    description: 'O Palhaço do Crime com Cartas do Caos cortantes em leque e espancamento cômico com pé de cabra.'
+    description: 'O Palhaço do Crime com Cartas do Caos cortantes em leque e Gran Finale: revólver BANG! com dinamite surpresa e nuvem de gás tóxico.'
   },
   {
     id: 114,

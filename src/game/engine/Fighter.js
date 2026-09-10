@@ -790,15 +790,14 @@ export class Fighter {
       sounds.playSuperCharge();
       sounds.playSuper();
       this.palpatineDualSabers = true;
-    } else if (this.superType === 'JOKER_CROWBAR') {
-      this.superPhase = 'CROWBAR_RUSH';
+    } else if (this.superType === 'JOKER_GRAND_FINALE' || this.superType === 'JOKER_CROWBAR') {
+      this.superPhase = 'BANG_SETUP';
       sounds.playSuperCharge();
-      sounds.playRapierSlash();
-      this.jokerCrowbarBeat = {
-        hitCount: 0,
-        nextHitTime: 0.15,
-        totalHits: 6,
-        target: this.opponent
+      sounds.playSelect();
+      this.jokerGrandFinaleProp = {
+        timer: 0,
+        bangShown: false,
+        dynamiteExploded: false
       };
     } else if (this.superType === 'SPARROW_BLACK_PEARL') {
       this.superPhase = 'CANNON_COMMAND';
@@ -917,8 +916,11 @@ export class Fighter {
     if (isGuarding && !attackData.unblockable) {
       const chipDamage = Math.max(1, Math.round(attackData.damage * 0.15 / this.defense));
       this.health = Math.max(0, this.health - chipDamage);
-      this.blockstunTime = 0.18;
-      this.velocity.x = -this.facing * (attackData.knockback * 0.4);
+
+      // Guard cancel / recuperação acelerada se o lutador for IA Crazy ou Boss
+      const isCrazyAI = this.isPlayer2 && (this.aiDifficulty === 'crazy' || this.aiTournamentLevel >= 9);
+      this.blockstunTime = isCrazyAI ? 0.05 : 0.18;
+      this.velocity.x = -this.facing * (attackData.knockback * (isCrazyAI ? 0.2 : 0.4));
 
       sounds.playBlock();
       if (particles) {
@@ -1891,11 +1893,25 @@ export class Fighter {
       ? ((this.superType === 'RENOIR_FLOWER' || this.superType === 'LUNE_ELEMENTAL' || this.superType === 'PAINTRESS_CHROMATIC_WAVES') ? 2.0 : 1.6) 
       : 0.8;
     if (attackStates.includes(this.state) && this.stateTime > maxLockTime) {
+      // Se Vader estava no meio do choke e foi interrompido ou atingiu o watchdog, libera o oponente imediatamente
+      if (this.superType === 'VADER_CHOKE' && this.opponent) {
+        this.opponent.isInvulnerable = false;
+        this.opponent.isGrounded = true;
+        this.opponent.position.y = this.opponent.groundY;
+        this.opponent.velocity.x = 0;
+        this.opponent.velocity.y = 0;
+        if (this.opponent.state === FIGHTER_STATE.HURT) {
+          this.opponent.state = FIGHTER_STATE.IDLE;
+        }
+      }
+
       this.state = this.isGrounded ? FIGHTER_STATE.IDLE : FIGHTER_STATE.JUMP;
       this.stateTime = 0;
       this.activeHitbox = null;
       this.isInvulnerable = false;
       this.superPhase = null;
+      this.superType = null;
+      this.vaderChokeTarget = null;
     }
 
     // 7. Pose Esquelética
@@ -2494,6 +2510,70 @@ export class Fighter {
       ctx.lineWidth = 2.5;
       ctx.stroke();
       ctx.restore();
+    }
+
+    // 14. Coringa: Revólver "BANG!" e Dinamite Jack-in-the-box (Grand Finale)
+    if (this.state === FIGHTER_STATE.SUPER_MOVE && (this.superType === 'JOKER_GRAND_FINALE' || this.superType === 'JOKER_CROWBAR')) {
+      const t = this.stateTime;
+      const gunX = this.position.x + this.facing * 48;
+      const gunY = this.position.y - 75;
+
+      ctx.save();
+      // Revólver cômico
+      ctx.translate(gunX, gunY);
+      ctx.scale(this.facing, 1);
+
+      // Cano longo dourado/roxo
+      ctx.fillStyle = '#581c87';
+      ctx.fillRect(0, -6, 24, 8);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(0, 0, 10, 12); // empunhadura
+
+      // Bandeirinha BANG se t >= 0.35
+      if (t >= 0.35 && t < 0.7) {
+        ctx.fillStyle = '#fef08a';
+        ctx.strokeStyle = '#dc2626';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.rect(24, -14, 52, 22);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#dc2626';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('BANG!', 50, 2);
+      }
+      ctx.restore();
+
+      // Caixa de Dinamite Surpresa que explode em t >= 0.65
+      if (t >= 0.55 && t < 1.25) {
+        const boxX = this.position.x + this.facing * 115;
+        const boxY = this.groundY;
+        ctx.save();
+        ctx.translate(boxX, boxY);
+        ctx.shadowColor = '#10b981';
+        ctx.shadowBlur = 20;
+
+        // Caixa de madeira com TNT
+        ctx.fillStyle = '#7c2d12';
+        ctx.fillRect(-22, -40, 44, 40);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-22, -40, 44, 40);
+
+        // Dinamites vermelhas
+        ctx.fillStyle = '#dc2626';
+        ctx.fillRect(-16, -52, 10, 14);
+        ctx.fillRect(6, -52, 10, 14);
+
+        // Pavio faiscando
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(0, -56, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
     }
   }
 

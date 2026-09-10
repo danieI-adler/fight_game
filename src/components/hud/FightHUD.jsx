@@ -258,7 +258,7 @@ export const FightHUD = ({
 
       {/* Bottom Hint */}
       <div className="w-full text-center text-xs text-slate-400 bg-slate-950/80 py-1 border-t border-slate-800">
-        P1: [A/D] Mover | [W / Espaço] Pular | [S] Agachar | [F/R] Socos | [G/T] Chutes | [E] Bloqueio | [Enter] Especial
+        P1: [A/D] Mover | [A-A / D-D] Dash | [W/Espaço] Pular | [S] Agachar | [F/R] Socos | [G/T] Chutes | [E] Bloqueio | [Enter] Especial
       </div>
     </div>
   );

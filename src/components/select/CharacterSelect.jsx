@@ -113,7 +113,9 @@ export const CharacterSelect = ({
           <h1 className={`text-xl font-bold tracking-wider ${
             isExpedition ? 'text-amber-300 font-serif' : 'text-white'
           }`}>
-            {isExpedition ? 'CLAIR OBSCUR: EXPEDITION 33' : 'SELEÇÃO DE PERSONAGENS'}
+            {mode === 'TOURNAMENT'
+              ? 'TORNEIO DOS 10 DESAFIOS: ESCOLHA SEU LUTADOR'
+              : (isExpedition ? 'CLAIR OBSCUR: EXPEDITION 33' : 'SELEÇÃO DE PERSONAGENS')}
           </h1>
         </div>
 
@@ -157,7 +159,7 @@ export const CharacterSelect = ({
             </select>
           </div>
 
-          {mode !== 'VERSUS' && (
+          {mode !== 'VERSUS' && mode !== 'TOURNAMENT' && (
             <div className="flex items-center gap-2 bg-slate-900 px-3 py-1 rounded border border-slate-800">
               <span className="text-slate-400">Dificuldade:</span>
               <select
@@ -171,6 +173,13 @@ export const CharacterSelect = ({
                 <option value="boss">Boss</option>
                 <option value="crazy">⚡ CRAZY (Imbatível)</option>
               </select>
+            </div>
+          )}
+
+          {mode === 'TOURNAMENT' && (
+            <div className="flex items-center gap-1.5 bg-purple-950/80 px-3 py-1 rounded border border-purple-700 text-purple-200 font-mono">
+              <span className="text-purple-400">Torneio:</span>
+              <span className="font-bold text-[11px] text-amber-300">10 Níveis Adaptativos</span>
             </div>
           )}
         </div>
@@ -193,14 +202,16 @@ export const CharacterSelect = ({
                   onClick={() => handleSelectP1(index)}
                   onContextMenu={(e) => {
                     e.preventDefault();
-                    handleSelectP2(index);
+                    if (mode !== 'TOURNAMENT') {
+                      handleSelectP2(index);
+                    }
                   }}
                   className={`relative p-2 rounded border cursor-pointer transition-all flex flex-col justify-between overflow-hidden ${
                     isExpedition ? 'h-24' : 'h-20'
                   } ${
                     isP1
                       ? 'border-blue-500 bg-blue-950/70 shadow-lg shadow-blue-950/60 ring-1 ring-blue-400'
-                      : isP2
+                      : (isP2 && mode !== 'TOURNAMENT')
                       ? 'border-red-500 bg-red-950/70 shadow-lg shadow-red-950/60 ring-1 ring-red-400'
                       : isExpedition
                       ? 'border-amber-900/40 bg-slate-950/90 hover:border-amber-500 hover:bg-slate-900'
@@ -210,10 +221,10 @@ export const CharacterSelect = ({
                   <div className="absolute top-1 left-1 flex gap-1 z-10">
                     {isP1 && (
                       <span className="px-1.5 bg-blue-600 text-white text-[9px] font-bold rounded shadow">
-                        P1
+                        {mode === 'TOURNAMENT' ? 'SEU LUTADOR' : 'P1'}
                       </span>
                     )}
-                    {isP2 && (
+                    {isP2 && mode !== 'TOURNAMENT' && (
                       <span className="px-1.5 bg-red-600 text-white text-[9px] font-bold rounded shadow">
                         {mode === 'VERSUS' ? 'P2' : 'CPU'}
                       </span>
@@ -250,7 +261,11 @@ export const CharacterSelect = ({
             })}
           </div>
           <div className="mt-2 text-[11px] text-slate-400 flex justify-between">
-            <span>Clique Esquerdo: P1 | Clique Direito: P2/CPU</span>
+            <span>
+              {mode === 'TOURNAMENT'
+                ? 'Clique no lutador desejado para representá-lo nos 10 níveis do Torneio'
+                : 'Clique Esquerdo: P1 | Clique Direito: P2/CPU'}
+            </span>
             <span>{charList.length} Personagens Disponíveis</span>
           </div>
         </div>
@@ -281,40 +296,52 @@ export const CharacterSelect = ({
 
             {/* P2 Card */}
             <div className="flex items-center gap-2 bg-slate-900/90 p-1.5 rounded border border-red-900/60 shadow-inner">
-              {selectedCharP2.image && (
-                <div className="w-12 h-16 rounded border border-red-500/50 overflow-hidden flex-shrink-0 bg-black">
-                  <img src={selectedCharP2.image} alt={selectedCharP2.name} className="w-full h-full object-cover object-top" />
+              {mode === 'TOURNAMENT' ? (
+                <div className="min-w-0 flex-1 py-2 text-center">
+                  <span className="font-bold text-amber-400 text-xs block">OPONENTES SECRETOS</span>
+                  <span className="text-[9px] text-slate-400 block mt-1">10 Inimigos Sorteados sem Reposição</span>
+                  <span className="text-[8px] text-purple-300 block font-mono">IA Evolui a Cada Nível</span>
                 </div>
+              ) : (
+                <>
+                  {selectedCharP2.image && (
+                    <div className="w-12 h-16 rounded border border-red-500/50 overflow-hidden flex-shrink-0 bg-black">
+                      <img src={selectedCharP2.image} alt={selectedCharP2.name} className="w-full h-full object-cover object-top" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <span className="font-bold text-red-300 text-xs block truncate">{selectedCharP2.name}</span>
+                    <div className="text-[9px] text-slate-300 space-y-0.5 mt-1">
+                      <div>Atk: {Math.round(selectedCharP2.stats.attackPower * 100)}% | Def: {Math.round(selectedCharP2.stats.defense * 100)}%</div>
+                      <div>Velocidade: {selectedCharP2.stats.speed}</div>
+                    </div>
+                  </div>
+                </>
               )}
-              <div className="min-w-0 flex-1">
-                <span className="font-bold text-red-300 text-xs block truncate">{selectedCharP2.name}</span>
-                <div className="text-[9px] text-slate-300 space-y-0.5 mt-1">
-                  <div>Atk: {Math.round(selectedCharP2.stats.attackPower * 100)}% | Def: {Math.round(selectedCharP2.stats.defense * 100)}%</div>
-                  <div>Velocidade: {selectedCharP2.stats.speed}</div>
-                </div>
-              </div>
             </div>
           </div>
 
           <div className="relative w-full h-44 bg-slate-950 rounded border border-slate-800 overflow-hidden flex items-center justify-center">
             <canvas ref={canvasRef} width={500} height={300} className="w-full h-full object-contain" />
             <div className="absolute top-2 left-3 text-blue-400 text-xs font-semibold">
-              P1: {selectedCharP1.name}
+              {mode === 'TOURNAMENT' ? 'Campeão' : 'P1'}: {selectedCharP1.name}
             </div>
             <div className="absolute top-2 right-3 text-red-400 text-xs font-semibold">
-              {mode === 'VERSUS' ? 'P2' : 'CPU'}: {selectedCharP2.name}
+              {mode === 'TOURNAMENT' ? 'Nível 1 de 10: Inimigo Sorteado' : `${mode === 'VERSUS' ? 'P2' : 'CPU'}: ${selectedCharP2.name}`}
             </div>
           </div>
 
           <button
             onClick={handleConfirm}
             className={`w-full py-2.5 rounded font-bold text-sm uppercase tracking-wider transition-colors cursor-pointer ${
-              isExpedition
+              mode === 'TOURNAMENT'
+                ? 'bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-black font-serif shadow-lg animate-pulse'
+                : isExpedition
                 ? 'bg-amber-600 hover:bg-amber-500 text-black font-serif'
                 : 'bg-blue-600 hover:bg-blue-500 text-white'
             }`}
           >
-            Iniciar Duelo
+            {mode === 'TOURNAMENT' ? '⚔️ Iniciar Torneio dos 10 Níveis' : 'Iniciar Duelo'}
           </button>
         </div>
       </div>

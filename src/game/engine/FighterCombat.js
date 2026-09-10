@@ -755,14 +755,14 @@ export class FighterCombat {
           fighter.isInvulnerable = true;
           const target = fighter.opponent;
 
-          // Levitação e asfixia
-          if (target && !target.isDead) {
+          // Levitação e asfixia até o momento do impacto
+          if (target && !target.isDead && fighter.stateTime < 0.8) {
             target.isGrounded = false;
             target.velocity.x = 0;
             target.velocity.y = 0;
-            target.position.y = fighter.groundY - 80; // suspenso no ar
+            target.position.y = fighter.groundY - 75; // suspenso no ar
             target.state = FIGHTER_STATE.HURT;
-            target.hitstunTime = 1.0;
+            target.hitstunTime = 0.5;
 
             if (particles && Math.random() < 0.6) {
               particles.emitSparks(target.position.x, target.position.y - 70, '#ef4444', 3, 3);
@@ -770,8 +770,8 @@ export class FighterCombat {
             }
           }
 
-          // Fecha o punho e aplica o dano massivo em t=1.2s
-          if (fighter.stateTime >= 1.2 && !fighter.hasHitCurrentAttack) {
+          // Fecha o punho e aplica o dano massivo em t=0.75s
+          if (fighter.stateTime >= 0.75 && !fighter.hasHitCurrentAttack) {
             fighter.hasHitCurrentAttack = true;
             fighter.superPhase = 'CHOKE_CRUSH';
             sounds.playDimensionalPierce();
@@ -779,27 +779,32 @@ export class FighterCombat {
 
             if (target && !target.isDead) {
               const attackData = {
-                damage: 360,
+                damage: 380,
                 knockback: 18,
                 knockdown: true,
                 isHeavy: true,
                 attackerPower: fighter.attackPower
               };
               target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 70 }, particles);
-              target.velocity.y = 4; // arremessado ao chão
+              // Garante que o oponente é lançado ao solo e não permanece com flags de invulnerabilidade presas
+              target.isGrounded = false;
+              target.velocity.y = 6;
+              target.isInvulnerable = false;
             }
 
             if (particles && target) {
-              particles.emitShockwave(target.position.x, target.position.y - 70, 180, '#ef4444');
-              particles.emitSparks(target.position.x, target.position.y - 70, '#ef4444', 40, 12);
+              particles.emitShockwave(target.position.x, target.position.y - 70, 190, '#ef4444');
+              particles.emitSparks(target.position.x, target.position.y - 70, '#ef4444', 45, 12);
             }
           }
 
-          if (fighter.stateTime >= 1.7) {
+          // Encerra o super golpe em 1.35s com folga segura antes de qualquer watchdog
+          if (fighter.stateTime >= 1.35) {
             fighter.isInvulnerable = false;
             fighter.superPhase = null;
             fighter.superType = null;
             fighter.state = FIGHTER_STATE.IDLE;
+            fighter.vaderChokeTarget = null;
 
             if (target && !target.isDead) {
               target.isInvulnerable = false;
@@ -808,7 +813,9 @@ export class FighterCombat {
               target.isGrounded = true;
               target.velocity.x = 0;
               target.velocity.y = 0;
-              target.state = FIGHTER_STATE.IDLE;
+              if (target.state !== FIGHTER_STATE.KNOCKDOWN && target.state !== FIGHTER_STATE.GET_UP) {
+                target.state = FIGHTER_STATE.IDLE;
+              }
             }
           }
           break;
@@ -828,39 +835,34 @@ export class FighterCombat {
             particles.emitShockwave(fighter.position.x + fighter.facing * 50, fighter.groundY, 60, '#ef4444');
           }
 
-          // Múltiplos golpes separados de sabre! Cada giro conecta um hit separado com som e faíscas
-          const hitCount = 6;
-          const hitInterval = 0.2;
-          for (let i = 0; i < hitCount; i++) {
-            const hitTime = 0.16 + i * hitInterval;
-            if (fighter.stateTime >= hitTime && fighter.stateTime < hitTime + 0.1) {
-              if (fighter.superPhase === `SABER_HIT_${i}`) {
-                fighter.superPhase = `SABER_HIT_${i + 1}`;
-                fighter.hasHitCurrentAttack = false; // Permite que cada golpe acerte individualmente!
-                sounds.playRapierSlash();
+          if (fighter.stateTime >= 0.15 && fighter.stateTime < 1.35) {
+            const hitInterval = 0.15;
+            const currentHitIndex = Math.floor((fighter.stateTime - 0.15) / hitInterval);
+            const expectedPhase = `SPIN_HIT_${currentHitIndex}`;
 
-                const isFinal = (i === hitCount - 1);
-                const hb = fighter.createHitbox(10, 85, 150, 85);
-                hb.damage = isFinal ? 95 : 55; // Danos separados somando ~370 no total
-                hb.knockback = isFinal ? 22 : 4;
-                hb.knockdown = isFinal;
-                hb.isHeavy = true;
-                hb.attackerPower = fighter.attackPower;
-                fighter.activeHitbox = hb;
+            if (fighter.superPhase !== expectedPhase) {
+              fighter.superPhase = expectedPhase;
+              sounds.playRapierSlash();
+              sounds.playPunch(false);
 
-                if (isFinal) {
-                  sounds.playThunderSlam();
-                  if (particles) {
-                    particles.emitShockwave(fighter.position.x + fighter.facing * 60, fighter.groundY, 120, '#ef4444');
-                  }
-                }
+              const hb = fighter.createHitbox(15, 80, 140, 55);
+              hb.damage = 38;
+              hb.knockback = 4;
+              hb.knockdown = currentHitIndex >= 7;
+              hb.isHeavy = currentHitIndex >= 7;
+              hb.attackerPower = fighter.attackPower;
+              fighter.activeHitbox = hb;
+
+              if (particles && fighter.opponent) {
+                const hx = fighter.opponent.position.x;
+                const hy = fighter.opponent.position.y - 50;
+                particles.emitSparks(hx, hy, '#ef4444', 12, 5);
+                particles.emitSparks(hx, hy, '#fbbf24', 8, 4);
               }
-            } else if (fighter.stateTime < hitTime && fighter.superPhase === 'SABER_SPIN') {
-              fighter.superPhase = 'SABER_HIT_0';
             }
           }
 
-          if (fighter.stateTime >= 1.55) {
+          if (fighter.stateTime >= 1.45) {
             fighter.isInvulnerable = false;
             fighter.superPhase = null;
             fighter.superType = null;
@@ -870,61 +872,98 @@ export class FighterCombat {
           break;
         }
 
-        // --- 10. CORINGA: PÉ DE CABRA ESPANCAMENTO (Alcance maior que soco normal, 6 hits, cada hit com 200% do dano de hit da ult da Maelle) ---
-        // (Hit da Maelle = 75 dano -> 200% = 150 dano por hit x 6 = 900 de dano máximo potencial, equilibrado proporcionalmente base: 70 por hit x 6 = 420 dano)
-        if (fighter.superType === 'JOKER_CROWBAR') {
+        // --- 10. CORINGA: GRAN FINALE DO PALHAÇO (Gag Revolver "BANG!" + Detonação com Gás Tóxico e Dinamite) ---
+        if (fighter.superType === 'JOKER_GRAND_FINALE' || fighter.superType === 'JOKER_CROWBAR') {
           fighter.isInvulnerable = true;
           fighter.velocity.x = 0;
           fighter.velocity.y = 0;
 
           const target = fighter.opponent;
-          const hitInterval = 0.18;
-          const targetX = target ? target.position.x : fighter.position.x + fighter.facing * 90;
 
-          // Se aproxima para o alcance do pé de cabra
-          if (target && fighter.stateTime < 0.15) {
-            const desiredX = targetX - fighter.facing * 85;
-            fighter.position.x += (desiredX - fighter.position.x) * 0.3;
-          }
-
-          for (let i = 0; i < 6; i++) {
-            const hitTime = 0.16 + i * hitInterval;
-            if (fighter.stateTime >= hitTime && fighter.stateTime < hitTime + 0.1) {
-              if (fighter.superPhase === `HIT_${i}`) {
-                fighter.superPhase = `HIT_${i + 1}`;
-                sounds.playPunch(true);
-                sounds.playRapierSlash();
-
-                // Hitbox com alcance ampliado (115px vs 60px do soco comum)
-                const hb = fighter.createHitbox(15, 95, 115, 60);
-                hb.damage = 70; // 200% do dano por golpe padrão da ult da Maelle (Maelle = 35/hit)
-                hb.knockback = i === 5 ? 26 : 4;
-                hb.knockdown = i === 5;
-                hb.isHeavy = true;
-                hb.attackerPower = fighter.attackPower;
-                fighter.activeHitbox = hb;
-
-                if (particles && target) {
-                  const hx = target.position.x + (Math.random() - 0.5) * 30;
-                  const hy = target.position.y - 70 + (Math.random() - 0.5) * 40;
-                  particles.emitSparks(hx, hy, '#10b981', 18, 6);
-                  particles.emitSparks(hx, hy, '#7c3aed', 12, 5);
-                  if (i === 5) {
-                    particles.emitShockwave(target.position.x, target.position.y - 60, 220, '#10b981');
-                    particles.emitSparks(target.position.x, target.position.y - 60, '#f59e0b', 35, 12);
-                    particles.emitFloatingText('THAT\'S THE PUNCHLINE!', target.position.x, target.position.y - 95, '#10b981', true);
-                  }
-                }
-              }
-            } else if (fighter.stateTime < hitTime && fighter.superPhase === 'CROWBAR_RUSH') {
-              fighter.superPhase = 'HIT_0';
+          // Fase 1 (0.0s - 0.35s): O Coringa saca o revólver gag e faz pose cômica
+          if (fighter.stateTime < 0.35) {
+            if (particles && Math.random() < 0.4) {
+              particles.emitSparks(fighter.position.x + fighter.facing * 35, fighter.position.y - 75, '#10b981', 3, 2);
+              particles.emitSparks(fighter.position.x + fighter.facing * 35, fighter.position.y - 75, '#a855f7', 2, 2);
             }
           }
 
+          // Fase 2 (0.35s - 0.65s): Disparo do revólver com bandeira "BANG!" e riso estridente
+          if (fighter.stateTime >= 0.35 && fighter.stateTime < 0.65) {
+            if (fighter.superPhase !== 'BANG_REVEAL') {
+              fighter.superPhase = 'BANG_REVEAL';
+              sounds.playPunch(false);
+              sounds.playWhoosh();
+              sounds.playStaffBell();
+
+              if (particles) {
+                particles.emitShockwave(fighter.position.x + fighter.facing * 55, fighter.position.y - 75, 70, '#10b981');
+                particles.emitFloatingText('BANG!', fighter.position.x + fighter.facing * 60, fighter.position.y - 95, '#ef4444', true);
+              }
+
+              // Atordoa levemente o oponente se estiver no alcance visual
+              if (target && !target.isDead) {
+                const dist = Math.abs(target.position.x - fighter.position.x);
+                if (dist < 320) {
+                  target.state = FIGHTER_STATE.HURT;
+                  target.hitstunTime = 0.55;
+                  target.velocity.x = 0;
+                }
+              }
+            }
+          }
+
+          // Fase 3 (0.65s - 1.15s): Eclosão da Dinamite Surpresa Jack-in-the-Box com fumaça tóxica verde e explosão massiva
+          if (fighter.stateTime >= 0.65 && !fighter.hasHitCurrentAttack) {
+            fighter.hasHitCurrentAttack = true;
+            fighter.superPhase = 'DYNAMITE_EXPLOSION';
+            sounds.playThunderSlam();
+            sounds.playFireCast();
+            sounds.playKO();
+
+            // Hitbox ampla e devastadora na frente do Coringa cobrindo o oponente
+            const reach = 260;
+            const boxX = fighter.facing === 1 ? fighter.position.x + 10 : fighter.position.x - 10 - reach;
+            const hb = new Box(boxX, fighter.position.y - 130, reach, 130, 'hitbox');
+            hb.damage = 410;
+            hb.knockback = 28;
+            hb.knockdown = true;
+            hb.isHeavy = true;
+            hb.attackerPower = fighter.attackPower;
+            fighter.activeHitbox = hb;
+
+            if (target && !target.isDead) {
+              const attackData = {
+                damage: 410,
+                knockback: 28,
+                knockdown: true,
+                isHeavy: true,
+                attackerPower: fighter.attackPower
+              };
+              target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 70 }, particles);
+              target.isInvulnerable = false;
+            }
+
+            if (particles) {
+              const blastX = fighter.position.x + fighter.facing * 120;
+              const blastY = fighter.groundY - 50;
+              particles.emitShockwave(blastX, blastY, 260, '#10b981');
+              particles.emitShockwave(blastX, blastY, 180, '#a855f7');
+              particles.emitSparks(blastX, blastY, '#22c55e', 45, 14);
+              particles.emitSparks(blastX, blastY, '#fbbf24', 35, 12);
+              particles.emitSparks(blastX, blastY, '#a855f7', 30, 10);
+              particles.emitDust(blastX, fighter.groundY, 30, '#14532d');
+              particles.emitFloatingText('THAT\'S THE PUNCHLINE! HA! HA!', blastX, blastY - 70, '#10b981', true);
+            }
+          }
+
+          // Encerramento limpo
           if (fighter.stateTime >= 1.35) {
             fighter.isInvulnerable = false;
             fighter.superPhase = null;
             fighter.superType = null;
+            fighter.activeHitbox = null;
+            fighter.jokerGrandFinaleProp = null;
             fighter.state = FIGHTER_STATE.IDLE;
           }
           break;

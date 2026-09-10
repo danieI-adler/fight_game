@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GameEngine, GAME_STATUS } from './game/engine/GameEngine';
-import { getCharacterById } from './game/characters/characterData';
-import { getExpeditionCharacterById } from './game/characters/expedition33Characters';
+import { getCharacterById, CHARACTERS } from './game/characters/characterData';
+import { getExpeditionCharacterById, EXPEDITION_33_CHARACTERS } from './game/characters/expedition33Characters';
 import { sounds } from './game/audio/soundManager';
 import { playerTracker } from './game/ai/PlayerProfileTracker';
 import { MainMenu } from './components/menu/MainMenu';
@@ -78,20 +78,75 @@ export function App() {
     isHost: true,
     isExpedition: false,
   });
+  const [tournamentRoster, setTournamentRoster] = useState([]);
   const [gameState, setGameState] = useState(null);
   const [showHitboxes, setShowHitboxes] = useState(false);
   const [dummyBehavior, setDummyBehavior] = useState('dummy');
+  const [doubleTapDashEnabled, setDoubleTapDashEnabled] = useState(() => {
+    try {
+      const stored = localStorage.getItem('fightgame_double_tap_dash');
+      return stored !== null ? stored === 'true' : true;
+    } catch (e) {
+      return true;
+    }
+  });
+
+  const handleToggleDash = () => {
+    const nextVal = !doubleTapDashEnabled;
+    setDoubleTapDashEnabled(nextVal);
+    try {
+      localStorage.setItem('fightgame_double_tap_dash', String(nextVal));
+    } catch (e) {}
+    if (engineRef.current && engineRef.current.inputHandler) {
+      engineRef.current.inputHandler.toggleDoubleTapDash(nextVal);
+    }
+  };
+
+  /**
+   * Sorteia 10 oponentes sem reposição da lista de personagens disponíveis,
+   * excluindo expressamente Relâmpago McQueen e o personagem escolhido pelo jogador.
+   */
+  const generateTournamentRoster = (playerCharId, isExpeditionMode) => {
+    const list = isExpeditionMode ? EXPEDITION_33_CHARACTERS : CHARACTERS;
+
+    // Filtra para remover qualquer versão do McQueen e o personagem escolhido pelo jogador
+    const eligible = list.filter((c) => {
+      const name = (c.name || '').toLowerCase();
+      const isMcQueen = name.includes('mcqueen') || name.includes('relampago') || c.id === 26 || c.id === 115 || c.isMcQueen;
+      const isPlayerPick = c.id === Number(playerCharId);
+      return !isMcQueen && !isPlayerPick;
+    });
+
+    // Embaralha aleatoriamente (Fisher-Yates) sem reposição
+    const shuffled = [...eligible];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    // Se a lista elegível tiver menos que 10, preenche circularmente sem McQueen
+    const roster = [];
+    for (let i = 0; i < 10; i++) {
+      roster.push(shuffled[i % shuffled.length]);
+    }
+    return roster;
+  };
 
   const handleNextTournamentLevel = () => {
     const nextLvl = Math.min(10, (matchConfig.tournamentLevel || 1) + 1);
+    const nextOpponent = tournamentRoster[nextLvl - 1] || tournamentRoster[0];
+    const nextP2Id = nextOpponent ? nextOpponent.id : matchConfig.p2Id;
+
     setMatchConfig(prev => ({
       ...prev,
+      p2Id: nextP2Id,
       tournamentLevel: nextLvl
     }));
+
     if (engineRef.current) {
       engineRef.current.startFight(
         matchConfig.p1Id,
-        matchConfig.p2Id,
+        nextP2Id,
         'TOURNAMENT',
         'tournament',
         matchConfig.stageId,
@@ -121,7 +176,21 @@ export function App() {
 
   // Iniciar partida offline
   const handleStartMatch = (config) => {
-    setMatchConfig({ ...config, isHost: true, isExpedition });
+    if (mode === 'TOURNAMENT') {
+      const roster = generateTournamentRoster(config.p1Id, isExpedition);
+      setTournamentRoster(roster);
+      const firstEnemy = roster[0];
+      setMatchConfig({
+        ...config,
+        p2Id: firstEnemy.id,
+        tournamentLevel: 1,
+        difficulty: 'tournament',
+        isHost: true,
+        isExpedition
+      });
+    } else {
+      setMatchConfig({ ...config, isHost: true, isExpedition });
+    }
     setScreen('FIGHT');
     setIsPaused(false);
   };
@@ -148,6 +217,9 @@ export function App() {
     engineRef.current = engine;
 
     engine.showHitboxes = showHitboxes;
+    if (engine.inputHandler) {
+      engine.inputHandler.doubleTapDashEnabled = doubleTapDashEnabled;
+    }
     engine.onStateChange = (state) => {
       setGameState({ ...state });
     };
@@ -204,7 +276,8 @@ export function App() {
         matchConfig.stageId,
         matchConfig.isHost !== undefined ? matchConfig.isHost : true,
         graphicsMode,
-        matchConfig.isExpedition !== undefined ? matchConfig.isExpedition : isExpedition
+        matchConfig.isExpedition !== undefined ? matchConfig.isExpedition : isExpedition,
+        matchConfig.tournamentLevel || 1
       );
     }
   };
@@ -355,6 +428,8 @@ export function App() {
               onMainMenu={() => setScreen('MAIN_MENU')}
               currentTrack={currentTrack}
               onNextMusic={handleNextMusic}
+              dashEnabled={doubleTapDashEnabled}
+              onToggleDash={handleToggleDash}
             />
           )}
 
