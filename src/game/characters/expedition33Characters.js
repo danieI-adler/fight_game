@@ -352,7 +352,7 @@ export const EXPEDITION_33_CHARACTERS = [
       paintTrailColor: '#10b981',
       weaponType: 'clown_cards'
     },
-    description: 'O Palhaço do Crime com Cartas Explosivas em leque, Caixa de Surpresa com gás hilaria e espancamento cômico com pé de cabra.'
+    description: 'O Palhaço do Crime com Cartas do Caos cortantes em leque e espancamento cômico com pé de cabra.'
   },
   {
     id: 114,
@@ -392,6 +392,7 @@ export const EXPEDITION_33_CHARACTERS = [
     energyColor: '#fde047',
     stats: { health: 1000, speed: 7.0, jumpForce: 13.8, attackPower: 1.0, defense: 1.0 },
     superType: 'MCQUEEN_KACHOW_BLITZ',
+    voiceAbility: 'mcqueen_katchau',
     visual: {
       isVehicle: true,
       isMcQueen: true,

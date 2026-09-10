@@ -526,8 +526,9 @@ export class GameEngine {
       if (hitResult) {
         this.p1.hasHitCurrentAttack = true;
         this.p1.comboCount++;
-        // Ganha 5% ao bater
-        this.p1.gainAttackEnergy(5);
+        // Ganha 8% de energia com o soco rápido (J) para premiar o combo starter, ou 5% nos demais
+        const energyGained = this.p1.state === 'LIGHT_PUNCH' ? 8 : 5;
+        this.p1.gainAttackEnergy(energyGained);
         let hitBoxP1 = this.p1.activeHitbox;
         // Sciel Buff de Crítico: se Sciel tiver cargas de crítico ativas, aplica chance / dano crítico massivo
         if (this.p1.scielCritCharges > 0) {
@@ -564,8 +565,8 @@ export class GameEngine {
       if (hitResult) {
         this.p2.hasHitCurrentAttack = true;
         this.p2.comboCount++;
-        // Ganha 5% ao bater
-        this.p2.gainAttackEnergy(5);
+        const energyGained = this.p2.state === 'LIGHT_PUNCH' ? 8 : 5;
+        this.p2.gainAttackEnergy(energyGained);
 
         let hitBoxP2 = this.p2.activeHitbox;
         // Sciel Buff de Crítico para P2

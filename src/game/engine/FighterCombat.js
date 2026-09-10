@@ -16,15 +16,19 @@ export class FighterCombat {
 
     switch (fighter.state) {
       case FIGHTER_STATE.LIGHT_PUNCH:
-        // J (Soco Rápido): Startup ágil (0.04s), recuperação rápida (total 0.18s), alcance curto/médio (55px), excelente para iniciar combos
-        if (fighter.stateTime > 0.04 && fighter.stateTime < 0.14) {
+        // J (Soco Rápido / Combo Starter & Pressure):
+        // Startup relâmpago (0.03s), janela ativa (0.03-0.12s), recuperação instantânea (0.15s).
+        // Hitstun superior (0.28s): concede vantagem de quadros positiva (+0.13s de vantagem em acerto!)
+        // Gera 8% de energia (o dobro do normal) para recompensar agressividade de curta distância.
+        if (fighter.stateTime > 0.03 && fighter.stateTime < 0.12) {
           fighter.activeHitbox = fighter.createHitbox(15, 95, 55, 30);
-          fighter.activeHitbox.damage = 35;
-          fighter.activeHitbox.knockback = 4;
+          fighter.activeHitbox.damage = 38;
+          fighter.activeHitbox.knockback = 3; // Quase sem knockback, mantém o oponente perto para combear!
           fighter.activeHitbox.isHeavy = false;
+          fighter.activeHitbox.hitstun = 0.28; // Vantagem massiva de quadros para conectar novos golpes
           fighter.activeHitbox.attackerPower = fighter.attackPower;
         }
-        if (fighter.stateTime >= 0.18) {
+        if (fighter.stateTime >= 0.15) {
           fighter.state = FIGHTER_STATE.IDLE;
         }
         break;
@@ -48,15 +52,18 @@ export class FighterCombat {
         break;
 
       case FIGHTER_STATE.LIGHT_KICK:
-        // K (Chute Baixo / Poke): Maior alcance (78px), mira mais baixa (y: 55), startup ligeiramente mais longo (0.07s) e mais recuperação (0.26s)
-        if (fighter.stateTime > 0.07 && fighter.stateTime < 0.19) {
-          fighter.activeHitbox = fighter.createHitbox(20, 55, 78, 30);
-          fighter.activeHitbox.damage = 48;
-          fighter.activeHitbox.knockback = 7;
+        // K (Chute Baixo / Poke de Afastamento):
+        // Maior alcance (80px), mira baixa (y: 55), startup moderado (0.07s-0.18s) e recuperação mais lenta (0.28s).
+        // Empurra o inimigo para longe (knockback 10), mas tem desvantagem em acerto (-0.10s) e é vulnerável se bloqueado.
+        if (fighter.stateTime > 0.07 && fighter.stateTime < 0.18) {
+          fighter.activeHitbox = fighter.createHitbox(20, 55, 80, 30);
+          fighter.activeHitbox.damage = 52;
+          fighter.activeHitbox.knockback = 10; // Afasta o inimigo para resetar distância neutra
           fighter.activeHitbox.isHeavy = false;
+          fighter.activeHitbox.hitstun = 0.18;
           fighter.activeHitbox.attackerPower = fighter.attackPower;
         }
-        if (fighter.stateTime >= 0.26) {
+        if (fighter.stateTime >= 0.28) {
           fighter.state = FIGHTER_STATE.IDLE;
         }
         break;

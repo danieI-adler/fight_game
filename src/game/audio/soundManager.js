@@ -547,6 +547,27 @@ class SoundManager {
     }
   }
 
+  playMcQueenKatchau() {
+    if (this.isMuted) return;
+    this.init();
+
+    try {
+      const audio = new Audio('./assets/audio/mcqueen_katchau.mp3');
+      audio.volume = 1.0;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn('Tentando caminho alternativo de katchau:', err);
+          const fallback = new Audio('./assets/expedition33/mcqueen_katchau.mp3');
+          fallback.volume = 1.0;
+          fallback.play().catch((e) => console.warn('Erro ao tocar katchau do McQueen:', e));
+        });
+      }
+    } catch (e) {
+      console.warn('Erro ao reproduzir katchau:', e);
+    }
+  }
+
   // --- ELEMENTOS DE LUNE (GELO, FOGO, TERRA, AR) ---
 
   playIceSpell() {

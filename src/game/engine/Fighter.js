@@ -417,7 +417,7 @@ export class Fighter {
       sounds.playWhoosh();
     } else {
       this.velocity.x *= 0.25;
-      this.state = FIGHTER_STATE.HEAVY_KICK;
+      this.state = FIGHTER_STATE.LIGHT_KICK;
       sounds.playWhoosh();
     }
   }
@@ -434,6 +434,8 @@ export class Fighter {
     if (!this.charData) return;
     if (this.charData.voiceAbility === 'gustave_ability') {
       sounds.playGustaveAbility();
+    } else if (this.charData.voiceAbility === 'mcqueen_katchau' || this.isMcQueen) {
+      sounds.playMcQueenKatchau();
     }
   }
 
@@ -613,7 +615,7 @@ export class Fighter {
         }
       }
     }
-    // 10. Coringa: Cartas do Caos em Leque (Q) + Caixa de Surpresa Armada (Level 2)
+    // 10. Coringa: Cartas do Caos em Leque (Especial 1 / Q)
     else if (charName.includes('coringa') || charName.includes('joker')) {
       this.extraType = 'JOKER_TRICK_CARDS';
       sounds.playWhoosh();
@@ -622,8 +624,8 @@ export class Fighter {
       const cx = this.position.x + this.facing * 35;
       const cy = this.position.y - 75;
       const angles = level === 2 ? [-0.28, -0.14, 0, 0.14, 0.28] : [-0.18, 0, 0.18];
-      const speed = 1050;
-      const cardDmg = level === 2 ? 45 : 38;
+      const speed = level === 2 ? 1200 : 1050;
+      const cardDmg = level === 2 ? 65 : 45;
 
       this.jokerCards = angles.map(ang => ({
         x: cx,
@@ -635,19 +637,6 @@ export class Fighter {
         active: true,
         hasHit: false
       }));
-
-      // No Level 2, além das 5 cartas também planta uma Caixa de Surpresa (Jack-in-the-Box) no chão!
-      if (level === 2) {
-        this.jokerJackInTheBox = {
-          x: this.position.x + this.facing * 90,
-          y: this.groundY,
-          timer: 0,
-          duration: 4.5,
-          popped: false,
-          damage: 120,
-          active: true
-        };
-      }
     }
     // 11. Jack Sparrow: Garrafa de Rum e Caminhar Bêbado de Esquiva (desvia dos próximos 3 ou 5 ataques)
     else if (charName.includes('jack') || charName.includes('sparrow')) {
@@ -662,6 +651,7 @@ export class Fighter {
       this.extraType = 'MCQUEEN_DRIFT_BURNOUT';
       sounds.playDash();
       sounds.playThunderSlam();
+      sounds.playMcQueenKatchau();
       this.mcqueenSpeedBuffTimer = 5.0; // Ganha velocidade por 5 segundos
       this.mcqueenSpeedMultiplier = level === 2 ? 3.0 : 2.0; // Dobro no lv1, triplo no lv2!
       this.mcqueenDriftBurn = {
@@ -836,6 +826,7 @@ export class Fighter {
       this.superPhase = 'NITRO_CHARGE';
       sounds.playSuperCharge();
       sounds.playSuper();
+      sounds.playMcQueenKatchau();
       this.mcqueenBlitz = {
         timer: 0,
         phase: 'DASH_OUT',
@@ -979,7 +970,7 @@ export class Fighter {
       this.isGrounded = false;
     } else {
       this.state = FIGHTER_STATE.HURT;
-      this.hitstunTime = attackData.isHeavy ? 0.32 : 0.18;
+      this.hitstunTime = attackData.hitstun !== undefined ? attackData.hitstun : (attackData.isHeavy ? 0.32 : 0.18);
       this.velocity.x = -this.facing * attackData.knockback;
     }
 
