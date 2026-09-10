@@ -129,24 +129,24 @@ class NetworkManager {
           }
         });
 
-        // Overall timeout for establishing the full connection (30 seconds)
+        // Overall timeout for establishing the full connection (60 seconds)
         const overallTimeout = setTimeout(() => {
-          this.emit('connection_failed', { reason: 'timeout', isHost: false });
+          this.emit('connection_failed', { reason: 'overall_timeout', isHost: false });
           this.disconnect();
-          reject(new Error('Connection timeout'));
-        }, 30000);
+          reject(new Error('Overall connection timeout'));
+        }, 60000);
 
         this.peer.on('open', (id) => {
           console.log(`[Client] Conectando ao host ${targetPeerId} com ID local: ${id}`);
           const dataConn = this.peer.connect(targetPeerId, { reliable: true });
 
-          // Wait for the data channel to open before proceeding
+          // Timeout for the data channel to open (30 seconds)
           const connTimeout = setTimeout(() => {
             this.emit('connection_failed', { reason: 'datachannel_timeout', isHost: false });
             dataConn.close();
             clearTimeout(overallTimeout);
             reject(new Error('DataChannel open timeout'));
-          }, 15000);
+          }, 30000);
 
           dataConn.on('open', () => {
             clearTimeout(connTimeout);
