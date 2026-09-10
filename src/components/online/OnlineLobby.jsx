@@ -61,12 +61,34 @@ export const OnlineLobby = ({
   const activeStageList = isExpeditionMode ? EXPEDITION_STAGES : STAGES;
   const getChar = isExpeditionMode ? getExpeditionCharacterById : getCharacterById;
 
+  const [retryCount, setRetryCount] = useState(0);
+
+  const handleRetryConnection = () => {
+    if (retryCount < 3) {
+      setRetryCount(retryCount + 1);
+      setErrorMsg('Tentando reconectar...');
+      // Re‑inicia a tentativa usando o mesmo código da sala
+      if (tab === 'JOIN') {
+        handleJoinRoom(activeRoomCode || roomCodeInput);
+      } else {
+        // Se o host, recria a sala (geralmente não ocorre aqui)
+        handleCreateRoom();
+      }
+    } else {
+      setErrorMsg('Falha ao conectar após várias tentativas. Verifique sua rede.');
+    }
+  };
+
   // Setup de Listeners do NetworkManager
   useEffect(() => {
     const unsubConnFailed = network.on('connection_failed', (info) => {
       console.log('[Lobby] Conexão falhou:', info);
       setIsConnecting(false);
-      setErrorMsg(`Falha de conexão (${info.reason}). Tente novamente.`);
+      setErrorMsg(`Falha de conexão (${info.reason}).`);
+      // Auto‑retry para clientes
+      if (!isHost) {
+        handleRetryConnection();
+      }
     });
 
     const unsubConnected = network.on('connected', (hostStatus) => {

@@ -124,29 +124,27 @@ class NetworkManager {
       try {
         this.peer = new Peer(null, {
           debug: 1,
-          config: {
-            iceServers: this.getIceServers()
-          }
+          config: { iceServers: this.getIceServers() }
         });
 
-        // Overall timeout for establishing the full connection (60 seconds)
+        // Overall timeout for establishing the full connection (120 seconds)
         const overallTimeout = setTimeout(() => {
           this.emit('connection_failed', { reason: 'overall_timeout', isHost: false });
           this.disconnect();
           reject(new Error('Overall connection timeout'));
-        }, 60000);
+        }, 120000);
 
         this.peer.on('open', (id) => {
           console.log(`[Client] Conectando ao host ${targetPeerId} com ID local: ${id}`);
           const dataConn = this.peer.connect(targetPeerId, { reliable: true });
 
-          // Timeout for the data channel to open (30 seconds)
+          // Timeout for the data channel to open (60 seconds)
           const connTimeout = setTimeout(() => {
             this.emit('connection_failed', { reason: 'datachannel_timeout', isHost: false });
             dataConn.close();
             clearTimeout(overallTimeout);
             reject(new Error('DataChannel open timeout'));
-          }, 30000);
+          }, 60000);
 
           dataConn.on('open', () => {
             clearTimeout(connTimeout);
