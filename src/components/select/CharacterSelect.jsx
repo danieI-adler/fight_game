@@ -169,6 +169,7 @@ export const CharacterSelect = ({
                 <option value="medium">Médio</option>
                 <option value="hard">Difícil</option>
                 <option value="boss">Boss</option>
+                <option value="crazy">⚡ CRAZY (Imbatível)</option>
               </select>
             </div>
           )}

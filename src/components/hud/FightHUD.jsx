@@ -5,6 +5,8 @@ export const FightHUD = ({
   gameState,
   char1,
   char2,
+  tournamentLevel = null,
+  difficulty = 'medium',
   isPaused,
   onTogglePause,
   isMuted,
@@ -186,8 +188,18 @@ export const FightHUD = ({
                 RANK {p2VersoRank} <span className="text-[10px] opacity-80 font-normal">({rankMultiplier(p2VersoRank)})</span>
               </span>
             )}
-            <span className="font-bold text-base text-slate-100">
+            <span className="font-bold text-base text-slate-100 flex items-center gap-1.5">
               {char2.name}
+              {tournamentLevel && (
+                <span className="text-[10px] bg-amber-600/90 text-black font-extrabold px-1.5 py-0.5 rounded font-serif shadow">
+                  LVL {tournamentLevel}/10
+                </span>
+              )}
+              {difficulty === 'crazy' && (
+                <span className="text-[9px] bg-red-600 text-white font-black px-1.5 py-0.5 rounded animate-pulse shadow">
+                  ⚡ CRAZY
+                </span>
+              )}
             </span>
           </div>
 

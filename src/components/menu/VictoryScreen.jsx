@@ -1,13 +1,31 @@
 import React from 'react';
 import { sounds } from '../../game/audio/soundManager';
 
-export const VictoryScreen = ({ winner, loser, onRematch, onSelectCharacter, onMainMenu }) => {
+export const VictoryScreen = ({
+  winner,
+  loser,
+  isTournament = false,
+  tournamentLevel = 1,
+  playerWon = false,
+  onNextTournamentLevel,
+  onRematch,
+  onSelectCharacter,
+  onMainMenu
+}) => {
   return (
     <div className="absolute inset-0 bg-black/85 flex items-center justify-center z-50 select-none backdrop-blur-sm">
       <div className="w-96 bg-slate-950 border border-amber-900/60 rounded-lg p-6 shadow-2xl flex flex-col items-center text-center ring-1 ring-amber-500/20">
-        <span className="text-xs font-semibold text-amber-400 uppercase tracking-widest mb-2 font-serif">
-          ✦ VITORIOSO ✦
+        <span className="text-xs font-semibold text-amber-400 uppercase tracking-widest mb-1 font-serif">
+          ✦ {isTournament ? `TORNEIO IA: NÍVEL ${tournamentLevel}/10` : 'VITORIOSO'} ✦
         </span>
+
+        {isTournament && (
+          <div className="text-[11px] text-purple-300 font-mono mb-2 bg-purple-950/60 px-2.5 py-1 rounded border border-purple-800/60">
+            {playerWon
+              ? (tournamentLevel < 10 ? 'A IA analisou seu estilo e subiu de nível!' : '🏆 VOCÊ DERROTOU A IA MÁXIMA!')
+              : 'A IA explorou suas fraquezas e venceu!'}
+          </div>
+        )}
 
         {winner.image && (
           <div className="w-24 h-32 rounded-lg border-2 border-amber-600/70 overflow-hidden mb-3 shadow-xl bg-black">
@@ -20,15 +38,27 @@ export const VictoryScreen = ({ winner, loser, onRematch, onSelectCharacter, onM
         </h2>
 
         <div className="flex flex-col gap-2.5 w-full">
-          <button
-            onClick={() => {
-              sounds.playPunch(false);
-              onRematch();
-            }}
-            className="py-2.5 px-4 rounded bg-amber-600 hover:bg-amber-500 text-black font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer font-serif"
-          >
-            Jogar Novamente
-          </button>
+          {isTournament && playerWon && tournamentLevel < 10 ? (
+            <button
+              onClick={() => {
+                sounds.playPunch(true);
+                if (onNextTournamentLevel) onNextTournamentLevel();
+              }}
+              className="py-2.5 px-4 rounded bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-black font-extrabold text-xs uppercase tracking-wider transition-all cursor-pointer font-serif shadow-lg animate-pulse"
+            >
+              Avançar p/ Nível {tournamentLevel + 1} (IA Adaptada)
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                sounds.playPunch(false);
+                onRematch();
+              }}
+              className="py-2.5 px-4 rounded bg-amber-600 hover:bg-amber-500 text-black font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer font-serif"
+            >
+              {isTournament ? 'Tentar Nível Novamente' : 'Jogar Novamente'}
+            </button>
+          )}
 
           <button
             onClick={() => {

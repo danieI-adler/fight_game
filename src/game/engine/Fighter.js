@@ -124,7 +124,11 @@ export class Fighter {
     this.batmanBatarang = null; // { x, y, vx, returning, originX, damage, active, hasHit }
     this.vaderThrowingSaber = null; // { x, y, vx, returning, startX, maxDist, damage, active, hasHit }
     this.palpatineLightning = null; // { timer, reach, damage, active }
-    this.jokerAcidBlossom = null; // { x, y, vx, timer, damage, active, hasHit }
+    this.jokerAcidBlossom = null; // mantido para compatibilidade
+    this.jokerCards = []; // [{ x, y, vx, vy, rot, timer, damage, active, hasHit }]
+    this.jokerJackInTheBox = null; // { x, y, timer, duration, popped, damage, active }
+    this.scielCritCharges = 0; // Quantidade de ataques restantes com chance crítica aumentada
+    this.scielCritTimer = 0; // Duração do buff de críticos da Sciel
     this.sparrowDrunkTimer = 0; // chance de esquiva aumentada
     this.sparrowDodgeCharges = 0; // esquiva dos próximos 3 ou 5 ataques
     this.mcqueenDriftBurn = null; // { x, y, duration, active }
@@ -216,6 +220,10 @@ export class Fighter {
     this.palpatineLightning = null;
     this.palpatineDualSabers = false;
     this.jokerAcidBlossom = null;
+    this.jokerCards = [];
+    this.jokerJackInTheBox = null;
+    this.scielCritCharges = 0;
+    this.scielCritTimer = 0;
     this.jokerCrowbarBeat = null;
     this.sparrowDrunkTimer = 0;
     this.sparrowDodgeCharges = 0;
@@ -495,6 +503,14 @@ export class Fighter {
       const healAmount = Math.round(this.maxHealth * healPercent);
       this.health = Math.min(this.maxHealth, this.health + healAmount);
     }
+    // 3.5 Sciel: Lâminas do Destino (Q) - Os próximos ataques têm chance crítica (Level 1: 3 ataques a 60% chance de dano crítico 1.85x; Level 2: 5 ataques a 100% crit garantido!)
+    else if (charName.includes('sciel')) {
+      this.extraType = 'SCIEL_CRIT_BUFF';
+      sounds.playSuperCharge();
+      sounds.playRapierSlash();
+      this.scielCritCharges = level === 2 ? 5 : 3;
+      this.scielCritTimer = 8.0; // buff dura 8 segundos ou até consumir as cargas
+    }
     // 4. Renoir: bate a bengala no chão, buraco negro surge sob o alvo (exige pulo no timing correto)
     else if (charName.includes('renoir')) {
       this.extraType = 'RENOIR_BLACK_HOLE';
@@ -597,20 +613,41 @@ export class Fighter {
         }
       }
     }
-    // 10. Coringa: Acid Blossom (esguicho rápido de ácido que atinge e deixa em pé stunado)
+    // 10. Coringa: Cartas do Caos em Leque (Q) + Caixa de Surpresa Armada (Level 2)
     else if (charName.includes('coringa') || charName.includes('joker')) {
-      this.extraType = 'JOKER_ACID_BLOSSOM';
+      this.extraType = 'JOKER_TRICK_CARDS';
       sounds.playWhoosh();
-      const ax = this.position.x + this.facing * 30;
-      const ay = this.position.y - 82;
-      this.jokerAcidBlossom = {
-        x: ax,
-        y: ay,
-        vx: this.facing * 1200,
-        damage: level === 2 ? 150 : 95,
+      sounds.playPunch(false);
+
+      const cx = this.position.x + this.facing * 35;
+      const cy = this.position.y - 75;
+      const angles = level === 2 ? [-0.28, -0.14, 0, 0.14, 0.28] : [-0.18, 0, 0.18];
+      const speed = 1050;
+      const cardDmg = level === 2 ? 45 : 38;
+
+      this.jokerCards = angles.map(ang => ({
+        x: cx,
+        y: cy,
+        vx: Math.cos(ang) * this.facing * speed,
+        vy: Math.sin(ang) * speed,
+        rot: ang,
+        damage: cardDmg,
         active: true,
         hasHit: false
-      };
+      }));
+
+      // No Level 2, além das 5 cartas também planta uma Caixa de Surpresa (Jack-in-the-Box) no chão!
+      if (level === 2) {
+        this.jokerJackInTheBox = {
+          x: this.position.x + this.facing * 90,
+          y: this.groundY,
+          timer: 0,
+          duration: 4.5,
+          popped: false,
+          damage: 120,
+          active: true
+        };
+      }
     }
     // 11. Jack Sparrow: Garrafa de Rum e Caminhar Bêbado de Esquiva (desvia dos próximos 3 ou 5 ataques)
     else if (charName.includes('jack') || charName.includes('sparrow')) {
@@ -1550,7 +1587,103 @@ export class Fighter {
       }
     }
 
-    // 5.13 Acid Blossom do Coringa (Ataque Extra: atinge e deixa de pé atordoado)
+    // 5.125 Buff de Críticos da Sciel (Contador de Tempo)
+    if (this.scielCritCharges > 0) {
+      this.scielCritTimer -= dt;
+      if (particles && Math.random() < 0.35) {
+        // Brilho dourado radiante ao redor da Sciel indicando postura de crítico
+        particles.emitSparks(this.position.x + (Math.random() - 0.5) * 40, this.position.y - 65 + (Math.random() - 0.5) * 40, '#fbbf24', 2, 3);
+      }
+      if (this.scielCritTimer <= 0) {
+        this.scielCritCharges = 0;
+      }
+    }
+
+    // 5.13 Cartas do Caos do Coringa (Ataque Extra Q)
+    if (this.jokerCards && this.jokerCards.length > 0) {
+      for (const card of this.jokerCards) {
+        if (!card.active) continue;
+        card.x += card.vx * dt;
+        card.y += card.vy * dt;
+        card.rot += dt * 18; // cartas girando no ar
+
+        if (particles && Math.random() < 0.4) {
+          particles.emitSparks(card.x, card.y, '#10b981', 2, 2);
+          particles.emitSparks(card.x, card.y, '#a855f7', 1, 2);
+        }
+
+        if (this.opponent && !card.hasHit && !this.opponent.isDead) {
+          const cBox = new Box(card.x - 14, card.y - 14, 28, 28, 'hitbox');
+          for (const hurt of this.opponent.getHurtboxes()) {
+            if (cBox.intersects(hurt)) {
+              card.hasHit = true;
+              card.active = false;
+              const attackData = {
+                damage: card.damage || 40,
+                knockback: 4,
+                knockdown: false,
+                isHeavy: false,
+                attackerPower: this.attackPower
+              };
+              this.opponent.receiveHit(attackData, { x: card.x, y: card.y }, particles);
+              sounds.playRapierSlash();
+              if (particles) {
+                particles.emitShockwave(card.x, card.y, 60, '#10b981');
+                particles.emitSparks(card.x, card.y, '#10b981', 16, 6);
+                particles.emitSparks(card.x, card.y, '#7c3aed', 12, 5);
+              }
+              break;
+            }
+          }
+        }
+
+        if (card.x < -100 || card.x > stageWidth + 100 || card.y < -100 || card.y > this.groundY + 20) {
+          card.active = false;
+        }
+      }
+      this.jokerCards = this.jokerCards.filter(c => c.active);
+    }
+
+    // 5.135 Caixa de Surpresa do Coringa (Jack-in-the-Box com Gás Tóxico)
+    if (this.jokerJackInTheBox && this.jokerJackInTheBox.active) {
+      const box = this.jokerJackInTheBox;
+      box.duration -= dt;
+      box.timer += dt;
+
+      if (particles && Math.random() < 0.3) {
+        particles.emitSparks(box.x, box.y - 15, '#10b981', 2, 2);
+      }
+
+      // Se oponente pisar perto ou após delay, ela eclode espalhando gás do riso
+      if (this.opponent && !box.popped && !this.opponent.isDead) {
+        const dist = Math.abs(box.x - this.opponent.position.x);
+        if (dist < 60 && this.opponent.isGrounded) {
+          box.popped = true;
+          sounds.playPunch(true);
+          sounds.playFireCast();
+          const attackData = {
+            damage: box.damage || 120,
+            knockback: 14,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: box.x, y: box.y - 45 }, particles);
+          if (particles) {
+            particles.emitShockwave(box.x, box.y - 30, 140, '#10b981');
+            particles.emitSparks(box.x, box.y - 40, '#22c55e', 35, 10);
+            particles.emitSparks(box.x, box.y - 40, '#a855f7', 25, 8);
+            particles.emitFloatingText('HA! HA! HA!', this.opponent.position.x, this.opponent.position.y - 85, '#10b981', true);
+          }
+        }
+      }
+
+      if (box.duration <= 0 || box.popped) {
+        box.active = false;
+      }
+    }
+
+    // 5.13 Acid Blossom do Coringa (Ataque Extra legado / fallback)
     if (this.jokerAcidBlossom && this.jokerAcidBlossom.active) {
       const a = this.jokerAcidBlossom;
       a.x += a.vx * dt;
@@ -2031,7 +2164,87 @@ export class Fighter {
       ctx.restore();
     }
 
-    // 8. Acid Blossom do Coringa (esguicho de ácido verde borbulhante)
+    // 7.5 Buff de Crítico Radiante de Sciel
+    if (this.scielCritCharges > 0) {
+      const hx = this.position.x;
+      const hy = this.position.y - 128;
+      const pulse = Math.sin(Date.now() * 0.012) * 3;
+      ctx.save();
+      ctx.shadowColor = '#fbbf24';
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = 'bold 12px "Cinzel", serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`✨ CRIT FOCUS: ${this.scielCritCharges}x`, hx, hy + pulse);
+
+      // Fitas de luz dourada circundando Sciel
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.ellipse(this.position.x, this.position.y - 65, 34 + pulse, 50, 0.2, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 8. Cartas do Caos do Coringa (cartas de baralho girando com brilho verde/roxo)
+    if (this.jokerCards && this.jokerCards.length > 0) {
+      for (const card of this.jokerCards) {
+        if (!card.active) continue;
+        ctx.save();
+        ctx.translate(card.x, card.y);
+        ctx.rotate(card.rot || 0);
+        ctx.shadowColor = '#10b981';
+        ctx.shadowBlur = 12;
+
+        // Retângulo da carta
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(-10, -15, 20, 30);
+        ctx.strokeStyle = '#7c3aed';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(-10, -15, 20, 30);
+
+        // Naipe / Símbolo da carta do Coringa
+        ctx.fillStyle = '#dc2626';
+        ctx.beginPath();
+        ctx.arc(0, 0, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // 8.5 Caixa de Surpresa do Coringa (Jack-in-the-Box)
+    if (this.jokerJackInTheBox && this.jokerJackInTheBox.active) {
+      const box = this.jokerJackInTheBox;
+      ctx.save();
+      ctx.translate(box.x, box.y);
+      ctx.shadowColor = '#10b981';
+      ctx.shadowBlur = 15;
+
+      // Caixa listrada roxo e verde
+      ctx.fillStyle = '#581c87';
+      ctx.fillRect(-18, -32, 36, 32);
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-18, -32, 36, 32);
+
+      // Manivela dourada girando
+      const crankAngle = Date.now() * 0.01;
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(18, -16);
+      ctx.lineTo(26, -16 + Math.sin(crankAngle) * 8);
+      ctx.stroke();
+
+      // Ponto de interrogação no centro
+      ctx.fillStyle = '#10b981';
+      ctx.font = 'bold 14px "Cinzel", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('?', 0, -10);
+      ctx.restore();
+    }
+
+    // 8.6 Acid Blossom do Coringa (legado/fallback)
     if (this.jokerAcidBlossom && this.jokerAcidBlossom.active) {
       const ax = this.jokerAcidBlossom.x;
       const ay = this.jokerAcidBlossom.y;

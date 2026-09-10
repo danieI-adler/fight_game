@@ -16,14 +16,15 @@ export class FighterCombat {
 
     switch (fighter.state) {
       case FIGHTER_STATE.LIGHT_PUNCH:
-        if (fighter.stateTime > 0.05 && fighter.stateTime < 0.18) {
-          fighter.activeHitbox = fighter.createHitbox(15, 95, 60, 30);
-          fighter.activeHitbox.damage = 40;
-          fighter.activeHitbox.knockback = 5;
+        // J (Soco Rápido): Startup ágil (0.04s), recuperação rápida (total 0.18s), alcance curto/médio (55px), excelente para iniciar combos
+        if (fighter.stateTime > 0.04 && fighter.stateTime < 0.14) {
+          fighter.activeHitbox = fighter.createHitbox(15, 95, 55, 30);
+          fighter.activeHitbox.damage = 35;
+          fighter.activeHitbox.knockback = 4;
           fighter.activeHitbox.isHeavy = false;
           fighter.activeHitbox.attackerPower = fighter.attackPower;
         }
-        if (fighter.stateTime >= 0.22) {
+        if (fighter.stateTime >= 0.18) {
           fighter.state = FIGHTER_STATE.IDLE;
         }
         break;
@@ -47,14 +48,15 @@ export class FighterCombat {
         break;
 
       case FIGHTER_STATE.LIGHT_KICK:
-        if (fighter.stateTime > 0.05 && fighter.stateTime < 0.18) {
-          fighter.activeHitbox = fighter.createHitbox(20, 65, 65, 35);
-          fighter.activeHitbox.damage = 50;
-          fighter.activeHitbox.knockback = 6;
+        // K (Chute Baixo / Poke): Maior alcance (78px), mira mais baixa (y: 55), startup ligeiramente mais longo (0.07s) e mais recuperação (0.26s)
+        if (fighter.stateTime > 0.07 && fighter.stateTime < 0.19) {
+          fighter.activeHitbox = fighter.createHitbox(20, 55, 78, 30);
+          fighter.activeHitbox.damage = 48;
+          fighter.activeHitbox.knockback = 7;
           fighter.activeHitbox.isHeavy = false;
           fighter.activeHitbox.attackerPower = fighter.attackPower;
         }
-        if (fighter.stateTime >= 0.24) {
+        if (fighter.stateTime >= 0.26) {
           fighter.state = FIGHTER_STATE.IDLE;
         }
         break;
@@ -791,6 +793,16 @@ export class FighterCombat {
             fighter.superPhase = null;
             fighter.superType = null;
             fighter.state = FIGHTER_STATE.IDLE;
+
+            if (target && !target.isDead) {
+              target.isInvulnerable = false;
+              target.hitstunTime = 0.2;
+              target.position.y = fighter.groundY;
+              target.isGrounded = true;
+              target.velocity.x = 0;
+              target.velocity.y = 0;
+              target.state = FIGHTER_STATE.IDLE;
+            }
           }
           break;
         }
@@ -891,7 +903,9 @@ export class FighterCombat {
                   particles.emitSparks(hx, hy, '#10b981', 18, 6);
                   particles.emitSparks(hx, hy, '#7c3aed', 12, 5);
                   if (i === 5) {
-                    particles.emitShockwave(target.position.x, target.position.y - 60, 180, '#10b981');
+                    particles.emitShockwave(target.position.x, target.position.y - 60, 220, '#10b981');
+                    particles.emitSparks(target.position.x, target.position.y - 60, '#f59e0b', 35, 12);
+                    particles.emitFloatingText('THAT\'S THE PUNCHLINE!', target.position.x, target.position.y - 95, '#10b981', true);
                   }
                 }
               }

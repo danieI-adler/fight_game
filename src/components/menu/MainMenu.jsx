@@ -1,5 +1,5 @@
 import React from 'react';
-import { Volume2, VolumeX, Sparkles, Sword, Wand2, Flame } from 'lucide-react';
+import { Volume2, VolumeX, Sparkles, Sword, Wand2, Flame, Trophy } from 'lucide-react';
 import { sounds } from '../../game/audio/soundManager';
 import { GRAPHICS_MODES } from './GraphicsSelectorModal';
 
@@ -147,6 +147,23 @@ export const MainMenu = ({
 
         {/* Game Modes */}
         <div className="flex flex-col gap-2.5 w-80">
+          <button
+            onClick={() => handleSelect('TOURNAMENT')}
+            className={`w-full py-3 px-4 rounded border font-bold text-sm uppercase tracking-wider transition-all cursor-pointer text-left flex justify-between items-center shadow-lg ${
+              isExpedition
+                ? 'bg-gradient-to-r from-amber-900 via-purple-950 to-amber-950 border-amber-500/80 text-amber-200 ring-1 ring-amber-400/40 hover:brightness-110'
+                : 'bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 border-indigo-500 text-indigo-200 ring-1 ring-indigo-400/40 hover:brightness-110'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <Trophy size={16} className="text-amber-400" />
+              <span>Torneio IA (10 Níveis)</span>
+            </span>
+            <span className="text-[10px] bg-red-600/90 text-white font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+              Evolutiva
+            </span>
+          </button>
+
           <button
             onClick={() => handleSelect('ARCADE')}
             className={`w-full py-3 px-4 rounded border font-bold text-sm uppercase tracking-wider transition-colors cursor-pointer text-left flex justify-between items-center ${

@@ -610,7 +610,7 @@ export const CHARACTERS = [
       gloveColor: '#7c3aed',
       paintTrailColor: '#10b981'
     },
-    description: 'Sobretudo roxo imperial, Acid Blossom na flor da lapela e espancamento brutal de 6 golpes estendidos com pé de cabra.'
+    description: 'O Príncipe Palhaço do Crime com Cartas Explosivas em leque, Caixa de Surpresa venenosa e espancamento cômico com pé de cabra.'
   },
   {
     id: 25,

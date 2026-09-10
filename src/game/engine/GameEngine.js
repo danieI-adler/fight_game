@@ -5,6 +5,7 @@ import { ParticleManager } from './Particles';
 import { CollisionSystem } from './Collision';
 import { InputHandler } from './InputHandler';
 import { FighterAI } from '../ai/FighterAI';
+import { playerTracker } from '../ai/PlayerProfileTracker';
 import { sounds } from '../audio/soundManager';
 import { getCharacterById } from '../characters/characterData';
 import { getExpeditionCharacterById } from '../characters/expedition33Characters';
@@ -81,6 +82,7 @@ export class GameEngine {
 
     // Rede
     this.remoteClientInput = {};
+    this.remoteClientInputQueue = [];
     this.lastNetworkSyncTime = 0;
 
     this.bindEvents();
@@ -121,21 +123,29 @@ export class GameEngine {
 
       if (type === MSG_TYPE.CLIENT_INPUT && this.isOnlineHost) {
         this.remoteClientInput = payload;
+        this.remoteClientInputQueue.push(payload);
+        if (this.remoteClientInputQueue.length > 30) {
+          this.remoteClientInputQueue.shift();
+        }
       } else if (type === MSG_TYPE.HOST_STATE && !this.isOnlineHost) {
         this.applyHostStateSnapshot(payload);
       }
     });
   }
 
-  startFight(char1Id, char2Id, mode = 'VERSUS', difficulty = 'medium', stageId = 'cyber_arena', isHost = true, graphicsMode = 'BELLE_EPOQUE_2D', isExpedition = false) {
+  startFight(char1Id, char2Id, mode = 'VERSUS', difficulty = 'medium', stageId = 'cyber_arena', isHost = true, graphicsMode = 'BELLE_EPOQUE_2D', isExpedition = false, tournamentLevel = 1) {
     this.mode = mode;
     this.graphicsMode = graphicsMode;
     this.isExpedition = isExpedition;
     this.stageId = stageId;
     this.isOnlineHost = isHost;
     this.isTraining = mode === 'TRAINING';
+    this.tournamentLevel = tournamentLevel;
     this.stage.setStage(stageId);
-    this.ai.setDifficulty(this.isTraining ? 'dummy' : difficulty);
+
+    const actualDiff = this.isTraining ? 'dummy' : (mode === 'TOURNAMENT' ? 'tournament' : difficulty);
+    const profile = mode === 'TOURNAMENT' ? playerTracker.getHabitProfile() : null;
+    this.ai.setDifficulty(actualDiff, tournamentLevel, profile);
 
     const c1 = this.isExpedition ? getExpeditionCharacterById(char1Id) : getCharacterById(char1Id);
     const c2 = this.isExpedition ? getExpeditionCharacterById(char2Id) : getCharacterById(char2Id);
@@ -297,17 +307,39 @@ export class GameEngine {
       }
 
       // 1. Processar P1 Local
+      if (this.justPressedP1) {
+        if (this.justPressedP1.jump) playerTracker.recordAction('JUMP');
+        if (this.justPressedP1.lightPunch) playerTracker.recordAction('lightPunch');
+        if (this.justPressedP1.heavyPunch) playerTracker.recordAction('heavyPunch');
+        if (this.justPressedP1.lightKick) playerTracker.recordAction('lightKick');
+        if (this.justPressedP1.heavyKick) playerTracker.recordAction('heavyKick');
+        if (this.justPressedP1.special1) playerTracker.recordAction('special');
+        if (this.justPressedP1.superMove) playerTracker.recordAction('super');
+      }
+
       this.inputHandler.updateFighterInput(this.p1, this.inputHandler.p1Binds, 0, this.justPressedP1);
       this.justPressedP1 = {};
+
+      // Rastrear frame posicional e comportamental de P1
+      const duelDist = Math.abs(this.p1.position.x - this.p2.position.x);
+      playerTracker.trackPlayerFrame(this.p1, this.p2, duelDist);
 
       // 2. Processar P2 (Versus Local / IA / Rede)
       if (this.mode === 'VERSUS') {
         this.inputHandler.updateFighterInput(this.p2, this.inputHandler.p2Binds, 1, this.justPressedP2);
         this.justPressedP2 = {};
       } else if (this.mode === 'ONLINE' && this.isOnlineHost) {
-        // Aplica inputs recebidos do cliente P2
+        // Aplica inputs recebidos do cliente P2 a partir da fila (sem perder nenhum ataque)
+        let mergedJustPressed = {};
+        while (this.remoteClientInputQueue.length > 0) {
+          const packet = this.remoteClientInputQueue.shift();
+          if (packet.justPressed) {
+            mergedJustPressed = { ...mergedJustPressed, ...packet.justPressed };
+          }
+          this.remoteClientInput = packet;
+        }
+
         if (this.remoteClientInput) {
-          const fakeBinds = { left: [], right: [], down: [], block: [] };
           this.p2.crouch(this.remoteClientInput.down);
           this.p2.block(this.remoteClientInput.block);
 
@@ -317,7 +349,7 @@ export class GameEngine {
             else this.p2.stopMoving();
           }
 
-          const jp = this.remoteClientInput.justPressed || {};
+          const jp = { ...(this.remoteClientInput.justPressed || {}), ...mergedJustPressed };
           if (jp.jump) {
             const dirX = this.remoteClientInput.left ? -1 : (this.remoteClientInput.right ? 1 : 0);
             this.p2.jump(dirX);
@@ -396,12 +428,16 @@ export class GameEngine {
       sparrowDrunkTimer: fighter.sparrowDrunkTimer,
       sparrowDodgeCharges: fighter.sparrowDodgeCharges,
       palpatineDualSabers: fighter.palpatineDualSabers,
+      scielCritCharges: fighter.scielCritCharges,
+      scielCritTimer: fighter.scielCritTimer,
       // Projéteis e summons
       batmanBatarang: fighter.batmanBatarang ? { ...fighter.batmanBatarang } : null,
       batmanBatmobile: fighter.batmanBatmobile ? { ...fighter.batmanBatmobile } : null,
       vaderThrowingSaber: fighter.vaderThrowingSaber ? { ...fighter.vaderThrowingSaber } : null,
       palpatineLightning: fighter.palpatineLightning ? { ...fighter.palpatineLightning } : null,
       jokerAcidBlossom: fighter.jokerAcidBlossom ? { ...fighter.jokerAcidBlossom } : null,
+      jokerCards: (fighter.jokerCards || []).map(c => ({ ...c })),
+      jokerJackInTheBox: fighter.jokerJackInTheBox ? { ...fighter.jokerJackInTheBox } : null,
       mcqueenDriftBurn: fighter.mcqueenDriftBurn ? { ...fighter.mcqueenDriftBurn } : null,
       sparrowBlackPearl: fighter.sparrowBlackPearl ? {
         shipX: fighter.sparrowBlackPearl.shipX,
@@ -435,6 +471,8 @@ export class GameEngine {
     if (s.sparrowDrunkTimer !== undefined) fighter.sparrowDrunkTimer = s.sparrowDrunkTimer;
     if (s.sparrowDodgeCharges !== undefined) fighter.sparrowDodgeCharges = s.sparrowDodgeCharges;
     if (s.palpatineDualSabers !== undefined) fighter.palpatineDualSabers = s.palpatineDualSabers;
+    if (s.scielCritCharges !== undefined) fighter.scielCritCharges = s.scielCritCharges;
+    if (s.scielCritTimer !== undefined) fighter.scielCritTimer = s.scielCritTimer;
 
     // Projéteis
     fighter.batmanBatarang = s.batmanBatarang;
@@ -442,6 +480,8 @@ export class GameEngine {
     fighter.vaderThrowingSaber = s.vaderThrowingSaber;
     fighter.palpatineLightning = s.palpatineLightning;
     fighter.jokerAcidBlossom = s.jokerAcidBlossom;
+    fighter.jokerCards = s.jokerCards || [];
+    fighter.jokerJackInTheBox = s.jokerJackInTheBox;
     fighter.mcqueenDriftBurn = s.mcqueenDriftBurn;
     fighter.sparrowBlackPearl = s.sparrowBlackPearl;
     fighter.gustaveBullet = s.gustaveBullet;
@@ -488,13 +528,28 @@ export class GameEngine {
         this.p1.comboCount++;
         // Ganha 5% ao bater
         this.p1.gainAttackEnergy(5);
-        const hitLanded = this.p2.receiveHit(this.p1.activeHitbox, hitResult.point, this.particles);
+        let hitBoxP1 = this.p1.activeHitbox;
+        // Sciel Buff de Crítico: se Sciel tiver cargas de crítico ativas, aplica chance / dano crítico massivo
+        if (this.p1.scielCritCharges > 0) {
+          const isCrit = Math.random() < 0.6 || hitBoxP1.isHeavy;
+          if (isCrit) {
+            hitBoxP1 = { ...hitBoxP1, damage: Math.round(hitBoxP1.damage * 1.85), isHeavy: true };
+            if (this.particles) {
+              this.particles.emitFloatingText('CRITICAL!', hitResult.point.x, hitResult.point.y - 40, '#fbbf24', true);
+              this.particles.emitShockwave(hitResult.point.x, hitResult.point.y, 110, '#fbbf24');
+              this.particles.emitSparks(hitResult.point.x, hitResult.point.y, '#f59e0b', 25, 8);
+            }
+          }
+          this.p1.scielCritCharges--;
+        }
+
+        const hitLanded = this.p2.receiveHit(hitBoxP1, hitResult.point, this.particles);
         // Se acertou golpe sem ser bloqueado (defesas não contam como hit), Verso sobe de rank
         if (hitLanded && this.p1.isVerso) {
           this.p1.gainVersoHit();
         }
 
-        if (this.p1.activeHitbox.isHeavy) {
+        if (hitBoxP1.isHeavy) {
           this.camera.addShake(12, 0.25);
           this.hitstopFrames = 5;
         } else {
@@ -511,13 +566,29 @@ export class GameEngine {
         this.p2.comboCount++;
         // Ganha 5% ao bater
         this.p2.gainAttackEnergy(5);
-        const hitLanded = this.p1.receiveHit(this.p2.activeHitbox, hitResult.point, this.particles);
+
+        let hitBoxP2 = this.p2.activeHitbox;
+        // Sciel Buff de Crítico para P2
+        if (this.p2.scielCritCharges > 0) {
+          const isCrit = Math.random() < 0.6 || hitBoxP2.isHeavy;
+          if (isCrit) {
+            hitBoxP2 = { ...hitBoxP2, damage: Math.round(hitBoxP2.damage * 1.85), isHeavy: true };
+            if (this.particles) {
+              this.particles.emitFloatingText('CRITICAL!', hitResult.point.x, hitResult.point.y - 40, '#fbbf24', true);
+              this.particles.emitShockwave(hitResult.point.x, hitResult.point.y, 110, '#fbbf24');
+              this.particles.emitSparks(hitResult.point.x, hitResult.point.y, '#f59e0b', 25, 8);
+            }
+          }
+          this.p2.scielCritCharges--;
+        }
+
+        const hitLanded = this.p1.receiveHit(hitBoxP2, hitResult.point, this.particles);
         // Se acertou golpe sem ser bloqueado (defesas não contam como hit), Verso sobe de rank
         if (hitLanded && this.p2.isVerso) {
           this.p2.gainVersoHit();
         }
 
-        if (this.p2.activeHitbox.isHeavy) {
+        if (hitBoxP2.isHeavy) {
           this.camera.addShake(12, 0.25);
           this.hitstopFrames = 5;
         } else {

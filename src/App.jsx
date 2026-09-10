@@ -3,6 +3,7 @@ import { GameEngine, GAME_STATUS } from './game/engine/GameEngine';
 import { getCharacterById } from './game/characters/characterData';
 import { getExpeditionCharacterById } from './game/characters/expedition33Characters';
 import { sounds } from './game/audio/soundManager';
+import { playerTracker } from './game/ai/PlayerProfileTracker';
 import { MainMenu } from './components/menu/MainMenu';
 import { CharacterSelect } from './components/select/CharacterSelect';
 import { OnlineLobby } from './components/online/OnlineLobby';
@@ -73,12 +74,34 @@ export function App() {
     p2Id: 2,
     stageId: 'cyber_arena',
     difficulty: 'medium',
+    tournamentLevel: 1,
     isHost: true,
     isExpedition: false,
   });
   const [gameState, setGameState] = useState(null);
   const [showHitboxes, setShowHitboxes] = useState(false);
   const [dummyBehavior, setDummyBehavior] = useState('dummy');
+
+  const handleNextTournamentLevel = () => {
+    const nextLvl = Math.min(10, (matchConfig.tournamentLevel || 1) + 1);
+    setMatchConfig(prev => ({
+      ...prev,
+      tournamentLevel: nextLvl
+    }));
+    if (engineRef.current) {
+      engineRef.current.startFight(
+        matchConfig.p1Id,
+        matchConfig.p2Id,
+        'TOURNAMENT',
+        'tournament',
+        matchConfig.stageId,
+        true,
+        graphicsMode,
+        isExpedition,
+        nextLvl
+      );
+    }
+  };
 
   const canvasRef = useRef(null);
   const engineRef = useRef(null);
@@ -140,7 +163,8 @@ export function App() {
       matchConfig.stageId,
       matchConfig.isHost !== undefined ? matchConfig.isHost : true,
       effectiveGraphics,
-      effectiveExpedition
+      effectiveExpedition,
+      matchConfig.tournamentLevel || 1
     );
 
     return () => {
@@ -225,7 +249,11 @@ export function App() {
         <MainMenu
           onSelectMode={(selectedMode) => {
             setMode(selectedMode);
-            if (selectedMode === 'ONLINE') {
+            if (selectedMode === 'TOURNAMENT') {
+              playerTracker.reset();
+              setMatchConfig(prev => ({ ...prev, tournamentLevel: 1, difficulty: 'tournament' }));
+              setScreen('SELECT');
+            } else if (selectedMode === 'ONLINE') {
               setScreen('ONLINE_LOBBY');
             } else {
               setScreen('SELECT');
@@ -299,6 +327,8 @@ export function App() {
             gameState={gameState}
             char1={char1}
             char2={char2}
+            tournamentLevel={mode === 'TOURNAMENT' ? (matchConfig.tournamentLevel || 1) : null}
+            difficulty={matchConfig.difficulty}
             isPaused={isPaused}
             onTogglePause={togglePause}
             isMuted={isMuted}
@@ -332,6 +362,10 @@ export function App() {
             <VictoryScreen
               winner={winner}
               loser={loser}
+              isTournament={mode === 'TOURNAMENT'}
+              tournamentLevel={matchConfig.tournamentLevel || 1}
+              playerWon={gameState && gameState.p1Wins >= 2}
+              onNextTournamentLevel={handleNextTournamentLevel}
               onRematch={handleRematch}
               onSelectCharacter={() => {
                 if (mode === 'ONLINE') setScreen('ONLINE_LOBBY');

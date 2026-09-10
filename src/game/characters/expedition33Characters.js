@@ -121,7 +121,7 @@ export const EXPEDITION_33_CHARACTERS = [
       weaponType: 'dual_curved_blades'
     },
     superType: 'SCIEL_DARK_WAVE',
-    description: 'Guerreira errante e serena. Empunha lâminas duplas curvas com precisão fluida e fitas de ouro que dançam no combate.'
+    description: 'Guerreira errante e serena. Empunha lâminas duplas curvas com precisão fluida, fitas de ouro e a habilidade Lâminas do Destino para desferir golpes críticos devastadores.'
   },
   {
     id: 105,
@@ -352,7 +352,7 @@ export const EXPEDITION_33_CHARACTERS = [
       paintTrailColor: '#10b981',
       weaponType: 'clown_cards'
     },
-    description: 'O Palhaço do Crime com Acid Blossom na lapela e um pé de cabra brutal para espancar o alvo em alcance estendido com 6 golpes devastadores.'
+    description: 'O Palhaço do Crime com Cartas Explosivas em leque, Caixa de Surpresa com gás hilaria e espancamento cômico com pé de cabra.'
   },
   {
     id: 114,
