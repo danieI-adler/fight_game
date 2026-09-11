@@ -1,4 +1,5 @@
 import { FIGHTER_STATE } from './Fighter';
+import { ExpeditionRenderer } from './ExpeditionRenderer';
 
 /**
  * Renderizador de Alta Fidelidade 2D - Estilo Clair Obscur: Expedition 33
@@ -59,6 +60,28 @@ export class FighterRenderer {
     const isMcQueen = (char.name || '').toLowerCase().includes('mcqueen') || vis.isVehicle || vis.isMcQueen;
     if (isMcQueen) {
       this.drawMcQueenCar(ctx, x, y, f, fighter);
+      ctx.restore();
+
+      if (showHitboxes) {
+        ctx.save();
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 1.5;
+        for (const box of fighter.getHurtboxes()) {
+          ctx.strokeRect(box.x, box.y, box.width, box.height);
+        }
+        if (fighter.activeHitbox) {
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2.5;
+          ctx.strokeRect(fighter.activeHitbox.x, fighter.activeHitbox.y, fighter.activeHitbox.width, fighter.activeHitbox.height);
+        }
+        ctx.restore();
+      }
+      return;
+    }
+
+    // SE FOR HULK TRANSFORMADO: RENDERIZAR O VERDADEIRO HULK
+    if (fighter.isHulk) {
+      ExpeditionRenderer.drawTrueHulk(ctx, x, y, f, p, fighter);
       ctx.restore();
 
       if (showHitboxes) {

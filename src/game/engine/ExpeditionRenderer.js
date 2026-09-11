@@ -59,11 +59,26 @@ export class ExpeditionRenderer {
       return;
     }
 
-    // Se Bruce Banner transformou no HULK: Aumentar o porte físico em 55% e alterar a pele/traje para verde-gama
+    // SE FOR HULK TRANSFORMADO: RENDERIZAR O VERDADEIRO HULK (GIGANTE, MUSCULOSO, PELE VERDE, BERMUDA ROXA RASGADA, CABELO NEGRO BAGUNÇADO)
     if (fighter.isHulk) {
-      ctx.translate(x, y);
-      ctx.scale(1.5, 1.5);
-      ctx.translate(-x, -y);
+      this.drawTrueHulk(ctx, x, y, f, p, fighter);
+      ctx.restore();
+
+      if (showHitboxes) {
+        ctx.save();
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 1.5;
+        for (const box of fighter.getHurtboxes()) {
+          ctx.strokeRect(box.x, box.y, box.width, box.height);
+        }
+        if (fighter.activeHitbox) {
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2.5;
+          ctx.strokeRect(fighter.activeHitbox.x, fighter.activeHitbox.y, fighter.activeHitbox.width, fighter.activeHitbox.height);
+        }
+        ctx.restore();
+      }
+      return;
     }
 
     // 3. Acessórios Traseiros (Lanceram de Gustave, Cajado com Sino de Monoco, Capa de Renoir, Asas de Esquie)
@@ -1022,6 +1037,173 @@ export class ExpeditionRenderer {
     ctx.ellipse(75, -24, 6, 3, 0.2, 0, Math.PI * 2);
     ctx.fill();
 
+    ctx.restore();
+  }
+
+  // --- RENDERIZADOR DEDICADO DO INCRÍVEL HULK (GIGANTE, PELE VERDE, MÚSCULOS COLOSSAIS, BERMUDA ROXA RASGADA) ---
+  static drawTrueHulk(ctx, x, y, f, p, fighter) {
+    const t = fighter.stateTime;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(f, 1);
+
+    // Aura gama pulsante verde ao redor do colosso
+    const gammaPulse = Math.sin(t * 8) * 0.15 + 0.85;
+    ctx.save();
+    ctx.shadowColor = 'rgba(74, 222, 128, 0.9)';
+    ctx.shadowBlur = 24 * gammaPulse;
+
+    // 1. Pernas Musculosas Gigantes (Pele verde #22c55e e bermuda roxa rasgada #581c87)
+    // Perna Traseira
+    ctx.fillStyle = '#15803d';
+    ctx.beginPath();
+    ctx.ellipse(-14, -32, 14, 28, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-16, -10, 12, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Pé Traseiro
+    ctx.beginPath();
+    ctx.roundRect(-26, -5, 24, 10, 4);
+    ctx.fill();
+
+    // Perna Frontal
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath();
+    ctx.ellipse(14, -32, 15, 28, -0.1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(16, -10, 13, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Pé Frontal
+    ctx.beginPath();
+    ctx.roundRect(4, -5, 26, 10, 4);
+    ctx.fill();
+
+    // Bermuda Roxa Rasgada (Calça rasgada clássica do Hulk)
+    ctx.fillStyle = '#4a044e';
+    ctx.beginPath();
+    ctx.moveTo(-24, -65);
+    ctx.lineTo(24, -65);
+    ctx.lineTo(26, -30);
+    // Pontas rasgadas da perna direita
+    ctx.lineTo(18, -25);
+    ctx.lineTo(12, -32);
+    ctx.lineTo(4, -26);
+    ctx.lineTo(0, -42); // cavalo
+    // Pontas rasgadas da perna esquerda
+    ctx.lineTo(-6, -26);
+    ctx.lineTo(-14, -32);
+    ctx.lineTo(-20, -25);
+    ctx.lineTo(-26, -30);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#2e1065';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // 2. Tronco / Trapézio e Peitoral Gigantesco
+    // Costas / Trapézio largo
+    ctx.fillStyle = '#16a34a';
+    ctx.beginPath();
+    ctx.ellipse(0, -98, 38, 26, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Peitorais maciços
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath();
+    ctx.ellipse(-14, -92, 18, 15, 0.1, 0, Math.PI * 2);
+    ctx.ellipse(14, -92, 18, 15, -0.1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Linhas musculares / abdômen tanquinho colossal
+    ctx.strokeStyle = '#15803d';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(0, -102);
+    ctx.lineTo(0, -66);
+    // Gomos do abdômen
+    ctx.moveTo(-12, -80);
+    ctx.lineTo(12, -80);
+    ctx.moveTo(-11, -72);
+    ctx.lineTo(11, -72);
+    ctx.stroke();
+
+    // 3. Braço Traseiro e Punho Esmagador
+    ctx.fillStyle = '#15803d';
+    ctx.beginPath();
+    ctx.arc(-34, -95, 17, 0, Math.PI * 2); // Ombro maciço
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-42, -75, 14, 20, 0.3, 0, Math.PI * 2); // Bíceps
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-48, -52, 15, 18, 0, 0, Math.PI * 2); // Antebraço
+    ctx.fill();
+    // Punho fechado traseiro
+    ctx.beginPath();
+    ctx.arc(-50, -36, 16, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4. Braço Frontal Titânico
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath();
+    ctx.arc(32, -95, 18, 0, Math.PI * 2); // Ombro frontal
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(44, -75, 16, 22, -0.3, 0, Math.PI * 2); // Bíceps frontal gigante
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(50, -52, 16, 19, 0, 0, Math.PI * 2); // Antebraço frontal
+    ctx.fill();
+    // Punho gigante dianteiro
+    ctx.beginPath();
+    ctx.arc(52, -35, 18, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#15803d';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // 5. Cabeça Feroz do Hulk
+    // Queixo quadrado pesado e mandíbula feroz
+    ctx.fillStyle = '#16a34a';
+    ctx.beginPath();
+    ctx.roundRect(-14, -135, 28, 26, [8, 8, 4, 4]);
+    ctx.fill();
+
+    // Expressão: Sobrancelha franzida e olhos verdes incandescentes
+    ctx.fillStyle = '#86efac';
+    ctx.shadowColor = '#4ade80';
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.ellipse(-6, -126, 4, 2.5, 0.2, 0, Math.PI * 2);
+    ctx.ellipse(6, -126, 4, 2.5, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Boca com dentes cerrados rosnando
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(-8, -118, 16, 6, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#052e16';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Cabelo preto curto e desgrenhado do Hulk
+    ctx.fillStyle = '#09090b';
+    ctx.beginPath();
+    ctx.moveTo(-16, -135);
+    ctx.lineTo(-12, -145);
+    ctx.lineTo(-4, -142);
+    ctx.lineTo(2, -147);
+    ctx.lineTo(10, -142);
+    ctx.lineTo(16, -145);
+    ctx.lineTo(16, -133);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
     ctx.restore();
   }
 }

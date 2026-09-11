@@ -152,6 +152,7 @@ export class Fighter {
     this.mcqueenBlitz = null; // { phase, timer, startX, targetX, hasHit }
     
     // Projéteis e Efeitos Especiais: Gandalf, Arqueiro Verde, Hulk e Zorro
+    this.rangedKickCooldown = 0; // Cooldown para balancear o spam de projéteis no chute a distância
     this.gandalfLightSpells = []; // [{ x, y, vx, damage, active, hasHit }]
     this.arrowProjectiles = []; // [{ x, y, vx, vy, gravity, isTrick, type, damage, active, hasHit }]
     this.arrowRainActive = null; // { timer, count, maxArrows, interval, arrows: [] }
@@ -442,36 +443,42 @@ export class Fighter {
       this.state = FIGHTER_STATE.LIGHT_KICK;
       sounds.playWhoosh();
 
-      // Gandalf e Arqueiro Verde: ÚNICOS dois personagens com projétil a distância no K!
+      // Gandalf e Arqueiro Verde: ÚNICOS dois personagens com projétil a distância no K (com balanceamento de cooldown e velocidade)
       if (this.isGandalf) {
-        sounds.playStaffBell();
-        sounds.playElectricZap();
-        const staffX = this.position.x + this.facing * 40;
-        const staffY = this.position.y - 75;
-        this.gandalfLightSpells.push({
-          x: staffX,
-          y: staffY,
-          vx: this.facing * 1150,
-          damage: 55,
-          active: true,
-          hasHit: false
-        });
+        if (this.rangedKickCooldown <= 0) {
+          this.rangedKickCooldown = 0.55; // Delay balanceado entre disparos
+          sounds.playStaffBell();
+          sounds.playElectricZap();
+          const staffX = this.position.x + this.facing * 40;
+          const staffY = this.position.y - 75;
+          this.gandalfLightSpells.push({
+            x: staffX,
+            y: staffY,
+            vx: this.facing * 880, // Velocidade balanceada e esquivável
+            damage: 42, // Dano balanceado
+            active: true,
+            hasHit: false
+          });
+        }
       } else if (this.isGreenArrow) {
-        sounds.playWhoosh();
-        const bowX = this.position.x + this.facing * 35;
-        const bowY = this.position.y - 75;
-        this.arrowProjectiles.push({
-          x: bowX,
-          y: bowY,
-          vx: this.facing * 1350,
-          vy: -40,
-          gravity: 120,
-          isTrick: false,
-          type: 'NORMAL_ARROW',
-          damage: 55,
-          active: true,
-          hasHit: false
-        });
+        if (this.rangedKickCooldown <= 0) {
+          this.rangedKickCooldown = 0.5; // Delay balanceado entre flechas
+          sounds.playWhoosh();
+          const bowX = this.position.x + this.facing * 35;
+          const bowY = this.position.y - 75;
+          this.arrowProjectiles.push({
+            x: bowX,
+            y: bowY,
+            vx: this.facing * 1050, // Velocidade balanceada
+            vy: -30,
+            gravity: 100,
+            isTrick: false,
+            type: 'NORMAL_ARROW',
+            damage: 45, // Dano balanceado
+            active: true,
+            hasHit: false
+          });
+        }
       }
     }
   }
@@ -1339,6 +1346,10 @@ export class Fighter {
       }
     }
 
+    if (this.rangedKickCooldown > 0) {
+      this.rangedKickCooldown -= dt;
+    }
+
     // 4.1 RELÂMPAGO MCQUEEN: DANO ESCALA PROPORCIONAL À SUA VELOCIDADE ATUAL!
     if (this.isMcQueen) {
       const currentSpeed = Math.abs(this.velocity.x);
@@ -2168,7 +2179,7 @@ export class Fighter {
       this.arrowProjectiles = this.arrowProjectiles.filter(a => a.active);
     }
 
-    // 5.20 Chuva de Flechas de Star City (Arqueiro Verde - Ultimate)
+    // 5.20 Chuva de Flechas de Star City (Arqueiro Verde - Ultimate POTENTE)
     if (this.arrowRainActive) {
       const ar = this.arrowRainActive;
       ar.timer += dt;
@@ -2176,13 +2187,13 @@ export class Fighter {
         ar.count++;
         sounds.playWhoosh();
         const rainTargetX = this.opponent ? this.opponent.position.x : this.position.x + this.facing * 200;
-        const spawnX = rainTargetX + (Math.random() - 0.5) * 450;
+        const spawnX = rainTargetX + (Math.random() - 0.5) * 380;
         const spawnY = -20;
         ar.arrows.push({
           x: spawnX,
           y: spawnY,
-          vx: (Math.random() - 0.5) * 60,
-          vy: 1100 + Math.random() * 300,
+          vx: (Math.random() - 0.5) * 40,
+          vy: 1300 + Math.random() * 350,
           active: true,
           hasHit: false
         });
@@ -2196,18 +2207,19 @@ export class Fighter {
         if (this.opponent && !this.opponent.isDead && !arrow.hasHit) {
           const dist = Math.abs(arrow.x - this.opponent.position.x);
           const heightDiff = Math.abs(arrow.y - (this.opponent.position.y - 50));
-          if (dist < 45 && heightDiff < 65) {
+          if (dist < 55 && heightDiff < 75) {
             arrow.hasHit = true;
             arrow.active = false;
-            sounds.playPunch(false);
+            sounds.playPunch(true);
             if (particles) {
-              particles.emitSparks(arrow.x, arrow.y, '#22c55e', 8, 4);
+              particles.emitSparks(arrow.x, arrow.y, '#22c55e', 14, 6);
+              particles.emitShockwave(arrow.x, arrow.y, 60, '#86efac');
             }
             const attackData = {
-              damage: 18, // Muitas flechas caindo
-              knockback: 4,
+              damage: 38, // Buff significativo: 38 de dano por flecha (causando até 400+ de dano total)
+              knockback: 7,
               knockdown: false,
-              isHeavy: false,
+              isHeavy: true,
               attackerPower: this.attackPower
             };
             this.opponent.receiveHit(attackData, { x: arrow.x, y: arrow.y }, particles);
