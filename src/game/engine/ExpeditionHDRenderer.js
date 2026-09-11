@@ -258,9 +258,10 @@ export class ExpeditionHDRenderer {
     }
 
     // 5. Renderização do Retrato HD do Personagem
-    const img = this.getImage(char.image);
-    const spriteWidth = 140;
-    const spriteHeight = 180;
+    const imageSrc = fighter.isHulk ? './assets/expedition33/hulk_transformed.png' : char.image;
+    const img = this.getImage(imageSrc);
+    const spriteWidth = fighter.isHulk ? 210 : 140;
+    const spriteHeight = fighter.isHulk ? 240 : 180;
     const spriteX = -spriteWidth / 2;
     const spriteY = -spriteHeight + 15;
 

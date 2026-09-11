@@ -87,6 +87,12 @@ export class Fighter {
     this.isHulk = false; // Começa como cientista frágil; se transforma apenas após a Ultimate!
     this.isZorro = Boolean(cNameLower.includes('zorro') || charData.cannotBlock || charData.hasClashParry);
 
+    // Identificação do Lote 2 dos Novos Personagens
+    this.isAang = Boolean(cNameLower.includes('aang') || charData.superType === 'AVATAR_STATE_FOUR_ELEMENTS');
+    this.isDoctorStrange = Boolean(cNameLower.includes('estranho') || cNameLower.includes('strange') || charData.hasSymmetricalPortals);
+    this.isWalterWhite = Boolean(cNameLower.includes('walter') || cNameLower.includes('heisenberg'));
+    this.isMessi = Boolean(cNameLower.includes('messi'));
+
     // Estado e Animação
     this.state = FIGHTER_STATE.IDLE;
     this.stateTime = 0;
@@ -160,6 +166,21 @@ export class Fighter {
     this.zorroMarkOfZ = null; // { timer, step, target, active }
     this.zorroWhipActive = null; // { timer, x, y, reach, active }
     this.hulkSmashEffect = null; // { timer, x, y, radius, active }
+
+    // Projéteis e Habilidades Especiais: Aang, Doutor Estranho, Walter White e Messi (Lote 2)
+    this.aangAirBlasts = []; // [{ x, y, vx, damage, active, hasHit }]
+    this.aangWaterWhip = null; // { timer, reach, damage, active, hasHit }
+    this.aangFireBlasts = []; // [{ x, y, vx, damage, active, hasHit }]
+    this.aangEarthPillar = null; // { timer, x, y, damage, active, hasHit }
+    this.aangAvatarStateActive = false; // Estado Avatar ativado na Ultimate
+    this.aangAvatarElements = []; // 4 elementos orbitando
+    this.strangePortals = null; // { leftX: 280, rightX: stageWidth - 280, y: groundY - 70, cooldown: 0 }
+    this.strangeEldritchWhip = null; // { timer, reach, damage, active, hasHit }
+    this.strangeMirrorDimension = null; // { timer, duration, target, active }
+    this.walterFulminateCrystal = null; // { x, y, vx, vy, damage, active, exploded }
+    this.walterM60Turret = null; // { timer, x, y, shotsFired, maxShots, interval, bullets: [] }
+    this.messiSoccerBall = null; // { x, y, vx, vy, curve, damage, active, hasHit }
+    this.messiAnkaraRush = null; // { timer, startX, targetX, active, hasHit }
 
     // Articulação Esquelética
     this.pose = {
@@ -479,6 +500,19 @@ export class Fighter {
             hasHit: false
           });
         }
+      } else if (this.isAang) {
+        // Elemento AR de Aang: Rajada cortante de vento / Air Sweep
+        sounds.playWhoosh();
+        const ax = this.position.x + this.facing * 35;
+        const ay = this.position.y - 65;
+        this.aangAirBlasts.push({
+          x: ax,
+          y: ay,
+          vx: this.facing * 920,
+          damage: 40,
+          active: true,
+          hasHit: false
+        });
       }
     }
   }
@@ -826,6 +860,99 @@ export class Fighter {
         hasHit: false
       };
     }
+    // 17. Aang: Elemento ÁGUA (Q 33%) ou Elemento FOGO (Q 66%)
+    else if (this.isAang) {
+      if (level === 1) {
+        // Elemento Água: Chicote fluido que atinge e desacelera o inimigo
+        this.extraType = 'AANG_WATER_WHIP';
+        sounds.playWaterSplash();
+        sounds.playWhoosh();
+        this.aangWaterWhip = {
+          timer: 0.35,
+          x: this.position.x,
+          y: this.position.y - 65,
+          reach: 220,
+          damage: 105,
+          active: true,
+          hasHit: false
+        };
+      } else {
+        // Elemento Fogo: Chute de labaredas em leque com status de queimadura
+        this.extraType = 'AANG_FIRE_FLURRY';
+        sounds.playFireBlast();
+        sounds.playPunch(true);
+        [-0.1, 0.05].forEach((ang, idx) => {
+          this.aangFireBlasts.push({
+            x: this.position.x + this.facing * 35,
+            y: this.position.y - 65 + idx * 12,
+            vx: Math.cos(ang) * this.facing * 1050,
+            vy: Math.sin(ang) * 1050,
+            damage: 80,
+            active: true,
+            hasHit: false
+          });
+        });
+      }
+    }
+    // 18. Doutor Estranho: Chicotes Místicos de Balthakk & Invocação dos Portais Simétricos (Q)
+    else if (this.isDoctorStrange) {
+      this.extraType = 'STRANGE_ELDRITCH_WHIP';
+      sounds.playSuperCharge();
+      sounds.playStaffBell();
+      const reach = level === 2 ? 300 : 200;
+      this.strangeEldritchWhip = {
+        timer: 0.4,
+        x: this.position.x,
+        y: this.position.y - 70,
+        reach: reach,
+        damage: level === 2 ? 165 : 105,
+        active: true,
+        hasHit: false
+      };
+      // Garante que os portais simétricos permanentes existam na arena
+      if (!this.strangePortals) {
+        this.strangePortals = {
+          leftX: 280,
+          rightX: 1720,
+          y: this.groundY - 70,
+          cooldown: 0
+        };
+      }
+    }
+    // 19. Walter White: Fulminato de Mercúrio ("This is not meth!") (Q)
+    else if (this.isWalterWhite) {
+      this.extraType = 'WALTER_MERCURY_FULMINATE';
+      sounds.playWhoosh();
+      const cx = this.position.x + this.facing * 30;
+      const cy = this.position.y - 75;
+      this.walterFulminateCrystal = {
+        x: cx,
+        y: cy,
+        vx: this.facing * (level === 2 ? 800 : 650),
+        vy: -260,
+        gravity: 650,
+        damage: level === 2 ? 210 : 135,
+        radius: level === 2 ? 160 : 110,
+        active: true,
+        exploded: false
+      };
+    }
+    // 20. Messi: Drible "Ankara Messi" desconcertante com caneta (Q)
+    else if (this.isMessi) {
+      this.extraType = 'MESSI_ANKARA_DRIBBLE';
+      sounds.playDash();
+      sounds.playWhoosh();
+      const target = this.opponent;
+      const targetX = target ? target.position.x : this.position.x + this.facing * 180;
+      this.messiAnkaraRush = {
+        timer: 0,
+        startX: this.position.x,
+        targetX: targetX + this.facing * 90, // Passa por trás do oponente!
+        damage: level === 2 ? 180 : 115,
+        active: true,
+        hasHit: false
+      };
+    }
     // Personagens genéricos: golpe padrão fortificado
     else {
       this.extraType = 'GENERIC_EXTRA';
@@ -1009,8 +1136,8 @@ export class Fighter {
       this.arrowRainActive = {
         timer: 0,
         count: 0,
-        maxArrows: 28,
-        interval: 0.06,
+        maxArrows: 35,
+        interval: 0.045,
         arrows: []
       };
     } else if (this.superType === 'HULK_TRANSFORMATION') {
@@ -1037,6 +1164,59 @@ export class Fighter {
         active: true,
         targetX: target ? target.position.x : this.position.x + this.facing * 140,
         targetY: target ? target.position.y - 60 : this.groundY - 60
+      };
+    } else if (this.superType === 'AVATAR_STATE_FOUR_ELEMENTS') {
+      this.superPhase = 'ELEMENTAL_SPHERE';
+      sounds.playSuperCharge();
+      sounds.playThunderSlam();
+      sounds.playWindTornado();
+      this.aangAvatarStateActive = true;
+      this.aangAvatarElements = [
+        { type: 'AIR', color: '#e0f2fe', angle: 0 },
+        { type: 'WATER', color: '#0ea5e9', angle: Math.PI * 0.5 },
+        { type: 'EARTH', color: '#ca8a04', angle: Math.PI },
+        { type: 'FIRE', color: '#ef4444', angle: Math.PI * 1.5 }
+      ];
+    } else if (this.superType === 'STRANGE_MIRROR_DIMENSION') {
+      this.superPhase = 'MIRROR_SHATTER';
+      sounds.playSuperCharge();
+      sounds.playDimensionalPierce();
+      const target = this.opponent;
+      this.strangeMirrorDimension = {
+        timer: 0,
+        duration: 1.8,
+        target: target,
+        shattered: false,
+        active: true
+      };
+    } else if (this.superType === 'HEISENBERG_M60_REMOTE') {
+      this.superPhase = 'TRUNK_OPEN';
+      sounds.playSuperCharge();
+      sounds.playGunshot();
+      this.walterM60Turret = {
+        timer: 0,
+        x: this.position.x - this.facing * 90,
+        y: this.groundY,
+        shotsFired: 0,
+        maxShots: 24,
+        interval: 0.05,
+        bullets: []
+      };
+    } else if (this.superType === 'MESSI_GOLDEN_FREE_KICK') {
+      this.superPhase = 'BALL_PLACEMENT';
+      sounds.playSuperCharge();
+      sounds.playDash();
+      const ballX = this.position.x + this.facing * 40;
+      const ballY = this.groundY - 15;
+      this.messiSoccerBall = {
+        x: ballX,
+        y: ballY,
+        vx: 0,
+        vy: 0,
+        kicked: false,
+        curve: 0,
+        active: true,
+        hasHit: false
       };
     } else {
       this.superType = 'GUSTAVE_SMASH';
@@ -1116,6 +1296,46 @@ export class Fighter {
 
       this.executeMonocoReflect(attackData, particles, isSkill);
       return false; // NÃO TOMA DANO!
+    }
+
+    // --- ANULAÇÃO DE ATAQUE DO ZORRO (CLASH PARRY / CONTRAGOLPE) ---
+    // Se Zorro atacar no mesmo momento em que recebe um golpe, anula completamente o ataque inimigo!
+    if (this.isZorro) {
+      const attackStates = [
+        FIGHTER_STATE.LIGHT_PUNCH,
+        FIGHTER_STATE.HEAVY_PUNCH,
+        FIGHTER_STATE.LIGHT_KICK,
+        FIGHTER_STATE.HEAVY_KICK,
+        FIGHTER_STATE.CROUCH_PUNCH,
+        FIGHTER_STATE.CROUCH_KICK,
+        FIGHTER_STATE.JUMP_PUNCH,
+        FIGHTER_STATE.JUMP_KICK,
+        FIGHTER_STATE.SPECIAL_1,
+        FIGHTER_STATE.SPECIAL_2,
+        FIGHTER_STATE.SUPER_MOVE
+      ];
+      if (attackStates.includes(this.state)) {
+        sounds.playRapierSlash();
+        sounds.playParryReflect();
+        if (particles) {
+          particles.emitSwordSlash(this.position.x - this.facing * 40, this.position.y - 65, this.position.x + this.facing * 50, this.position.y - 65, '#fbbf24', 6);
+          particles.emitSparks(hitPoint.x, hitPoint.y, '#fbbf24', 28, 10);
+          particles.emitShockwave(hitPoint.x, hitPoint.y, 140, '#f59e0b');
+          particles.emitFloatingText('CLASH NULLIFIED!', this.position.x, this.position.y - 95, '#fbbf24', true);
+        }
+        // Anula golpe adversário e se o oponente estiver perto causa contra-golpe rápido
+        if (this.opponent && !this.opponent.isDead) {
+          const counterData = {
+            damage: 85,
+            knockback: 15,
+            knockdown: false,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(counterData, { x: this.opponent.position.x, y: this.opponent.position.y - 50 }, particles);
+        }
+        return false; // ANULA O ATAQUE COMPLETAMENTE!
+      }
     }
 
     const isGuarding = this.isBlocking || (this.state === FIGHTER_STATE.WALK_BACK && this.isGrounded);
@@ -2179,21 +2399,22 @@ export class Fighter {
       this.arrowProjectiles = this.arrowProjectiles.filter(a => a.active);
     }
 
-    // 5.20 Chuva de Flechas de Star City (Arqueiro Verde - Ultimate POTENTE)
+    // 5.20 Chuva de Flechas de Star City (Arqueiro Verde - Ultimate Devastadora)
     if (this.arrowRainActive) {
       const ar = this.arrowRainActive;
       ar.timer += dt;
       if (ar.count < ar.maxArrows && ar.timer >= ar.count * ar.interval) {
         ar.count++;
         sounds.playWhoosh();
+        // Foca diretamente na posição atual do oponente com dispersão reduzida
         const rainTargetX = this.opponent ? this.opponent.position.x : this.position.x + this.facing * 200;
-        const spawnX = rainTargetX + (Math.random() - 0.5) * 380;
-        const spawnY = -20;
+        const spawnX = rainTargetX + (Math.random() - 0.5) * 160;
+        const spawnY = -30;
         ar.arrows.push({
           x: spawnX,
           y: spawnY,
-          vx: (Math.random() - 0.5) * 40,
-          vy: 1300 + Math.random() * 350,
+          vx: (Math.random() - 0.5) * 30,
+          vy: 1600 + Math.random() * 300,
           active: true,
           hasHit: false
         });
@@ -2207,18 +2428,18 @@ export class Fighter {
         if (this.opponent && !this.opponent.isDead && !arrow.hasHit) {
           const dist = Math.abs(arrow.x - this.opponent.position.x);
           const heightDiff = Math.abs(arrow.y - (this.opponent.position.y - 50));
-          if (dist < 55 && heightDiff < 75) {
+          if (dist < 70 && heightDiff < 90) {
             arrow.hasHit = true;
             arrow.active = false;
             sounds.playPunch(true);
             if (particles) {
-              particles.emitSparks(arrow.x, arrow.y, '#22c55e', 14, 6);
-              particles.emitShockwave(arrow.x, arrow.y, 60, '#86efac');
+              particles.emitSparks(arrow.x, arrow.y, '#22c55e', 20, 8);
+              particles.emitShockwave(arrow.x, arrow.y, 80, '#86efac');
             }
             const attackData = {
-              damage: 38, // Buff significativo: 38 de dano por flecha (causando até 400+ de dano total)
-              knockback: 7,
-              knockdown: false,
+              damage: 52, // DANO POTENTE: 52 por flecha (com 35 flechas concentradas, causa dano letal!)
+              knockback: 10,
+              knockdown: true,
               isHeavy: true,
               attackerPower: this.attackPower
             };
@@ -2228,8 +2449,9 @@ export class Fighter {
 
         if (arrow.y >= this.groundY) {
           arrow.active = false;
-          if (particles && Math.random() < 0.3) {
-            particles.emitDust(arrow.x, this.groundY, 2, '#14532d');
+          if (particles && Math.random() < 0.4) {
+            particles.emitDust(arrow.x, this.groundY, 4, '#14532d');
+            particles.emitSparks(arrow.x, this.groundY - 10, '#22c55e', 6, 4);
           }
         }
       }
@@ -2333,6 +2555,348 @@ export class Fighter {
       if (zw.timer <= 0) {
         zw.active = false;
         this.zorroWhipActive = null;
+      }
+    }
+
+    // 5.24 Aang: Rajada de Vento / Air Blast (Ar)
+    if (this.aangAirBlasts && this.aangAirBlasts.length > 0) {
+      for (const ab of this.aangAirBlasts) {
+        if (!ab.active) continue;
+        ab.x += ab.vx * dt;
+        if (particles && Math.random() < 0.4) {
+          particles.emitDust(ab.x, this.groundY, 2, '#e0f2fe');
+        }
+        if (this.opponent && !this.opponent.isDead && !ab.hasHit) {
+          const dist = Math.abs(ab.x - this.opponent.position.x);
+          if (dist < 45) {
+            ab.hasHit = true;
+            ab.active = false;
+            sounds.playWhoosh();
+            if (particles) {
+              particles.emitShockwave(ab.x, this.opponent.position.y - 50, 75, '#38bdf8');
+              particles.emitDust(ab.x, this.groundY, 8, '#cbd5e1');
+            }
+            const attackData = {
+              damage: ab.damage,
+              knockback: 14,
+              knockdown: false,
+              isHeavy: false,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: ab.x, y: this.opponent.position.y - 50 }, particles);
+          }
+        }
+        if (ab.x < -100 || ab.x > stageWidth + 100) ab.active = false;
+      }
+      this.aangAirBlasts = this.aangAirBlasts.filter(a => a.active);
+    }
+
+    // 5.25 Aang: Chicote de Água / Water Whip (Água)
+    if (this.aangWaterWhip && this.aangWaterWhip.active) {
+      const ww = this.aangWaterWhip;
+      ww.timer -= dt;
+      if (this.opponent && !this.opponent.isDead && !ww.hasHit) {
+        const dist = Math.abs(this.position.x - this.opponent.position.x);
+        const facingTarget = (this.opponent.position.x - this.position.x) * this.facing > 0;
+        if (facingTarget && dist < ww.reach) {
+          ww.hasHit = true;
+          sounds.playWaterSplash();
+          this.opponent.slowTimer = 3.0; // Desacelera o inimigo!
+          if (particles) {
+            particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 50, 90, '#0ea5e9');
+            particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 50, '#38bdf8', 18, 7);
+          }
+          const attackData = {
+            damage: ww.damage,
+            knockback: 8,
+            knockdown: false,
+            isHeavy: false,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 50 }, particles);
+        }
+      }
+      if (ww.timer <= 0) {
+        ww.active = false;
+        this.aangWaterWhip = null;
+      }
+    }
+
+    // 5.26 Aang: Labaredas de Fogo / Fire Flurry (Fogo)
+    if (this.aangFireBlasts && this.aangFireBlasts.length > 0) {
+      for (const fb of this.aangFireBlasts) {
+        if (!fb.active) continue;
+        fb.x += fb.vx * dt;
+        fb.y += fb.vy * dt;
+        if (particles && Math.random() < 0.5) {
+          particles.emitSparks(fb.x, fb.y, '#f97316', 4, 3);
+        }
+        if (this.opponent && !this.opponent.isDead && !fb.hasHit) {
+          const dist = Math.abs(fb.x - this.opponent.position.x);
+          const hDiff = Math.abs(fb.y - (this.opponent.position.y - 50));
+          if (dist < 45 && hDiff < 60) {
+            fb.hasHit = true;
+            fb.active = false;
+            sounds.playFireBlast();
+            this.opponent.burnTimer = 3.5; // Aplica queimadura contínua!
+            if (particles) {
+              particles.emitShockwave(fb.x, fb.y, 80, '#ef4444');
+              particles.emitSparks(fb.x, fb.y, '#f97316', 16, 6);
+            }
+            const attackData = {
+              damage: fb.damage,
+              knockback: 10,
+              knockdown: false,
+              isHeavy: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: fb.x, y: fb.y }, particles);
+          }
+        }
+        if (fb.x < -100 || fb.x > stageWidth + 100 || fb.y >= this.groundY) fb.active = false;
+      }
+      this.aangFireBlasts = this.aangFireBlasts.filter(f => f.active);
+    }
+
+    // 5.27 Doutor Estranho: Portais Simétricos Permanentes (Apenas Strange Pode Entrar!)
+    if (this.isDoctorStrange && !this.strangePortals) {
+      // Inicia os portais simétricos automaticamente na arena
+      this.strangePortals = {
+        leftX: 280,
+        rightX: Math.max(800, stageWidth - 280),
+        y: this.groundY - 65,
+        cooldown: 0
+      };
+    }
+    if (this.strangePortals) {
+      const sp = this.strangePortals;
+      sp.rightX = Math.max(800, stageWidth - 280);
+      if (sp.cooldown > 0) sp.cooldown -= dt;
+
+      // APENAS DOUTOR ESTRANHO PODE ATRAVESSAR!
+      if (this.isDoctorStrange && sp.cooldown <= 0) {
+        const leftDist = Math.abs(this.position.x - sp.leftX);
+        const rightDist = Math.abs(this.position.x - sp.rightX);
+        if (leftDist < 35 && Math.abs(this.position.y - sp.y) < 80) {
+          // Entra no portal esquerdo e sai no direito simétrico!
+          sp.cooldown = 1.0;
+          this.position.x = sp.rightX - 45;
+          sounds.playDimensionalPierce();
+          sounds.playWhoosh();
+          if (particles) {
+            particles.emitShockwave(sp.leftX, sp.y, 110, '#f59e0b');
+            particles.emitShockwave(sp.rightX, sp.y, 110, '#f59e0b');
+            particles.emitSparks(sp.rightX, sp.y, '#fbbf24', 25, 8);
+          }
+        } else if (rightDist < 35 && Math.abs(this.position.y - sp.y) < 80) {
+          // Entra no portal direito e sai no esquerdo simétrico!
+          sp.cooldown = 1.0;
+          this.position.x = sp.leftX + 45;
+          sounds.playDimensionalPierce();
+          sounds.playWhoosh();
+          if (particles) {
+            particles.emitShockwave(sp.rightX, sp.y, 110, '#f59e0b');
+            particles.emitShockwave(sp.leftX, sp.y, 110, '#f59e0b');
+            particles.emitSparks(sp.leftX, sp.y, '#fbbf24', 25, 8);
+          }
+        }
+      }
+    }
+
+    // 5.28 Doutor Estranho: Chicotes Místicos de Balthakk (Q)
+    if (this.strangeEldritchWhip && this.strangeEldritchWhip.active) {
+      const sw = this.strangeEldritchWhip;
+      sw.timer -= dt;
+      if (this.opponent && !this.opponent.isDead && !sw.hasHit) {
+        const dist = Math.abs(this.position.x - this.opponent.position.x);
+        const facingTarget = (this.opponent.position.x - this.position.x) * this.facing > 0;
+        if (facingTarget && dist < sw.reach) {
+          sw.hasHit = true;
+          sounds.playDimensionalPierce();
+          if (particles) {
+            particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 110, '#f59e0b');
+            particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 60, '#fbbf24', 24, 8);
+          }
+          const attackData = {
+            damage: sw.damage,
+            knockback: 15,
+            knockdown: false,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
+        }
+      }
+      if (sw.timer <= 0) {
+        sw.active = false;
+        this.strangeEldritchWhip = null;
+      }
+    }
+
+    // 5.29 Walter White: Cristal de Fulminato de Mercúrio (Q)
+    if (this.walterFulminateCrystal && this.walterFulminateCrystal.active) {
+      const wc = this.walterFulminateCrystal;
+      wc.x += wc.vx * dt;
+      wc.vy += wc.gravity * dt;
+      wc.y += wc.vy * dt;
+
+      const hitGround = wc.y >= this.groundY;
+      const hitOpponent = this.opponent && Math.abs(wc.x - this.opponent.position.x) < 45 && Math.abs(wc.y - (this.opponent.position.y - 50)) < 55;
+
+      if (hitGround || hitOpponent) {
+        wc.active = false;
+        wc.exploded = true;
+        sounds.playThunderSlam();
+        sounds.playKO();
+        if (particles) {
+          particles.emitShockwave(wc.x, this.groundY, wc.radius, '#0284c7');
+          particles.emitSparks(wc.x, this.groundY - 30, '#38bdf8', 40, 14);
+          particles.emitSparks(wc.x, this.groundY - 30, '#ffffff', 30, 10);
+          particles.emitFloatingText('THIS IS NOT METH!', wc.x, this.groundY - 90, '#38bdf8', true);
+        }
+        if (this.opponent && !this.opponent.isDead) {
+          const dist = Math.abs(wc.x - this.opponent.position.x);
+          if (dist < wc.radius) {
+            const attackData = {
+              damage: wc.damage,
+              knockback: 22,
+              knockdown: true,
+              isHeavy: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.groundY - 40 }, particles);
+          }
+        }
+        this.walterFulminateCrystal = null;
+      }
+    }
+
+    // 5.30 Walter White: Torreta M60 Automatizada no Porta-Malas (Ultimate)
+    if (this.walterM60Turret) {
+      const wt = this.walterM60Turret;
+      wt.timer += dt;
+      if (wt.shotsFired < wt.maxShots && wt.timer >= wt.shotsFired * wt.interval) {
+        wt.shotsFired++;
+        sounds.playGunshot();
+        const bulletY = this.groundY - 60 + (Math.random() - 0.5) * 20;
+        wt.bullets.push({
+          x: wt.x + this.facing * 35,
+          y: bulletY,
+          vx: this.facing * 1850,
+          damage: 18,
+          active: true,
+          hasHit: false
+        });
+      }
+
+      for (const bullet of wt.bullets) {
+        if (!bullet.active) continue;
+        bullet.x += bullet.vx * dt;
+        if (this.opponent && !this.opponent.isDead && !bullet.hasHit) {
+          const dist = Math.abs(bullet.x - this.opponent.position.x);
+          const hDiff = Math.abs(bullet.y - (this.opponent.position.y - 50));
+          if (dist < 40 && hDiff < 65) {
+            bullet.hasHit = true;
+            bullet.active = false;
+            sounds.playPunch(true);
+            if (particles) {
+              particles.emitSparks(bullet.x, bullet.y, '#f59e0b', 10, 5);
+            }
+            const attackData = {
+              damage: bullet.damage,
+              knockback: 5,
+              knockdown: false,
+              isHeavy: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: bullet.x, bulletY: bullet.y }, particles);
+          }
+        }
+        if (bullet.x < -100 || bullet.x > stageWidth + 100) bullet.active = false;
+      }
+      wt.bullets = wt.bullets.filter(b => b.active);
+      if (wt.shotsFired >= wt.maxShots && wt.bullets.length === 0 && wt.timer > 2.5) {
+        this.walterM60Turret = null;
+      }
+    }
+
+    // 5.31 Messi: Drible "Ankara Messi" com caneta (Q)
+    if (this.messiAnkaraRush && this.messiAnkaraRush.active) {
+      const mr = this.messiAnkaraRush;
+      mr.timer += dt;
+      const progress = Math.min(1, mr.timer / 0.28);
+      this.position.x = mr.startX + (mr.targetX - mr.startX) * progress;
+
+      if (particles && Math.random() < 0.6) {
+        particles.emitDust(this.position.x, this.groundY, 3, '#38bdf8');
+      }
+
+      if (this.opponent && !this.opponent.isDead && !mr.hasHit && progress > 0.4) {
+        mr.hasHit = true;
+        sounds.playDash();
+        sounds.playPunch(true);
+        if (particles) {
+          particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 40, 110, '#38bdf8');
+          particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 40, '#facc15', 20, 8);
+          particles.emitFloatingText('ANKARA MESSI!', this.opponent.position.x, this.opponent.position.y - 85, '#38bdf8', true);
+        }
+        const attackData = {
+          damage: mr.damage,
+          knockback: 14,
+          knockdown: true,
+          isHeavy: true,
+          attackerPower: this.attackPower
+        };
+        this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 40 }, particles);
+      }
+
+      if (mr.timer >= 0.32) {
+        mr.active = false;
+        this.messiAnkaraRush = null;
+        this.facing = -this.facing; // Vira para o oponente após passar por trás!
+      }
+    }
+
+    // 5.32 Messi: Chute de Ouro / Curva Perfeita (Ultimate)
+    if (this.messiSoccerBall && this.messiSoccerBall.active) {
+      const ball = this.messiSoccerBall;
+      if (ball.kicked) {
+        ball.x += ball.vx * dt;
+        ball.vy += 220 * dt; // Gravidade suave
+        ball.y += ball.vy * dt;
+        ball.curve += dt * 4;
+
+        if (particles && Math.random() < 0.6) {
+          particles.emitSparks(ball.x, ball.y, '#facc15', 4, 3);
+        }
+
+        if (this.opponent && !this.opponent.isDead && !ball.hasHit) {
+          const dist = Math.abs(ball.x - this.opponent.position.x);
+          const hDiff = Math.abs(ball.y - (this.opponent.position.y - 50));
+          if (dist < 55 && hDiff < 65) {
+            ball.hasHit = true;
+            ball.active = false;
+            sounds.playThunderSlam();
+            sounds.playKO();
+            if (particles) {
+              particles.emitShockwave(ball.x, ball.y, 220, '#facc15');
+              particles.emitSparks(ball.x, ball.y, '#facc15', 45, 14);
+              particles.emitFloatingText('GOLAÇO NO ÂNGULO!', ball.x, ball.y - 60, '#facc15', true);
+            }
+            const attackData = {
+              damage: 395,
+              knockback: 32,
+              knockdown: true,
+              isHeavy: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: ball.x, y: ball.y }, particles);
+          }
+        }
+        if (ball.y >= this.groundY || ball.x < -100 || ball.x > stageWidth + 100) {
+          ball.active = false;
+          this.messiSoccerBall = null;
+        }
       }
     }
 
@@ -3251,6 +3815,273 @@ export class Fighter {
       // Linha inferior
       ctx.lineTo(45, 35);
       ctx.stroke();
+      ctx.restore();
+    }
+
+    // 21. Aang: Rajadas de Vento (Air Blasts)
+    if (this.aangAirBlasts) {
+      for (const ab of this.aangAirBlasts) {
+        if (!ab.active) continue;
+        ctx.save();
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 15;
+        ctx.strokeStyle = '#e0f2fe';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        // Meia-lua de ar comprimido voando
+        ctx.arc(ab.x, ab.y, 22, -Math.PI * 0.4, Math.PI * 0.4);
+        ctx.stroke();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(ab.x - this.facing * 8, ab.y, 16, -Math.PI * 0.35, Math.PI * 0.35);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // 22. Aang: Chicote de Água (Water Whip)
+    if (this.aangWaterWhip && this.aangWaterWhip.active) {
+      const ww = this.aangWaterWhip;
+      ctx.save();
+      ctx.shadowColor = '#0ea5e9';
+      ctx.shadowBlur = 20;
+      ctx.strokeStyle = 'rgba(14, 165, 233, 0.85)';
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      const endX = this.position.x + this.facing * ww.reach;
+      const endY = this.position.y - 65;
+      ctx.beginPath();
+      ctx.moveTo(this.position.x + this.facing * 35, this.position.y - 70);
+      ctx.quadraticCurveTo((this.position.x + endX) / 2, this.position.y - 110, endX, endY);
+      ctx.stroke();
+      // Gotas fluindo
+      ctx.fillStyle = '#bae6fd';
+      ctx.beginPath();
+      ctx.arc(endX, endY, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 23. Aang: Labaredas de Fogo (Fire Flurry)
+    if (this.aangFireBlasts) {
+      for (const fb of this.aangFireBlasts) {
+        if (!fb.active) continue;
+        ctx.save();
+        ctx.shadowColor = '#ef4444';
+        ctx.shadowBlur = 18;
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath();
+        ctx.arc(fb.x, fb.y, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(fb.x, fb.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // 24. Aang: Esfera dos 4 Elementos no Estado Avatar
+    if (this.aangAvatarStateActive && this.state === FIGHTER_STATE.SUPER_MOVE) {
+      const rot = Date.now() * 0.006;
+      const centerX = this.position.x;
+      const centerY = this.position.y - 65;
+      const orbRadius = 75;
+
+      ctx.save();
+      // Esfera de vento protegendo o Avatar
+      ctx.strokeStyle = 'rgba(224, 242, 254, 0.6)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 55, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Olhos e seta brilhando em branco/azul etéreo
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 25;
+
+      // 4 Elementos girando em anel
+      const elements = [
+        { color: '#e0f2fe', label: '🌪️ AR', rad: 10 },
+        { color: '#0ea5e9', label: '💧 ÁGUA', rad: 12 },
+        { color: '#ca8a04', label: '🪨 TERRA', rad: 14 },
+        { color: '#ef4444', label: '🔥 FOGO', rad: 12 }
+      ];
+      elements.forEach((elem, idx) => {
+        const ang = rot + (idx * Math.PI * 0.5);
+        const ex = centerX + Math.cos(ang) * orbRadius;
+        const ey = centerY + Math.sin(ang) * orbRadius * 0.5;
+        ctx.fillStyle = elem.color;
+        ctx.beginPath();
+        ctx.arc(ex, ey, elem.rad, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+
+    // 25. Doutor Estranho: Portais Simétricos Permanentes na Arena
+    if (this.strangePortals) {
+      const sp = this.strangePortals;
+      const t = Date.now() * 0.005;
+      const portalYs = [sp.leftX, sp.rightX];
+
+      for (const px of portalYs) {
+        ctx.save();
+        ctx.translate(px, sp.y);
+        ctx.shadowColor = '#f59e0b';
+        ctx.shadowBlur = 24;
+
+        // Anel de faíscas Eldritch girando
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 32, 60, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 26, 52, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Faíscas pontuais dançando ao redor do portal
+        ctx.fillStyle = '#fef08a';
+        for (let s = 0; s < 6; s++) {
+          const sAng = t + s * 1.05;
+          const sx = Math.cos(sAng) * 32 + (Math.sin(sAng * 3) * 6);
+          const sy = Math.sin(sAng) * 60;
+          ctx.beginPath();
+          ctx.arc(sx, sy, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Interior escuro dimensional
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 22, 48, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // 26. Doutor Estranho: Chicotes Místicos de Balthakk (Q)
+    if (this.strangeEldritchWhip && this.strangeEldritchWhip.active) {
+      const sw = this.strangeEldritchWhip;
+      ctx.save();
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 20;
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 5;
+      const endX = this.position.x + this.facing * sw.reach;
+      const endY = this.position.y - 65;
+      ctx.beginPath();
+      ctx.moveTo(this.position.x + this.facing * 35, this.position.y - 70);
+      ctx.bezierCurveTo(
+        this.position.x + this.facing * (sw.reach * 0.4), this.position.y - 120,
+        this.position.x + this.facing * (sw.reach * 0.7), this.position.y - 20,
+        endX, endY
+      );
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 27. Walter White: Cristal de Fulminato de Mercúrio Voando
+    if (this.walterFulminateCrystal && this.walterFulminateCrystal.active) {
+      const wc = this.walterFulminateCrystal;
+      ctx.save();
+      ctx.translate(wc.x, wc.y);
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = '#e0f2fe';
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      // Cristal facetado translúcido
+      ctx.moveTo(0, -10);
+      ctx.lineTo(8, -2);
+      ctx.lineTo(6, 8);
+      ctx.lineTo(-6, 8);
+      ctx.lineTo(-8, -2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 28. Walter White: Porta-Malas e Torreta M60
+    if (this.walterM60Turret) {
+      const wt = this.walterM60Turret;
+      ctx.save();
+      ctx.translate(wt.x, wt.y);
+      ctx.shadowColor = '#000000';
+      ctx.shadowBlur = 15;
+
+      // Silhueta da traseira do sedan
+      ctx.fillStyle = '#27272a';
+      ctx.fillRect(-45, -35, 90, 35);
+      // Porta-malas aberto levantado
+      ctx.fillStyle = '#3f3f46';
+      ctx.beginPath();
+      ctx.moveTo(-45, -35);
+      ctx.lineTo(45, -35);
+      ctx.lineTo(45, -60);
+      ctx.lineTo(-45, -55);
+      ctx.closePath();
+      ctx.fill();
+
+      // Cano metálico da metralhadora M60 apontado para a frente
+      ctx.fillStyle = '#09090b';
+      ctx.fillRect(this.facing === 1 ? 20 : -55, -46, 35, 8);
+
+      // Flash do disparo no cano
+      if (Math.random() < 0.6) {
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(this.facing === 1 ? 58 : -58, -42, 10, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // Projéteis da M60 cortando em linha reta
+      for (const bullet of wt.bullets) {
+        if (!bullet.active) continue;
+        ctx.save();
+        ctx.shadowColor = '#f59e0b';
+        ctx.shadowBlur = 10;
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(bullet.x, bullet.y);
+        ctx.lineTo(bullet.x - this.facing * 30, bullet.y);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // 29. Messi: Bola de Ouro / Curva Perfeita
+    if (this.messiSoccerBall && this.messiSoccerBall.active) {
+      const ball = this.messiSoccerBall;
+      ctx.save();
+      ctx.translate(ball.x, ball.y);
+      ctx.rotate(ball.kicked ? Date.now() * 0.02 : 0);
+      ctx.shadowColor = '#facc15';
+      ctx.shadowBlur = 18;
+
+      // Bola branca com detalhes dourados
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, 11, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // Pentágonos da bola
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
     }
   }

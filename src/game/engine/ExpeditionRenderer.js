@@ -1045,7 +1045,7 @@ export class ExpeditionRenderer {
     const t = fighter.stateTime;
     ctx.save();
     ctx.translate(x, y);
-    ctx.scale(f, 1);
+    ctx.scale(f * 1.45, 1.45); // Verdadeiro Gigante Esmeralda Colossal!
 
     // Aura gama pulsante verde ao redor do colosso
     const gammaPulse = Math.sin(t * 8) * 0.15 + 0.85;

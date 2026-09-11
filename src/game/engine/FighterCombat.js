@@ -1215,6 +1215,141 @@ export class FighterCombat {
           break;
         }
 
+        // --- 17. AANG: ESTADO AVATAR (BOMBARDEIO DOS 4 ELEMENTOS) ---
+        if (fighter.superType === 'AVATAR_STATE_FOUR_ELEMENTS') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          fighter.velocity.y = 0;
+          const target = fighter.opponent;
+          const targetX = target ? target.position.x : fighter.position.x + fighter.facing * 140;
+
+          if (particles && Math.random() < 0.6) {
+            particles.emitSparks(fighter.position.x, fighter.position.y - 65, '#38bdf8', 4, 6);
+            particles.emitDust(fighter.position.x, fighter.groundY, 4, '#cbd5e1');
+          }
+
+          if (fighter.stateTime >= 0.6 && !fighter.hasHitCurrentAttack) {
+            fighter.hasHitCurrentAttack = true;
+            sounds.playThunderSlam();
+            sounds.playFireBlast();
+            sounds.playWaterSplash();
+            if (particles) {
+              particles.emitShockwave(targetX, fighter.groundY - 40, 240, '#0ea5e9');
+              particles.emitShockwave(targetX, fighter.groundY - 40, 160, '#ef4444');
+              particles.emitSparks(targetX, fighter.groundY - 40, '#fef08a', 45, 14);
+              particles.emitDust(targetX, fighter.groundY, 20, '#ca8a04');
+              particles.emitFloatingText('ESTADO AVATAR!', fighter.position.x, fighter.position.y - 110, '#38bdf8', true);
+            }
+            if (target && !target.isDead) {
+              const attackData = {
+                damage: 410,
+                knockback: 34,
+                knockdown: true,
+                isHeavy: true,
+                attackerPower: fighter.attackPower
+              };
+              target.receiveHit(attackData, { x: targetX, y: fighter.groundY - 40 }, particles);
+            }
+          }
+
+          if (fighter.stateTime >= 1.25) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.aangAvatarStateActive = false;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 18. DOUTOR ESTRANHO: DIMENSÃO ESPELHADA ---
+        if (fighter.superType === 'STRANGE_MIRROR_DIMENSION') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          const target = fighter.opponent;
+          const targetX = target ? target.position.x : fighter.position.x + fighter.facing * 120;
+
+          if (particles && Math.random() < 0.7) {
+            particles.emitSparks(targetX + (Math.random() - 0.5) * 80, fighter.groundY - 60, '#fbbf24', 4, 6);
+          }
+
+          if (fighter.stateTime >= 0.55 && !fighter.hasHitCurrentAttack) {
+            fighter.hasHitCurrentAttack = true;
+            sounds.playDimensionalPierce();
+            sounds.playThunderSlam();
+            if (particles) {
+              particles.emitShockwave(targetX, fighter.groundY - 50, 220, '#f59e0b');
+              particles.emitSparks(targetX, fighter.groundY - 50, '#ffffff', 40, 14);
+              particles.emitFloatingText('DIMENSÃO ESPELHADA!', targetX, fighter.groundY - 100, '#f59e0b', true);
+            }
+            if (target && !target.isDead) {
+              const attackData = {
+                damage: 395,
+                knockback: 30,
+                knockdown: true,
+                isHeavy: true,
+                attackerPower: fighter.attackPower
+              };
+              target.receiveHit(attackData, { x: targetX, y: fighter.groundY - 50 }, particles);
+            }
+          }
+
+          if (fighter.stateTime >= 1.15) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 19. WALTER WHITE: DISPARO REMOTO DE M60 ---
+        if (fighter.superType === 'HEISENBERG_M60_REMOTE') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (particles && Math.random() < 0.4) {
+            particles.emitSparks(fighter.position.x - fighter.facing * 80, fighter.groundY - 45, '#f59e0b', 3, 4);
+          }
+          if (fighter.stateTime >= 1.4) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 20. MESSI: COBRANÇA DE FALTA MÁGICA / GOLAÇO DE OURO ---
+        if (fighter.superType === 'MESSI_GOLDEN_FREE_KICK') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+
+          // Fase 1: Posicionamento e corrida (0 - 0.4s)
+          // Fase 2: Chute na bola (0.4s)
+          if (fighter.stateTime >= 0.4 && fighter.messiSoccerBall && !fighter.messiSoccerBall.kicked) {
+            fighter.messiSoccerBall.kicked = true;
+            sounds.playPunch(true);
+            sounds.playWhoosh();
+            const target = fighter.opponent;
+            const targetX = target ? target.position.x : fighter.position.x + fighter.facing * 400;
+            const dx = targetX - fighter.messiSoccerBall.x;
+            fighter.messiSoccerBall.vx = dx * 2.8;
+            fighter.messiSoccerBall.vy = -520; // Sobe com curva e desce no ângulo
+            if (particles) {
+              particles.emitShockwave(fighter.messiSoccerBall.x, fighter.messiSoccerBall.y, 80, '#facc15');
+              particles.emitSparks(fighter.messiSoccerBall.x, fighter.messiSoccerBall.y, '#facc15', 20, 8);
+            }
+          }
+
+          if (fighter.stateTime >= 1.1) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
         // --- 7. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
         if (fighter.stateTime < 0.5) {
           fighter.velocity.x = 0;
