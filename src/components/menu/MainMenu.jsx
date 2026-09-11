@@ -1,7 +1,8 @@
 import React from 'react';
-import { Volume2, VolumeX, Sparkles, Sword, Wand2, Flame, Trophy } from 'lucide-react';
+import { Volume2, VolumeX, Sparkles, Sword, Wand2, Flame, Trophy, Bug } from 'lucide-react';
 import { sounds } from '../../game/audio/soundManager';
 import { GRAPHICS_MODES } from './GraphicsSelectorModal';
+import { openGitHubIssue } from '../../utils/githubFeedback';
 
 export const MainMenu = ({
   onSelectMode,
@@ -56,6 +57,22 @@ export const MainMenu = ({
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              sounds.playSelect();
+              openGitHubIssue('bug', { mode: isExpedition ? 'Expedition 33' : 'Original' });
+            }}
+            className={`p-1.5 px-2.5 rounded border transition-colors cursor-pointer text-xs flex items-center gap-1.5 ${
+              isExpedition
+                ? 'bg-red-950/70 hover:bg-red-900/90 border-red-900/60 text-red-300'
+                : 'bg-slate-850 hover:bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
+            }`}
+            title="Reportar Bug ou Sugestão no GitHub"
+          >
+            <Bug size={14} className="text-red-400" />
+            <span>Reportar Bug / Ideia</span>
+          </button>
+
           <button
             onClick={onToggleMute}
             className={`p-1.5 rounded border transition-colors cursor-pointer text-xs flex items-center gap-1.5 ${

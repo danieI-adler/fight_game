@@ -1,5 +1,7 @@
 import React from 'react';
 import { sounds } from '../../game/audio/soundManager';
+import { Bug } from 'lucide-react';
+import { openGitHubIssue } from '../../utils/githubFeedback';
 
 export const VictoryScreen = ({
   winner,
@@ -78,6 +80,17 @@ export const VictoryScreen = ({
             className="py-2 px-4 rounded bg-slate-950 hover:bg-slate-850 border border-slate-800 text-slate-400 hover:text-slate-200 text-xs uppercase tracking-wider transition-colors cursor-pointer"
           >
             Menu Principal
+          </button>
+
+          <button
+            onClick={() => {
+              sounds.playSelect();
+              openGitHubIssue('bug', { character: winner?.name });
+            }}
+            className="py-1.5 px-3 rounded bg-red-950/40 hover:bg-red-900/60 border border-red-900/40 text-red-300 hover:text-red-200 text-[11px] font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5 mt-0.5"
+          >
+            <Bug size={13} className="text-red-400" />
+            <span>Reportar Bug / Feedback</span>
           </button>
         </div>
       </div>
