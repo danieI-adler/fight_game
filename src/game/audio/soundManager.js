@@ -625,6 +625,40 @@ class SoundManager {
     this.playNoise(0.55, 0.6, 800);
   }
 
+  playFireBlast() {
+    this.playFireCast();
+  }
+
+  playWaterSplash() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(450, t);
+    osc.frequency.exponentialRampToValueAtTime(180, t + 0.25);
+
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(900, t);
+    filter.Q.value = 3.0;
+
+    gain.gain.setValueAtTime(0.7, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.28);
+    this.playNoise(0.22, 0.5, 1200);
+  }
+
   playEarthquakeSound() {
     if (this.isMuted) return;
     this.init();
