@@ -1115,6 +1115,106 @@ export class FighterCombat {
           break;
         }
 
+        // --- 13. GANDALF: YOU SHALL NOT PASS! ---
+        if (fighter.superType === 'GANDALF_SHALL_NOT_PASS') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (particles && Math.random() < 0.6) {
+            particles.emitSparks(fighter.position.x + fighter.facing * 35, fighter.groundY - 100, '#ffffff', 4, 6);
+          }
+          if (fighter.stateTime >= 1.25) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 14. ARQUEIRO VERDE: ARROW STORM OF STAR CITY ---
+        if (fighter.superType === 'ARROW_STORM') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (particles && Math.random() < 0.5) {
+            particles.emitSparks(fighter.position.x + fighter.facing * 30, fighter.position.y - 80, '#22c55e', 3, 5);
+          }
+          if (fighter.stateTime >= 1.1) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 15. BRUCE BANNER: TRANSFORMAÇÃO PERMANENTE NO HULK ---
+        if (fighter.superType === 'HULK_TRANSFORMATION') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (particles) {
+            particles.emitShockwave(fighter.position.x, fighter.groundY, 160, '#84cc16');
+            particles.emitSparks(fighter.position.x, fighter.position.y - 70, '#a3e635', 8, 8);
+          }
+          if (fighter.stateTime >= 1.2) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 16. ZORRO: MARCA DO Z ---
+        if (fighter.superType === 'ZORRO_MARK_OF_Z') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          const target = fighter.opponent;
+          const targetX = target ? target.position.x : fighter.position.x + fighter.facing * 120;
+          const targetY = target ? target.position.y - 60 : fighter.groundY - 60;
+
+          // 3 cortes ultrarrápidos desenhando o Z
+          if (fighter.stateTime >= 0.15 && fighter.stateTime < 0.35 && fighter.superPhase === 'Z_SLASH_1') {
+            fighter.superPhase = 'Z_SLASH_2';
+            sounds.playRapierSlash();
+            fighter.position.x = targetX - fighter.facing * 60;
+            if (particles) particles.emitSwordSlash(targetX - 50, targetY - 35, targetX + 50, targetY - 35, '#fbbf24', 6);
+          } else if (fighter.stateTime >= 0.35 && fighter.stateTime < 0.55 && fighter.superPhase === 'Z_SLASH_2') {
+            fighter.superPhase = 'Z_SLASH_3';
+            sounds.playRapierSlash();
+            fighter.position.x = targetX + fighter.facing * 50;
+            if (particles) particles.emitSwordSlash(targetX + 50, targetY - 35, targetX - 50, targetY + 35, '#fbbf24', 6);
+          } else if (fighter.stateTime >= 0.55 && fighter.superPhase === 'Z_SLASH_3') {
+            fighter.superPhase = 'Z_SLASH_DONE';
+            sounds.playRapierSlash();
+            sounds.playThunderSlam();
+            fighter.position.x = targetX - fighter.facing * 70;
+            if (particles) {
+              particles.emitSwordSlash(targetX - 50, targetY + 35, targetX + 50, targetY + 35, '#fbbf24', 6);
+              particles.emitShockwave(targetX, targetY, 180, '#f59e0b');
+              particles.emitSparks(targetX, targetY, '#fbbf24', 40, 14);
+              particles.emitFloatingText('MARCA DO Z!', targetX, targetY - 60, '#fbbf24', true);
+            }
+            if (target && !target.isDead) {
+              const attackData = {
+                damage: 390,
+                knockback: 32,
+                knockdown: true,
+                isHeavy: true,
+                attackerPower: fighter.attackPower
+              };
+              target.receiveHit(attackData, { x: targetX, y: targetY }, particles);
+            }
+          }
+
+          if (fighter.stateTime >= 1.05) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
         // --- 7. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
         if (fighter.stateTime < 0.5) {
           fighter.velocity.x = 0;

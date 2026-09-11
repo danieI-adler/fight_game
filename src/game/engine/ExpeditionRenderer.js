@@ -59,6 +59,13 @@ export class ExpeditionRenderer {
       return;
     }
 
+    // Se Bruce Banner transformou no HULK: Aumentar o porte físico em 55% e alterar a pele/traje para verde-gama
+    if (fighter.isHulk) {
+      ctx.translate(x, y);
+      ctx.scale(1.5, 1.5);
+      ctx.translate(-x, -y);
+    }
+
     // 3. Acessórios Traseiros (Lanceram de Gustave, Cajado com Sino de Monoco, Capa de Renoir, Asas de Esquie)
     this.drawBackAccessories(ctx, x, y, f, p, vis, fighter.stateTime);
 

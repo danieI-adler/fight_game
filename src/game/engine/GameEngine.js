@@ -589,6 +589,20 @@ export class GameEngine {
           this.p1.scielCritCharges--;
         }
 
+        // Mecânica Exclusiva do ZORRO: Se o oponente atacar ao mesmo tempo (clash), Zorro anula o golpe rival!
+        if (this.p2.isZorro && this.p2.activeHitbox) {
+          // P1 atacou Zorro, mas Zorro também estava atacando!
+          // Zorro anula o golpe do P1 completamente!
+          this.p1.activeHitbox = null;
+          sounds.playParryReflect();
+          if (this.particles) {
+            this.particles.emitFloatingText('CLASH NEGATED!', hitResult.point.x, hitResult.point.y - 50, '#fbbf24', true);
+            this.particles.emitShockwave(hitResult.point.x, hitResult.point.y, 140, '#fbbf24');
+            this.particles.emitSparks(hitResult.point.x, hitResult.point.y, '#ffffff', 30, 10);
+          }
+          return;
+        }
+
         const hitLanded = this.p2.receiveHit(hitBoxP1, hitResult.point, this.particles);
         // Se acertou golpe sem ser bloqueado (defesas não contam como hit), Verso sobe de rank
         if (hitLanded && this.p1.isVerso) {
@@ -626,6 +640,20 @@ export class GameEngine {
             }
           }
           this.p2.scielCritCharges--;
+        }
+
+        // Mecânica Exclusiva do ZORRO: Se o oponente atacar ao mesmo tempo (clash), Zorro anula o golpe rival!
+        if (this.p1.isZorro && this.p1.activeHitbox) {
+          // P2 atacou Zorro, mas Zorro também estava atacando!
+          // Zorro anula o golpe do P2 completamente!
+          this.p2.activeHitbox = null;
+          sounds.playParryReflect();
+          if (this.particles) {
+            this.particles.emitFloatingText('CLASH NEGATED!', hitResult.point.x, hitResult.point.y - 50, '#fbbf24', true);
+            this.particles.emitShockwave(hitResult.point.x, hitResult.point.y, 140, '#fbbf24');
+            this.particles.emitSparks(hitResult.point.x, hitResult.point.y, '#ffffff', 30, 10);
+          }
+          return;
         }
 
         const hitLanded = this.p1.receiveHit(hitBoxP2, hitResult.point, this.particles);

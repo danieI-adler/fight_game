@@ -79,6 +79,14 @@ export class Fighter {
       charData.visual?.isMcQueen
     );
 
+    // Identificação do Lote 1 dos Novos Personagens
+    const cNameLower = (charData.name || '').toLowerCase();
+    this.isGandalf = Boolean(cNameLower.includes('gandalf') || charData.hasRangedKick && cNameLower.includes('gandalf'));
+    this.isGreenArrow = Boolean(cNameLower.includes('arqueiro') || cNameLower.includes('green arrow') || (charData.hasRangedKick && !this.isGandalf));
+    this.isBanner = Boolean(cNameLower.includes('banner') || charData.isBannerTransform);
+    this.isHulk = false; // Começa como cientista frágil; se transforma apenas após a Ultimate!
+    this.isZorro = Boolean(cNameLower.includes('zorro') || charData.cannotBlock || charData.hasClashParry);
+
     // Estado e Animação
     this.state = FIGHTER_STATE.IDLE;
     this.stateTime = 0;
@@ -142,6 +150,15 @@ export class Fighter {
     this.jokerCrowbarBeat = null; // { hitCount, timer, nextHitTime, target }
     this.sparrowBlackPearl = null; // { timer, shotsFired, maxShots: 3, interval: 5.0, cannonballs: [] }
     this.mcqueenBlitz = null; // { phase, timer, startX, targetX, hasHit }
+    
+    // Projéteis e Efeitos Especiais: Gandalf, Arqueiro Verde, Hulk e Zorro
+    this.gandalfLightSpells = []; // [{ x, y, vx, damage, active, hasHit }]
+    this.arrowProjectiles = []; // [{ x, y, vx, vy, gravity, isTrick, type, damage, active, hasHit }]
+    this.arrowRainActive = null; // { timer, count, maxArrows, interval, arrows: [] }
+    this.gandalfShallNotPass = null; // { timer, fissureX, active, hasHit }
+    this.zorroMarkOfZ = null; // { timer, step, target, active }
+    this.zorroWhipActive = null; // { timer, x, y, reach, active }
+    this.hulkSmashEffect = null; // { timer, x, y, radius, active }
 
     // Articulação Esquelética
     this.pose = {
@@ -295,20 +312,24 @@ export class Fighter {
       this.state = FIGHTER_STATE.WALK_FORWARD;
     } else if (dir === -this.facing) {
       this.state = FIGHTER_STATE.WALK_BACK;
-      this.isBlocking = true;
-      this.lastAction = 'BLOCK';
+      if (!this.isZorro) {
+        this.isBlocking = true;
+        this.lastAction = 'BLOCK';
+      }
     }
   }
 
   stopMoving() {
     if (this.isCrouching) {
       this.velocity.x = 0;
+      this.state = FIGHTER_STATE.CROUCH;
       return;
     }
+
     if (this.state === FIGHTER_STATE.WALK_FORWARD || this.state === FIGHTER_STATE.WALK_BACK) {
       this.velocity.x = 0;
-      this.isBlocking = false;
       this.state = FIGHTER_STATE.IDLE;
+      this.isBlocking = false;
     }
   }
 
@@ -326,25 +347,22 @@ export class Fighter {
   }
 
   crouch(isCrouching) {
-    if (!this.isGrounded) return;
+    if (!this.canAct() && this.state !== FIGHTER_STATE.CROUCH) return;
+    this.isCrouching = isCrouching;
 
-    // Se estiver executando um ataque (ex: soco ou chute agachado), mantém isCrouching mas NÃO interrompe o golpe
     const attackStates = [
-      FIGHTER_STATE.CROUCH_PUNCH,
-      FIGHTER_STATE.CROUCH_KICK,
       FIGHTER_STATE.LIGHT_PUNCH,
       FIGHTER_STATE.HEAVY_PUNCH,
       FIGHTER_STATE.LIGHT_KICK,
       FIGHTER_STATE.HEAVY_KICK,
+      FIGHTER_STATE.CROUCH_PUNCH,
+      FIGHTER_STATE.CROUCH_KICK,
+      FIGHTER_STATE.JUMP_PUNCH,
+      FIGHTER_STATE.JUMP_KICK,
       FIGHTER_STATE.SPECIAL_1,
       FIGHTER_STATE.SPECIAL_2,
-      FIGHTER_STATE.SUPER_MOVE,
-      FIGHTER_STATE.HURT,
-      FIGHTER_STATE.KNOCKDOWN,
-      FIGHTER_STATE.GET_UP
+      FIGHTER_STATE.SUPER_MOVE
     ];
-
-    this.isCrouching = isCrouching;
 
     if (attackStates.includes(this.state)) {
       return;
@@ -359,6 +377,10 @@ export class Fighter {
   }
 
   block(isBlocking) {
+    if (this.isZorro) {
+      this.isBlocking = false;
+      return; // Zorro não pode se defender!
+    }
     if (!this.canAct() && this.state !== FIGHTER_STATE.BLOCK) return;
     this.isBlocking = isBlocking;
     if (isBlocking && this.isGrounded) {
@@ -419,6 +441,38 @@ export class Fighter {
       this.velocity.x *= 0.25;
       this.state = FIGHTER_STATE.LIGHT_KICK;
       sounds.playWhoosh();
+
+      // Gandalf e Arqueiro Verde: ÚNICOS dois personagens com projétil a distância no K!
+      if (this.isGandalf) {
+        sounds.playStaffBell();
+        sounds.playElectricZap();
+        const staffX = this.position.x + this.facing * 40;
+        const staffY = this.position.y - 75;
+        this.gandalfLightSpells.push({
+          x: staffX,
+          y: staffY,
+          vx: this.facing * 1150,
+          damage: 55,
+          active: true,
+          hasHit: false
+        });
+      } else if (this.isGreenArrow) {
+        sounds.playWhoosh();
+        const bowX = this.position.x + this.facing * 35;
+        const bowY = this.position.y - 75;
+        this.arrowProjectiles.push({
+          x: bowX,
+          y: bowY,
+          vx: this.facing * 1350,
+          vy: -40,
+          gravity: 120,
+          isTrick: false,
+          type: 'NORMAL_ARROW',
+          damage: 55,
+          active: true,
+          hasHit: false
+        });
+      }
     }
   }
 
@@ -666,6 +720,105 @@ export class Fighter {
       // Arranque veloz instantâneo
       this.velocity.x = this.facing * (this.speed * 2.5);
     }
+    // 13. Gandalf: Pulso de Luz Cegante dos Istari (Q)
+    else if (this.isGandalf) {
+      this.extraType = 'GANDALF_LIGHT_PULSE';
+      sounds.playStaffBell();
+      sounds.playSuperCharge();
+      const pulseRange = level === 2 ? 380 : 260;
+      const target = this.opponent;
+      if (target && !target.isDead) {
+        const dist = Math.abs(target.position.x - this.position.x);
+        if (dist < pulseRange) {
+          const attackData = {
+            damage: level === 2 ? 160 : 100,
+            knockback: 18,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 70 }, null);
+          target.hitstunTime = level === 2 ? 1.2 : 0.7; // Atordoado pela luz ofuscante
+        }
+      }
+    }
+    // 14. Arqueiro Verde: Flechas Especiais / Trick Arrows (Q)
+    else if (this.isGreenArrow) {
+      this.extraType = 'ARROW_TRICK_SHOT';
+      sounds.playWhoosh();
+      const bowX = this.position.x + this.facing * 35;
+      const bowY = this.position.y - 75;
+      if (level === 2) {
+        // Flecha Explosiva Tripla
+        [-0.15, 0, 0.15].forEach(ang => {
+          this.arrowProjectiles.push({
+            x: bowX,
+            y: bowY,
+            vx: Math.cos(ang) * this.facing * 1400,
+            vy: Math.sin(ang) * 1400,
+            gravity: 100,
+            isTrick: true,
+            type: 'EXPLOSIVE_ARROW',
+            damage: 90,
+            active: true,
+            hasHit: false
+          });
+        });
+      } else {
+        // Flecha Luva de Boxe / Concussiva
+        this.arrowProjectiles.push({
+          x: bowX,
+          y: bowY,
+          vx: this.facing * 1250,
+          vy: -20,
+          gravity: 80,
+          isTrick: true,
+          type: 'BOXING_GLOVE_ARROW',
+          damage: 115,
+          active: true,
+          hasHit: false
+        });
+      }
+    }
+    // 15. Bruce Banner / Hulk: Hulk Smash no Q (apenas se transformado no Hulk!)
+    else if (this.isBanner) {
+      if (!this.isHulk) {
+        // Bruce Banner não tem poderes antes da transformação
+        this.extraType = 'BANNER_NERVOUS';
+        sounds.playWhoosh();
+        // Não gasta tanta energia se falhou
+        this.energy = Math.min(this.maxEnergy, this.energy + energyCost);
+      } else {
+        this.extraType = 'HULK_GROUND_SMASH';
+        sounds.playThunderSlam();
+        sounds.playSuperCharge();
+        this.hulkSmashEffect = {
+          timer: 0.8,
+          x: this.position.x + this.facing * 60,
+          y: this.groundY,
+          radius: level === 2 ? 320 : 220,
+          damage: level === 2 ? 230 : 150,
+          active: true,
+          hasHit: false
+        };
+      }
+    }
+    // 16. Zorro: Golpe de Chicote Desarmante & Capa Esvoaçante (Q)
+    else if (this.isZorro) {
+      this.extraType = 'ZORRO_WHIP_LASH';
+      sounds.playRapierSlash();
+      sounds.playWhoosh();
+      const reach = level === 2 ? 340 : 240;
+      this.zorroWhipActive = {
+        timer: 0.4,
+        x: this.position.x,
+        y: this.position.y - 65,
+        reach: reach,
+        damage: level === 2 ? 170 : 110,
+        active: true,
+        hasHit: false
+      };
+    }
     // Personagens genéricos: golpe padrão fortificado
     else {
       this.extraType = 'GENERIC_EXTRA';
@@ -830,6 +983,53 @@ export class Fighter {
         timer: 0,
         phase: 'DASH_OUT',
         hasHit: false
+      };
+    } else if (this.superType === 'GANDALF_SHALL_NOT_PASS') {
+      this.superPhase = 'STAFF_STRIKE';
+      sounds.playSuperCharge();
+      sounds.playThunderSlam();
+      sounds.playStaffBell();
+      this.gandalfShallNotPass = {
+        timer: 0,
+        fissureX: this.position.x + this.facing * 120,
+        active: true,
+        hasHit: false
+      };
+    } else if (this.superType === 'ARROW_STORM') {
+      this.superPhase = 'SKY_SHOT';
+      sounds.playSuperCharge();
+      sounds.playWhoosh();
+      this.arrowRainActive = {
+        timer: 0,
+        count: 0,
+        maxArrows: 28,
+        interval: 0.06,
+        arrows: []
+      };
+    } else if (this.superType === 'HULK_TRANSFORMATION') {
+      this.superPhase = 'GAMMA_ROAR';
+      sounds.playSuperCharge();
+      sounds.playThunderSlam();
+      // Transforma Bruce Banner no HULK permanentemente até o fim do combate!
+      this.isHulk = true;
+      this.maxHealth += 500;
+      this.health = Math.min(this.maxHealth, this.health + 500);
+      this.attackPower = this.baseAttackPower * 2.2;
+      this.defense = 1.6;
+      this.speed = 8.2;
+      this.jumpForce = 15.5;
+    } else if (this.superType === 'ZORRO_MARK_OF_Z') {
+      this.superPhase = 'Z_SLASH_1';
+      sounds.playSuperCharge();
+      sounds.playRapierSlash();
+      const target = this.opponent;
+      this.zorroMarkOfZ = {
+        timer: 0,
+        step: 1,
+        target: target,
+        active: true,
+        targetX: target ? target.position.x : this.position.x + this.facing * 140,
+        targetY: target ? target.position.y - 60 : this.groundY - 60
       };
     } else {
       this.superType = 'GUSTAVE_SMASH';
@@ -1875,6 +2075,255 @@ export class Fighter {
       }
     }
 
+    // 5.18 Magia Branca dos Istari de Gandalf (Projétil no K)
+    if (this.gandalfLightSpells && this.gandalfLightSpells.length > 0) {
+      for (const spell of this.gandalfLightSpells) {
+        if (!spell.active) continue;
+        spell.x += spell.vx * dt;
+
+        if (particles && Math.random() < 0.7) {
+          particles.emitSparks(spell.x, spell.y, '#ffffff', 3, 3);
+          particles.emitSparks(spell.x, spell.y, '#e2e8f0', 2, 2);
+        }
+
+        if (this.opponent && !this.opponent.isDead && !spell.hasHit) {
+          const dist = Math.abs(spell.x - this.opponent.position.x);
+          const heightDiff = Math.abs(spell.y - (this.opponent.position.y - 65));
+          if (dist < 45 && heightDiff < 70) {
+            spell.hasHit = true;
+            spell.active = false;
+            sounds.playStaffBell();
+            sounds.playElectricZap();
+            if (particles) {
+              particles.emitShockwave(spell.x, spell.y, 90, '#ffffff');
+              particles.emitSparks(spell.x, spell.y, '#e2e8f0', 25, 8);
+            }
+            const attackData = {
+              damage: spell.damage || 55,
+              knockback: 10,
+              knockdown: false,
+              isHeavy: false,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: spell.x, y: spell.y }, particles);
+          }
+        }
+
+        if (spell.x < -100 || spell.x > stageWidth + 100) {
+          spell.active = false;
+        }
+      }
+      this.gandalfLightSpells = this.gandalfLightSpells.filter(s => s.active);
+    }
+
+    // 5.19 Flechas do Arqueiro Verde (Projéteis normais no K e flechas especiais no Q)
+    if (this.arrowProjectiles && this.arrowProjectiles.length > 0) {
+      for (const arr of this.arrowProjectiles) {
+        if (!arr.active) continue;
+        arr.x += arr.vx * dt;
+        arr.vy += (arr.gravity || 90) * dt;
+        arr.y += arr.vy * dt;
+
+        if (particles && arr.isTrick && Math.random() < 0.6) {
+          particles.emitSparks(arr.x, arr.y, arr.type === 'EXPLOSIVE_ARROW' ? '#ef4444' : '#22c55e', 3, 3);
+        }
+
+        if (this.opponent && !this.opponent.isDead && !arr.hasHit) {
+          const dist = Math.abs(arr.x - this.opponent.position.x);
+          const heightDiff = Math.abs(arr.y - (this.opponent.position.y - 60));
+          if (dist < 50 && heightDiff < 75) {
+            arr.hasHit = true;
+            arr.active = false;
+            sounds.playPunch(arr.isTrick);
+
+            if (arr.type === 'EXPLOSIVE_ARROW') {
+              sounds.playThunderSlam();
+              if (particles) {
+                particles.emitShockwave(arr.x, arr.y, 140, '#ef4444');
+                particles.emitSparks(arr.x, arr.y, '#f59e0b', 30, 10);
+              }
+            } else if (arr.type === 'BOXING_GLOVE_ARROW') {
+              sounds.playThunderSlam();
+              if (particles) {
+                particles.emitFloatingText('POW!', arr.x, arr.y - 30, '#22c55e', true);
+                particles.emitShockwave(arr.x, arr.y, 110, '#22c55e');
+              }
+            }
+
+            const attackData = {
+              damage: arr.damage || 55,
+              knockback: arr.type === 'BOXING_GLOVE_ARROW' ? 24 : 14,
+              knockdown: arr.isTrick,
+              isHeavy: arr.isTrick,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: arr.x, y: arr.y }, particles);
+          }
+        }
+
+        if (arr.y >= this.groundY || arr.x < -100 || arr.x > stageWidth + 100) {
+          arr.active = false;
+        }
+      }
+      this.arrowProjectiles = this.arrowProjectiles.filter(a => a.active);
+    }
+
+    // 5.20 Chuva de Flechas de Star City (Arqueiro Verde - Ultimate)
+    if (this.arrowRainActive) {
+      const ar = this.arrowRainActive;
+      ar.timer += dt;
+      if (ar.count < ar.maxArrows && ar.timer >= ar.count * ar.interval) {
+        ar.count++;
+        sounds.playWhoosh();
+        const rainTargetX = this.opponent ? this.opponent.position.x : this.position.x + this.facing * 200;
+        const spawnX = rainTargetX + (Math.random() - 0.5) * 450;
+        const spawnY = -20;
+        ar.arrows.push({
+          x: spawnX,
+          y: spawnY,
+          vx: (Math.random() - 0.5) * 60,
+          vy: 1100 + Math.random() * 300,
+          active: true,
+          hasHit: false
+        });
+      }
+
+      for (const arrow of ar.arrows) {
+        if (!arrow.active) continue;
+        arrow.x += arrow.vx * dt;
+        arrow.y += arrow.vy * dt;
+
+        if (this.opponent && !this.opponent.isDead && !arrow.hasHit) {
+          const dist = Math.abs(arrow.x - this.opponent.position.x);
+          const heightDiff = Math.abs(arrow.y - (this.opponent.position.y - 50));
+          if (dist < 45 && heightDiff < 65) {
+            arrow.hasHit = true;
+            arrow.active = false;
+            sounds.playPunch(false);
+            if (particles) {
+              particles.emitSparks(arrow.x, arrow.y, '#22c55e', 8, 4);
+            }
+            const attackData = {
+              damage: 18, // Muitas flechas caindo
+              knockback: 4,
+              knockdown: false,
+              isHeavy: false,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: arrow.x, y: arrow.y }, particles);
+          }
+        }
+
+        if (arrow.y >= this.groundY) {
+          arrow.active = false;
+          if (particles && Math.random() < 0.3) {
+            particles.emitDust(arrow.x, this.groundY, 2, '#14532d');
+          }
+        }
+      }
+
+      ar.arrows = ar.arrows.filter(a => a.active);
+      if (ar.count >= ar.maxArrows && ar.arrows.length === 0 && ar.timer > 3.5) {
+        this.arrowRainActive = null;
+      }
+    }
+
+    // 5.21 You Shall Not Pass (Gandalf - Ultimate)
+    if (this.gandalfShallNotPass && this.gandalfShallNotPass.active) {
+      const snp = this.gandalfShallNotPass;
+      snp.timer += dt;
+      if (particles) {
+        // Fissura de luz santa jorrando do solo
+        particles.emitShockwave(snp.fissureX, this.groundY, 150, '#ffffff');
+        particles.emitSparks(snp.fissureX, this.groundY - 40, '#f8fafc', 12, 10);
+      }
+      if (this.opponent && !this.opponent.isDead && !snp.hasHit && snp.timer >= 0.25) {
+        const dist = Math.abs(snp.fissureX - this.opponent.position.x);
+        if (dist < 160) {
+          snp.hasHit = true;
+          sounds.playThunderSlam();
+          if (particles) {
+            particles.emitShockwave(snp.fissureX, this.groundY, 260, '#ffffff');
+            particles.emitSparks(snp.fissureX, this.groundY - 60, '#ffffff', 50, 16);
+            particles.emitFloatingText('YOU SHALL NOT PASS!', this.position.x, this.position.y - 120, '#ffffff', true);
+          }
+          const attackData = {
+            damage: 385,
+            knockback: 38,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: snp.fissureX, y: this.groundY - 50 }, particles);
+        }
+      }
+      if (snp.timer > 1.2) {
+        snp.active = false;
+        this.gandalfShallNotPass = null;
+      }
+    }
+
+    // 5.22 Hulk Smash no Solo (Hulk - Q)
+    if (this.hulkSmashEffect && this.hulkSmashEffect.active) {
+      const hs = this.hulkSmashEffect;
+      hs.timer -= dt;
+      if (this.opponent && !this.opponent.isDead && !hs.hasHit) {
+        const dist = Math.abs(hs.x - this.opponent.position.x);
+        if (dist < hs.radius) {
+          hs.hasHit = true;
+          sounds.playThunderSlam();
+          if (particles) {
+            particles.emitShockwave(hs.x, this.groundY, hs.radius, '#84cc16');
+            particles.emitSparks(hs.x, this.groundY - 40, '#4d7c0f', 35, 12);
+            particles.emitDust(hs.x, this.groundY, 25, '#365314');
+            particles.emitFloatingText('HULK SMASH!', this.position.x, this.position.y - 100, '#84cc16', true);
+          }
+          const attackData = {
+            damage: hs.damage,
+            knockback: 28,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: hs.x, y: this.groundY - 30 }, particles);
+        }
+      }
+      if (hs.timer <= 0) {
+        hs.active = false;
+        this.hulkSmashEffect = null;
+      }
+    }
+
+    // 5.23 Chicote do Zorro (Q)
+    if (this.zorroWhipActive && this.zorroWhipActive.active) {
+      const zw = this.zorroWhipActive;
+      zw.timer -= dt;
+      if (this.opponent && !this.opponent.isDead && !zw.hasHit) {
+        const dist = Math.abs(this.position.x - this.opponent.position.x);
+        const facingTarget = (this.opponent.position.x - this.position.x) * this.facing > 0;
+        if (facingTarget && dist < zw.reach) {
+          zw.hasHit = true;
+          sounds.playRapierSlash();
+          if (particles) {
+            particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 50, '#fbbf24', 16, 6);
+            particles.emitFloatingText('DISARM!', this.opponent.position.x, this.opponent.position.y - 80, '#f59e0b', true);
+          }
+          const attackData = {
+            damage: zw.damage,
+            knockback: 12,
+            knockdown: false,
+            isHeavy: false,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 50 }, particles);
+        }
+      }
+      if (zw.timer <= 0) {
+        zw.active = false;
+        this.zorroWhipActive = null;
+      }
+    }
+
     // 6. Watchdog de Segurança Anti-Travamento (Golpes comuns 0.8s, Super Move 1.6s)
     const attackStates = [
       FIGHTER_STATE.LIGHT_PUNCH,
@@ -2657,6 +3106,139 @@ export class Fighter {
       ctx.arc(88, 0, 8, 0, Math.PI * 2);
       ctx.fill();
 
+      ctx.restore();
+    }
+
+    // 16. Gandalf: Esferas de Magia Branca (Projétil K)
+    if (this.gandalfLightSpells) {
+      for (const sp of this.gandalfLightSpells) {
+        if (!sp.active) continue;
+        ctx.save();
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(sp.x, sp.y, 11, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#93c5fd';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(sp.x, sp.y, 16, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // 17. Arqueiro Verde: Flechas no Ar
+    if (this.arrowProjectiles) {
+      for (const arr of this.arrowProjectiles) {
+        if (!arr.active) continue;
+        ctx.save();
+        ctx.translate(arr.x, arr.y);
+        const ang = Math.atan2(arr.vy, arr.vx);
+        ctx.rotate(ang);
+
+        // Haste da flecha de madeira/carbono verde
+        ctx.strokeStyle = '#15803d';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-24, 0);
+        ctx.lineTo(16, 0);
+        ctx.stroke();
+
+        // Pena da cauda
+        ctx.fillStyle = '#22c55e';
+        ctx.beginPath();
+        ctx.moveTo(-24, 0);
+        ctx.lineTo(-30, -5);
+        ctx.lineTo(-26, 0);
+        ctx.lineTo(-30, 5);
+        ctx.fill();
+
+        // Ponta da flecha (Normal, Explosiva ou Luva de Boxe)
+        if (arr.type === 'BOXING_GLOVE_ARROW') {
+          ctx.fillStyle = '#dc2626';
+          ctx.beginPath();
+          ctx.arc(22, 0, 9, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (arr.type === 'EXPLOSIVE_ARROW') {
+          ctx.fillStyle = '#f97316';
+          ctx.shadowColor = '#ef4444';
+          ctx.shadowBlur = 10;
+          ctx.beginPath();
+          ctx.arc(18, 0, 6, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.fillStyle = '#e2e8f0';
+          ctx.beginPath();
+          ctx.moveTo(16, -4);
+          ctx.lineTo(26, 0);
+          ctx.lineTo(16, 4);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+
+    // 18. Arqueiro Verde: Chuva de Flechas caindo do céu
+    if (this.arrowRainActive && this.arrowRainActive.arrows) {
+      for (const arr of this.arrowRainActive.arrows) {
+        if (!arr.active) continue;
+        ctx.save();
+        ctx.translate(arr.x, arr.y);
+        const ang = Math.atan2(arr.vy, arr.vx);
+        ctx.rotate(ang);
+        ctx.strokeStyle = '#4ade80';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(-20, 0);
+        ctx.lineTo(15, 0);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // 19. Gandalf: Fissura de Luz Santa ("You Shall Not Pass!")
+    if (this.gandalfShallNotPass && this.gandalfShallNotPass.active) {
+      const snp = this.gandalfShallNotPass;
+      ctx.save();
+      ctx.shadowColor = '#ffffff';
+      ctx.shadowBlur = 30;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.lineWidth = 18;
+      ctx.beginPath();
+      ctx.moveTo(snp.fissureX, this.groundY);
+      ctx.lineTo(snp.fissureX, this.groundY - 260);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(snp.fissureX, this.groundY);
+      ctx.lineTo(snp.fissureX, this.groundY - 290);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 20. Zorro: Marca do Z brilhante na tela / no alvo
+    if (this.zorroMarkOfZ && this.zorroMarkOfZ.active) {
+      const zm = this.zorroMarkOfZ;
+      ctx.save();
+      ctx.translate(zm.targetX, zm.targetY);
+      ctx.strokeStyle = '#fbbf24';
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 25;
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      // Linha superior
+      ctx.moveTo(-45, -35);
+      ctx.lineTo(45, -35);
+      // Linha diagonal
+      ctx.lineTo(-45, 35);
+      // Linha inferior
+      ctx.lineTo(45, 35);
+      ctx.stroke();
       ctx.restore();
     }
   }
