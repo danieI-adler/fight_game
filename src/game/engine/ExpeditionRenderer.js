@@ -1040,12 +1040,13 @@ export class ExpeditionRenderer {
     ctx.restore();
   }
 
-  // --- RENDERIZADOR DEDICADO DO INCRÍVEL HULK (GIGANTE, PELE VERDE, MÚSCULOS COLOSSAIS, BERMUDA ROXA RASGADA) ---
+  // --- RENDERIZADOR DEDICADO DO INCRÍVEL HULK COM ANIMAÇÕES COMPLETAS E DINÂMICAS ---
   static drawTrueHulk(ctx, x, y, f, p, fighter) {
     const t = fighter.stateTime;
+    const state = fighter.state;
     ctx.save();
     ctx.translate(x, y);
-    ctx.scale(f * 1.45, 1.45); // Verdadeiro Gigante Esmeralda Colossal!
+    ctx.scale(f * 1.45, 1.45); // Escala colossal do Gigante Esmeralda
 
     // Aura gama pulsante verde ao redor do colosso
     const gammaPulse = Math.sin(t * 8) * 0.15 + 0.85;
@@ -1053,32 +1054,190 @@ export class ExpeditionRenderer {
     ctx.shadowColor = 'rgba(74, 222, 128, 0.9)';
     ctx.shadowBlur = 24 * gammaPulse;
 
+    // Cálculo das animações procedurais baseadas no estado
+    let bodyY = 0;
+    let bodyRot = 0;
+    let chestTilt = 0;
+    let headOffX = 0;
+    let headOffY = 0;
+
+    // Posições dos pés
+    let legBackAngle = 0;
+    let legFrontAngle = 0;
+    let footBackY = 0;
+    let footFrontY = 0;
+    let footBackX = -14;
+    let footFrontX = 14;
+
+    // Posições dos braços
+    let armBackAngle = 0;
+    let armFrontAngle = 0;
+    let fistBackX = -50;
+    let fistBackY = -36;
+    let fistFrontX = 52;
+    let fistFrontY = -35;
+    let armFrontExt = 0;
+    let armBackExt = 0;
+
+    const isWalking = state === FIGHTER_STATE.WALK_FORWARD || state === FIGHTER_STATE.WALK_BACK || (state === FIGHTER_STATE.BLOCK && Math.abs(fighter.velocity.x) > 0.1);
+    const isCrouched = state === FIGHTER_STATE.CROUCH || state === FIGHTER_STATE.CROUCH_BLOCK || state === FIGHTER_STATE.CROUCH_PUNCH || state === FIGHTER_STATE.CROUCH_KICK;
+    const isPunching = state === FIGHTER_STATE.LIGHT_PUNCH || state === FIGHTER_STATE.HEAVY_PUNCH || state === FIGHTER_STATE.CROUCH_PUNCH;
+    const isKicking = state === FIGHTER_STATE.LIGHT_KICK || state === FIGHTER_STATE.HEAVY_KICK || state === FIGHTER_STATE.CROUCH_KICK;
+    const isSpecial = state === FIGHTER_STATE.SPECIAL_1 || state === FIGHTER_STATE.SPECIAL_2 || state === FIGHTER_STATE.SUPER_MOVE;
+    const isHurt = state === FIGHTER_STATE.HURT;
+    const isKnocked = state === FIGHTER_STATE.KNOCKDOWN || state === FIGHTER_STATE.DEFEAT;
+    const isBlocking = state === FIGHTER_STATE.BLOCK || state === FIGHTER_STATE.CROUCH_BLOCK;
+
+    if (isKnocked) {
+      bodyY = 35;
+      bodyRot = -0.7;
+      fistBackY = 20;
+      fistFrontY = 25;
+    } else if (isHurt) {
+      bodyRot = -0.15;
+      bodyY = 5;
+      headOffX = -8;
+      headOffY = -4;
+      fistBackX = -35;
+      fistFrontX = 25;
+      fistFrontY = -60;
+    } else if (isCrouched) {
+      bodyY = 22;
+      chestTilt = 0.15;
+      footBackX = -20;
+      footFrontX = 18;
+      footBackY = 5;
+      footFrontY = 5;
+      if (state === FIGHTER_STATE.CROUCH_PUNCH) {
+        const pExt = Math.sin(Math.min(1, t / 0.22) * Math.PI);
+        armFrontExt = pExt * 45;
+        fistFrontX = 52 + armFrontExt;
+        fistFrontY = -15;
+      } else {
+        fistFrontX = 35;
+        fistFrontY = -15;
+        fistBackX = -20;
+        fistBackY = -15;
+      }
+    } else if (isSpecial) {
+      // Hulk Smash ou Super Golpe: ergue os dois braços gigantes e golpeia o solo
+      const smashPhase = Math.min(1, t / 0.45);
+      if (smashPhase < 0.4) {
+        // Erguendo ambos os punhos aos céus com rugido furioso
+        const lift = smashPhase / 0.4;
+        bodyY = -lift * 10;
+        fistFrontX = 15;
+        fistFrontY = -120 * lift;
+        fistBackX = -15;
+        fistBackY = -120 * lift;
+        armFrontAngle = -1.2 * lift;
+        armBackAngle = -1.2 * lift;
+      } else {
+        // Slam violento no solo gerando cratera
+        const slam = (smashPhase - 0.4) / 0.6;
+        bodyY = Math.sin(slam * Math.PI * 0.5) * 15;
+        bodyRot = 0.25;
+        fistFrontX = 45;
+        fistFrontY = -10;
+        fistBackX = 25;
+        fistBackY = -10;
+        armFrontAngle = 0.6;
+        armBackAngle = 0.6;
+      }
+    } else if (isPunching) {
+      const punchExt = Math.sin(Math.min(1, t / (state === FIGHTER_STATE.HEAVY_PUNCH ? 0.38 : 0.22)) * Math.PI);
+      armFrontExt = punchExt * (state === FIGHTER_STATE.HEAVY_PUNCH ? 60 : 42);
+      chestTilt = punchExt * 0.2;
+      bodyY = punchExt * 4;
+      fistFrontX = 52 + armFrontExt;
+      fistFrontY = -55 - punchExt * 10;
+      fistBackX = -35 - punchExt * 10;
+      fistBackY = -45;
+    } else if (isKicking) {
+      const kickExt = Math.sin(Math.min(1, t / 0.35) * Math.PI);
+      legFrontAngle = -kickExt * 0.9;
+      footFrontX = 14 + kickExt * 50;
+      footFrontY = -kickExt * 45;
+      bodyRot = -kickExt * 0.2;
+      bodyY = -kickExt * 6;
+    } else if (isBlocking) {
+      // Postura de bloqueio maciço: braços cruzados na frente do rosto
+      fistFrontX = 22;
+      fistFrontY = -95;
+      fistBackX = 14;
+      fistBackY = -85;
+      chestTilt = -0.05;
+      if (isWalking) {
+        const step = Math.sin(t * 10);
+        footBackX = -14 - step * 12;
+        footFrontX = 14 + step * 12;
+        bodyY = Math.abs(step) * 4;
+      }
+    } else if (isWalking) {
+      // Passos pesados titânicos do Hulk
+      const walk = Math.sin(t * 9);
+      legBackAngle = -walk * 0.45;
+      legFrontAngle = walk * 0.45;
+      footBackX = -14 - walk * 18;
+      footFrontX = 14 + walk * 18;
+      footBackY = Math.max(0, -walk * 12);
+      footFrontY = Math.max(0, walk * 12);
+      bodyY = Math.abs(walk) * 5;
+      bodyRot = walk * 0.06;
+
+      // Balanço dos braços colossais ao andar
+      armFrontAngle = -walk * 0.5;
+      armBackAngle = walk * 0.5;
+      fistFrontX = 52 - walk * 24;
+      fistFrontY = -35 + Math.abs(walk) * 8;
+      fistBackX = -50 + walk * 24;
+      fistBackY = -36 + Math.abs(walk) * 8;
+    } else {
+      // IDLE: Respiração pesada e ameaçadora do monstro
+      const breath = Math.sin(t * 4);
+      bodyY = breath * 2.5;
+      chestTilt = breath * 0.02;
+      fistFrontY = -35 + breath * 3;
+      fistBackY = -36 - breath * 3;
+    }
+
+    ctx.translate(0, bodyY);
+    if (bodyRot !== 0) ctx.rotate(bodyRot);
+
     // 1. Pernas Musculosas Gigantes (Pele verde #22c55e e bermuda roxa rasgada #581c87)
     // Perna Traseira
+    ctx.save();
+    ctx.translate(-14, -32);
+    ctx.rotate(legBackAngle);
     ctx.fillStyle = '#15803d';
     ctx.beginPath();
-    ctx.ellipse(-14, -32, 14, 28, 0.1, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, 14, 28, 0.1, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(-16, -10, 12, 18, 0, 0, Math.PI * 2);
+    ctx.ellipse(-2, 22 + footBackY * 0.5, 12, 18, 0, 0, Math.PI * 2);
     ctx.fill();
     // Pé Traseiro
     ctx.beginPath();
-    ctx.roundRect(-26, -5, 24, 10, 4);
+    ctx.roundRect(-12, 27 + footBackY, 24, 10, 4);
     ctx.fill();
+    ctx.restore();
 
     // Perna Frontal
+    ctx.save();
+    ctx.translate(14, -32);
+    ctx.rotate(legFrontAngle);
     ctx.fillStyle = '#22c55e';
     ctx.beginPath();
-    ctx.ellipse(14, -32, 15, 28, -0.1, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, 15, 28, -0.1, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(16, -10, 13, 18, 0, 0, Math.PI * 2);
+    ctx.ellipse(2, 22 + footFrontY * 0.5, 13, 18, 0, 0, Math.PI * 2);
     ctx.fill();
     // Pé Frontal
     ctx.beginPath();
-    ctx.roundRect(4, -5, 26, 10, 4);
+    ctx.roundRect(-10, 27 + footFrontY, 26, 10, 4);
     ctx.fill();
+    ctx.restore();
 
     // Bermuda Roxa Rasgada (Calça rasgada clássica do Hulk)
     ctx.fillStyle = '#4a044e';
@@ -1103,6 +1262,9 @@ export class ExpeditionRenderer {
     ctx.stroke();
 
     // 2. Tronco / Trapézio e Peitoral Gigantesco
+    ctx.save();
+    if (chestTilt !== 0) ctx.rotate(chestTilt);
+
     // Costas / Trapézio largo
     ctx.fillStyle = '#16a34a';
     ctx.beginPath();
@@ -1130,41 +1292,52 @@ export class ExpeditionRenderer {
     ctx.stroke();
 
     // 3. Braço Traseiro e Punho Esmagador
+    ctx.save();
+    ctx.translate(-34, -95);
+    if (armBackAngle !== 0) ctx.rotate(armBackAngle);
     ctx.fillStyle = '#15803d';
     ctx.beginPath();
-    ctx.arc(-34, -95, 17, 0, Math.PI * 2); // Ombro maciço
+    ctx.arc(0, 0, 17, 0, Math.PI * 2); // Ombro maciço
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(-42, -75, 14, 20, 0.3, 0, Math.PI * 2); // Bíceps
+    ctx.ellipse(-8, 20, 14, 20, 0.3, 0, Math.PI * 2); // Bíceps
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(-48, -52, 15, 18, 0, 0, Math.PI * 2); // Antebraço
+    ctx.ellipse(-14, 43, 15, 18, 0, 0, Math.PI * 2); // Antebraço
     ctx.fill();
     // Punho fechado traseiro
     ctx.beginPath();
-    ctx.arc(-50, -36, 16, 0, Math.PI * 2);
+    ctx.arc(-16, 59, 16, 0, Math.PI * 2);
     ctx.fill();
+    ctx.restore();
 
     // 4. Braço Frontal Titânico
+    ctx.save();
+    ctx.translate(32, -95);
+    if (armFrontAngle !== 0) ctx.rotate(armFrontAngle);
     ctx.fillStyle = '#22c55e';
     ctx.beginPath();
-    ctx.arc(32, -95, 18, 0, Math.PI * 2); // Ombro frontal
+    ctx.arc(0, 0, 18, 0, Math.PI * 2); // Ombro frontal
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(44, -75, 16, 22, -0.3, 0, Math.PI * 2); // Bíceps frontal gigante
+    ctx.ellipse(12 + armFrontExt * 0.3, 20, 16, 22, -0.3, 0, Math.PI * 2); // Bíceps frontal gigante
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(50, -52, 16, 19, 0, 0, Math.PI * 2); // Antebraço frontal
+    ctx.ellipse(18 + armFrontExt * 0.65, 43, 16, 19, 0, 0, Math.PI * 2); // Antebraço frontal
     ctx.fill();
     // Punho gigante dianteiro
     ctx.beginPath();
-    ctx.arc(52, -35, 18, 0, Math.PI * 2);
+    ctx.arc(20 + armFrontExt, 60, 18, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = '#15803d';
     ctx.lineWidth = 2;
     ctx.stroke();
+    ctx.restore();
 
     // 5. Cabeça Feroz do Hulk
+    ctx.save();
+    ctx.translate(headOffX, headOffY);
+
     // Queixo quadrado pesado e mandíbula feroz
     ctx.fillStyle = '#16a34a';
     ctx.beginPath();
@@ -1203,7 +1376,9 @@ export class ExpeditionRenderer {
     ctx.closePath();
     ctx.fill();
 
-    ctx.restore();
-    ctx.restore();
+    ctx.restore(); // Fecha Cabeça
+    ctx.restore(); // Fecha Tronco
+    ctx.restore(); // Fecha Aura
+    ctx.restore(); // Fecha Hulk transform
   }
 }

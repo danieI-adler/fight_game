@@ -83,10 +83,10 @@ export class FighterCombat {
         break;
 
       case FIGHTER_STATE.CROUCH_PUNCH:
-        if (fighter.stateTime > 0.05 && fighter.stateTime < 0.18) {
-          fighter.activeHitbox = fighter.createHitbox(15, 45, 55, 25);
-          fighter.activeHitbox.damage = 35;
-          fighter.activeHitbox.knockback = 4;
+        if (fighter.stateTime > 0.04 && fighter.stateTime < 0.18) {
+          fighter.activeHitbox = fighter.createHitbox(10, 48, 75, 32);
+          fighter.activeHitbox.damage = 40;
+          fighter.activeHitbox.knockback = 4.5;
           fighter.activeHitbox.isHeavy = false;
           fighter.activeHitbox.attackerPower = fighter.attackPower;
         }

@@ -328,6 +328,14 @@ export class Fighter {
       return;
     }
 
+    if (this.isBlocking && !this.isZorro) {
+      // Andar bloqueando: velocidade reduzida em 50% mantendo postura de guarda
+      this.velocity.x = dir * (this.getEffectiveSpeed() * 0.5);
+      this.state = FIGHTER_STATE.BLOCK;
+      this.lastAction = 'BLOCK';
+      return;
+    }
+
     this.velocity.x = dir * this.getEffectiveSpeed();
 
     if (dir === this.facing) {
@@ -345,6 +353,12 @@ export class Fighter {
     if (this.isCrouching) {
       this.velocity.x = 0;
       this.state = FIGHTER_STATE.CROUCH;
+      return;
+    }
+
+    if (this.isBlocking && !this.isZorro) {
+      this.velocity.x = 0;
+      this.state = FIGHTER_STATE.BLOCK;
       return;
     }
 
@@ -2857,43 +2871,61 @@ export class Fighter {
       }
     }
 
-    // 5.32 Messi: Chute de Ouro / Curva Perfeita (Ultimate)
+    // 5.32 Messi: Chute de Ouro / Curva Perfeita (Ultimate - Teleguiado e Acerto Automático)
     if (this.messiSoccerBall && this.messiSoccerBall.active) {
       const ball = this.messiSoccerBall;
       if (ball.kicked) {
-        ball.x += ball.vx * dt;
-        ball.vy += 220 * dt; // Gravidade suave
-        ball.y += ball.vy * dt;
-        ball.curve += dt * 4;
+        if (this.opponent && !this.opponent.isDead) {
+          const targetX = this.opponent.position.x;
+          const targetY = this.opponent.position.y - 55;
+          const toTargetX = targetX - ball.x;
+          const toTargetY = targetY - ball.y;
+          const distToTarget = Math.hypot(toTargetX, toTargetY);
 
-        if (particles && Math.random() < 0.6) {
-          particles.emitSparks(ball.x, ball.y, '#facc15', 4, 3);
+          // Curva inteligente teleguiada automática em direção ao oponente
+          const speed = 1100;
+          const steerRate = Math.min(1, dt * 14);
+          const desiredVx = (toTargetX / (distToTarget || 1)) * speed;
+          const desiredVy = (toTargetY / (distToTarget || 1)) * speed;
+
+          ball.vx = ball.vx + (desiredVx - ball.vx) * steerRate;
+          ball.vy = ball.vy + (desiredVy - ball.vy) * steerRate;
+        }
+
+        ball.x += ball.vx * dt;
+        ball.y += ball.vy * dt;
+        ball.curve += dt * 8;
+
+        if (particles && Math.random() < 0.8) {
+          particles.emitSparks(ball.x, ball.y, '#facc15', 5, 4);
+          particles.emitElectricArc(ball.x - 12, ball.y - 12, ball.x + 12, ball.y + 12, '#38bdf8');
         }
 
         if (this.opponent && !this.opponent.isDead && !ball.hasHit) {
-          const dist = Math.abs(ball.x - this.opponent.position.x);
-          const hDiff = Math.abs(ball.y - (this.opponent.position.y - 50));
-          if (dist < 55 && hDiff < 65) {
+          const dist = Math.hypot(ball.x - this.opponent.position.x, ball.y - (this.opponent.position.y - 50));
+          // Acerto automático infalível ao se aproximar ou quando a trajetória alcança o oponente
+          if (dist < 85) {
             ball.hasHit = true;
             ball.active = false;
             sounds.playThunderSlam();
             sounds.playKO();
             if (particles) {
-              particles.emitShockwave(ball.x, ball.y, 220, '#facc15');
-              particles.emitSparks(ball.x, ball.y, '#facc15', 45, 14);
-              particles.emitFloatingText('GOLAÇO NO ÂNGULO!', ball.x, ball.y - 60, '#facc15', true);
+              particles.emitShockwave(ball.x, ball.y, 240, '#facc15');
+              particles.emitSparks(ball.x, ball.y, '#facc15', 50, 16);
+              particles.emitFloatingText('GOLAÇO NO ÂNGULO!', ball.x, ball.y - 65, '#facc15', true);
             }
             const attackData = {
-              damage: 395,
+              damage: 420,
               knockback: 32,
               knockdown: true,
               isHeavy: true,
+              unblockable: true,
               attackerPower: this.attackPower
             };
             this.opponent.receiveHit(attackData, { x: ball.x, y: ball.y }, particles);
           }
         }
-        if (ball.y >= this.groundY || ball.x < -100 || ball.x > stageWidth + 100) {
+        if (ball.y >= this.groundY + 20 || ball.x < -150 || ball.x > stageWidth + 150) {
           ball.active = false;
           this.messiSoccerBall = null;
         }

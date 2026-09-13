@@ -99,12 +99,14 @@ export class GameEngine {
 
       // P1 Just Pressed (Usado localmente por P1 no Versus/Arcade e pelo jogador local no Online)
       if (this.inputHandler.p1Binds.up.includes(e.code)) this.justPressedP1.jump = true;
-      if (this.inputHandler.p1Binds.lightPunch.includes(e.code)) this.justPressedP1.lightPunch = true;
-      if (this.inputHandler.p1Binds.heavyPunch.includes(e.code)) this.justPressedP1.heavyPunch = true;
-      if (this.inputHandler.p1Binds.lightKick.includes(e.code)) this.justPressedP1.lightKick = true;
-      if (this.inputHandler.p1Binds.heavyKick.includes(e.code)) this.justPressedP1.heavyKick = true;
-      if (this.inputHandler.p1Binds.special1.includes(e.code)) this.justPressedP1.special1 = true;
-      if (this.inputHandler.p1Binds.superMove.includes(e.code)) this.justPressedP1.superMove = true;
+      if (!e.repeat) {
+        if (this.inputHandler.p1Binds.lightPunch.includes(e.code)) this.justPressedP1.lightPunch = true;
+        if (this.inputHandler.p1Binds.heavyPunch.includes(e.code)) this.justPressedP1.heavyPunch = true;
+        if (this.inputHandler.p1Binds.lightKick.includes(e.code)) this.justPressedP1.lightKick = true;
+        if (this.inputHandler.p1Binds.heavyKick.includes(e.code)) this.justPressedP1.heavyKick = true;
+        if (this.inputHandler.p1Binds.special1.includes(e.code)) this.justPressedP1.special1 = true;
+        if (this.inputHandler.p1Binds.superMove.includes(e.code)) this.justPressedP1.superMove = true;
+      }
 
       // Detecção de Duplo Toque para Dash (P1 - A / D)
       if (this.inputHandler.doubleTapDashEnabled) {
@@ -130,12 +132,14 @@ export class GameEngine {
       // P2 Just Pressed (Modo Versus Local)
       if (this.mode === 'VERSUS') {
         if (this.inputHandler.p2Binds.up.includes(e.code)) this.justPressedP2.jump = true;
-        if (this.inputHandler.p2Binds.lightPunch.includes(e.code)) this.justPressedP2.lightPunch = true;
-        if (this.inputHandler.p2Binds.heavyPunch.includes(e.code)) this.justPressedP2.heavyPunch = true;
-        if (this.inputHandler.p2Binds.lightKick.includes(e.code)) this.justPressedP2.lightKick = true;
-        if (this.inputHandler.p2Binds.heavyKick.includes(e.code)) this.justPressedP2.heavyKick = true;
-        if (this.inputHandler.p2Binds.special1.includes(e.code)) this.justPressedP2.special1 = true;
-        if (this.inputHandler.p2Binds.superMove.includes(e.code)) this.justPressedP2.superMove = true;
+        if (!e.repeat) {
+          if (this.inputHandler.p2Binds.lightPunch.includes(e.code)) this.justPressedP2.lightPunch = true;
+          if (this.inputHandler.p2Binds.heavyPunch.includes(e.code)) this.justPressedP2.heavyPunch = true;
+          if (this.inputHandler.p2Binds.lightKick.includes(e.code)) this.justPressedP2.lightKick = true;
+          if (this.inputHandler.p2Binds.heavyKick.includes(e.code)) this.justPressedP2.heavyKick = true;
+          if (this.inputHandler.p2Binds.special1.includes(e.code)) this.justPressedP2.special1 = true;
+          if (this.inputHandler.p2Binds.superMove.includes(e.code)) this.justPressedP2.superMove = true;
+        }
 
         if (this.inputHandler.doubleTapDashEnabled) {
           if (this.inputHandler.p2Binds.left.includes(e.code)) {
