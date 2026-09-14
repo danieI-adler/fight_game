@@ -99,6 +99,12 @@ export class Fighter {
     this.isCaptainAmerica = Boolean(cNameLower.includes('amrica') || cNameLower.includes('america') || cNameLower.includes('capito amrica') || cNameLower.includes('capitao america'));
     this.isNaruto = Boolean(cNameLower.includes('naruto') || charData.superType === 'NARUTO_RASEN_SHURIKEN');
 
+    // Identificação do Lote 4 dos Novos Personagens (Sasuke, Bob Esponja, Homem de Ferro, Homem-Aranha)
+    this.isSasuke = Boolean(cNameLower.includes('sasuke') || charData.superType === 'SASUKE_KIRIN');
+    this.isSpongeBob = Boolean(cNameLower.includes('spongebob') || cNameLower.includes('esponja') || charData.superType === 'SPONGEBOB_BUBBLE_SPATULA');
+    this.isIronMan = Boolean(cNameLower.includes('ferro') || cNameLower.includes('iron') || charData.superType === 'IRONMAN_UNIBEAM');
+    this.isSpiderMan = Boolean(cNameLower.includes('aranha') || cNameLower.includes('spider') || charData.superType === 'SPIDERMAN_WEB_BARRAGE');
+
     // Estado e Animação
     this.state = FIGHTER_STATE.IDLE;
     this.stateTime = 0;
@@ -198,6 +204,16 @@ export class Fighter {
     this.narutoRasengan = null; // { timer, startX, targetX, active, hasHit }
     this.narutoRasenShuriken = null; // { x, y, vx, vy, active, hasHit, timer, expanded }
 
+    // Projéteis e Habilidades Especiais: Sasuke, Bob Esponja, Homem de Ferro, Homem-Aranha (Lote 4)
+    this.sasukeChidori = null; // { timer, startX, targetX, damage, active, hasHit }
+    this.sasukeKirin = null; // { timer, x, y, damage, active, hasHit, lightningFlashes: 0 }
+    this.spongebobPatty = null; // { x, y, vx, vy, rot, damage, active, hasHit }
+    this.spongebobBubbleSpatula = null; // { timer, target, damage, active, hitsLanded: 0 }
+    this.ironmanRepulsor = null; // { x, y, vx, damage, active, hasHit }
+    this.ironmanUnibeam = null; // { timer, reach, width, damage, active, tickTimer: 0 }
+    this.spidermanWeb = null; // { x, y, vx, vy, damage, active, hasHit, pulling: false }
+    this.spidermanWebBarrage = null; // { timer, phase, target, active, hitsLanded: 0 }
+
     // Articulação Esquelética
     this.pose = {
       head: { x: 0, y: -115 },
@@ -293,6 +309,16 @@ export class Fighter {
     this.extraAttackLevel = 1;
     this.versoEnterUsed = false;
     this.isWeakenedSway = false;
+
+    // Reset Lote 4
+    this.sasukeChidori = null;
+    this.sasukeKirin = null;
+    this.spongebobPatty = null;
+    this.spongebobBubbleSpatula = null;
+    this.ironmanRepulsor = null;
+    this.ironmanUnibeam = null;
+    this.spidermanWeb = null;
+    this.spidermanWebBarrage = null;
 
     // Reinicia o rank do Verso em uma nova rodada
     if (this.isVerso) {
@@ -1077,6 +1103,75 @@ export class Fighter {
         hasHit: false
       };
     }
+    // 25. Sasuke Uchiha: Chidori Relâmpago Perfurante de Guarda (Q)
+    else if (this.isSasuke) {
+      this.extraType = 'SASUKE_CHIDORI_RUSH';
+      sounds.playElectricZap();
+      sounds.playSuperCharge();
+      sounds.playDash();
+      const target = this.opponent;
+      const targetX = target ? target.position.x : this.position.x + this.facing * 260;
+      this.sasukeChidori = {
+        timer: 0,
+        startX: this.position.x,
+        targetX: targetX,
+        damage: level === 2 ? 220 : 155,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 26. Bob Esponja: Hambúrguer de Siri Voador (Q)
+    else if (this.isSpongeBob) {
+      this.extraType = 'SPONGEBOB_PATTY_THROW';
+      sounds.playWhoosh();
+      sounds.playPunch(false);
+      const sx = this.position.x + this.facing * 35;
+      const sy = this.position.y - 60;
+      this.spongebobPatty = {
+        x: sx,
+        y: sy,
+        vx: this.facing * (level === 2 ? 900 : 750),
+        vy: -180,
+        rot: 0,
+        damage: level === 2 ? 160 : 110,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 27. Homem de Ferro: Disparo Repulsor de Plasma Stark (Q)
+    else if (this.isIronMan) {
+      this.extraType = 'IRONMAN_REPULSOR_BEAM';
+      sounds.playSuperCharge();
+      sounds.playLaser();
+      const sx = this.position.x + this.facing * 40;
+      const sy = this.position.y - 68;
+      this.ironmanRepulsor = {
+        x: sx,
+        y: sy,
+        vx: this.facing * (level === 2 ? 1400 : 1150),
+        damage: level === 2 ? 190 : 135,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 28. Homem-Aranha: Teia Puxadora & Dropkick Aéreo (Q)
+    else if (this.isSpiderMan) {
+      this.extraType = 'SPIDERMAN_WEB_PULL';
+      sounds.playWhoosh();
+      sounds.playDash();
+      const sx = this.position.x + this.facing * 32;
+      const sy = this.position.y - 65;
+      this.spidermanWeb = {
+        x: sx,
+        y: sy,
+        vx: this.facing * (level === 2 ? 1300 : 1050),
+        vy: 0,
+        damage: level === 2 ? 175 : 125,
+        active: true,
+        hasHit: false,
+        pulling: false
+      };
+    }
     // Personagens genéricos: golpe padrão fortificado
     else {
       this.extraType = 'GENERIC_EXTRA';
@@ -1395,6 +1490,59 @@ export class Fighter {
         hasHit: false,
         timer: 0,
         expanded: false
+      };
+    } else if (this.superType === 'SASUKE_KIRIN') {
+      this.superPhase = 'KIRIN_ROAR';
+      sounds.playSuperCharge();
+      sounds.playThunderSlam();
+      sounds.playElectricZap();
+      const targetX = this.opponent ? this.opponent.position.x : this.position.x + this.facing * 280;
+      this.sasukeKirin = {
+        timer: 0,
+        x: targetX,
+        y: this.groundY - 140,
+        damage: 380,
+        active: true,
+        hasHit: false,
+        lightningFlashes: 0
+      };
+    } else if (this.superType === 'SPONGEBOB_BUBBLE_SPATULA') {
+      this.superPhase = 'BUBBLE_TRAP';
+      sounds.playSuperCharge();
+      sounds.playWhoosh();
+      const target = this.opponent;
+      this.spongebobBubbleSpatula = {
+        timer: 0,
+        target: target,
+        damage: 340,
+        active: true,
+        hitsLanded: 0
+      };
+    } else if (this.superType === 'IRONMAN_UNIBEAM') {
+      this.superPhase = 'UNIBEAM_FIRE';
+      sounds.playSuperCharge();
+      sounds.playLaser();
+      this.ironmanUnibeam = {
+        timer: 0,
+        reach: 1200,
+        width: 38,
+        damage: 390,
+        active: true,
+        tickTimer: 0
+      };
+    } else if (this.superType === 'SPIDERMAN_WEB_BARRAGE') {
+      this.superPhase = 'WEB_BARRAGE';
+      sounds.playSuperCharge();
+      sounds.playWhoosh();
+      sounds.playDash();
+      const target = this.opponent;
+      this.spidermanWebBarrage = {
+        timer: 0,
+        phase: 'WEB_BIND',
+        target: target,
+        damage: 360,
+        active: true,
+        hitsLanded: 0
       };
     } else {
       this.superType = 'GUSTAVE_SMASH';
@@ -3326,6 +3474,371 @@ export class Fighter {
       }
     }
 
+    // 5.38 Sasuke Uchiha: Chidori Relâmpago (Q)
+    if (this.sasukeChidori && this.sasukeChidori.active) {
+      const sc = this.sasukeChidori;
+      sc.timer += dt;
+      const progress = Math.min(1, sc.timer / 0.22);
+      this.position.x = sc.startX + (sc.targetX - sc.startX) * progress;
+
+      if (particles && Math.random() < 0.85) {
+        particles.emitElectricArc(this.position.x - 25, this.position.y - 65, this.position.x + 25, this.position.y - 65, '#818cf8');
+        particles.emitSparks(this.position.x + this.facing * 35, this.position.y - 65, '#38bdf8', 8, 7);
+      }
+
+      if (this.opponent && !this.opponent.isDead && !sc.hasHit && progress > 0.3) {
+        const dist = Math.abs(this.position.x - this.opponent.position.x);
+        if (dist < 80) {
+          sc.hasHit = true;
+          sounds.playElectricZap();
+          sounds.playPunch(true);
+          if (particles) {
+            particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 160, '#818cf8');
+            particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 60, '#c084fc', 35, 12);
+            particles.emitFloatingText('CHIDORI!', this.opponent.position.x, this.opponent.position.y - 85, '#818cf8', true);
+          }
+          const attackData = {
+            damage: sc.damage,
+            knockback: 20,
+            knockdown: true,
+            isHeavy: true,
+            unblockable: true, // Quebra de guarda perfurante
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
+        }
+      }
+
+      if (progress >= 1) {
+        sc.active = false;
+        this.sasukeChidori = null;
+      }
+    }
+
+    // 5.39 Sasuke Uchiha: Kirin Celestial (Ultimate)
+    if (this.sasukeKirin && this.sasukeKirin.active) {
+      const sk = this.sasukeKirin;
+      sk.timer += dt;
+
+      if (particles && Math.random() < 0.8) {
+        particles.emitElectricArc(sk.x - 60 + Math.random() * 120, sk.y - 80, sk.x + (Math.random() - 0.5) * 80, this.groundY, '#818cf8', 3);
+        particles.emitSparks(sk.x, this.groundY, '#38bdf8', 12, 8);
+      }
+
+      if (!sk.hasHit && sk.timer >= 0.5) {
+        sk.hasHit = true;
+        sounds.playThunderSlam();
+        sounds.playKO();
+        if (particles) {
+          particles.emitShockwave(sk.x, this.groundY, 320, '#818cf8');
+          particles.emitShockwave(sk.x, this.groundY, 200, '#38bdf8');
+          particles.emitSparks(sk.x, this.groundY - 60, '#ffffff', 60, 20);
+          particles.emitFloatingText('KIRIN DOS CÉUS!', sk.x, sk.y - 40, '#818cf8', true);
+        }
+        if (this.opponent && !this.opponent.isDead) {
+          const dist = Math.abs(this.opponent.position.x - sk.x);
+          if (dist < 260) {
+            const attackData = {
+              damage: sk.damage,
+              knockback: 36,
+              knockdown: true,
+              isHeavy: true,
+              unblockable: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
+          }
+        }
+      }
+
+      if (sk.timer >= 1.4) {
+        sk.active = false;
+        this.sasukeKirin = null;
+      }
+    }
+
+    // 5.40 Bob Esponja: Hambúrguer de Siri Giratório (Q)
+    if (this.spongebobPatty && this.spongebobPatty.active) {
+      const sp = this.spongebobPatty;
+      sp.x += sp.vx * dt;
+      sp.y += sp.vy * dt;
+      sp.vy += 450 * dt; // Gravidade leve de arco
+      sp.rot += 12 * dt;
+
+      if (particles && Math.random() < 0.4) {
+        particles.emitSparks(sp.x, sp.y, '#facc15', 3, 2);
+      }
+
+      if (this.opponent && !this.opponent.isDead && !sp.hasHit) {
+        const dist = Math.hypot(sp.x - this.opponent.position.x, sp.y - (this.opponent.position.y - 55));
+        if (dist < 45) {
+          sp.hasHit = true;
+          sp.active = false;
+          sounds.playPunch(true);
+          sounds.playGiggle ? sounds.playGiggle() : sounds.playWhoosh();
+          if (particles) {
+            particles.emitShockwave(sp.x, sp.y, 80, '#facc15');
+            particles.emitSparks(sp.x, sp.y, '#ef4444', 18, 6);
+            particles.emitFloatingText('HAMBÚRGUER DE SIRI!', sp.x, sp.y - 30, '#eab308', true);
+          }
+          const attackData = {
+            damage: sp.damage,
+            knockback: 14,
+            knockdown: false,
+            isHeavy: false,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: sp.x, y: sp.y }, particles);
+          this.spongebobPatty = null;
+        }
+      }
+
+      if (sp.x < -100 || sp.x > stageWidth + 100 || sp.y > this.groundY) {
+        sp.active = false;
+        this.spongebobPatty = null;
+      }
+    }
+
+    // 5.41 Bob Esponja: Bolha Gigante & Espátula (Ultimate)
+    if (this.spongebobBubbleSpatula && this.spongebobBubbleSpatula.active) {
+      const bs = this.spongebobBubbleSpatula;
+      bs.timer += dt;
+      const target = bs.target;
+
+      if (target && !target.isDead) {
+        // Prende no ar durante a bolha
+        if (bs.timer < 1.0) {
+          target.velocity.set(0, 0);
+          target.position.y = this.groundY - 60;
+        }
+
+        if (particles && Math.random() < 0.6) {
+          particles.emitElectricArc(target.position.x - 30, target.position.y - 50, target.position.x + 30, target.position.y - 50, '#38bdf8');
+          particles.emitSparks(target.position.x, target.position.y - 50, '#facc15', 5, 4);
+        }
+
+        // 3 Golpes rápidos de espátula dourada
+        const hitTimes = [0.4, 0.7, 1.05];
+        for (let i = bs.hitsLanded; i < hitTimes.length; i++) {
+          if (bs.timer >= hitTimes[i]) {
+            bs.hitsLanded = i + 1;
+            sounds.playPunch(true);
+            sounds.playWhoosh();
+            if (particles) {
+              particles.emitShockwave(target.position.x, target.position.y - 50, 110, '#facc15');
+              particles.emitSparks(target.position.x, target.position.y - 50, '#38bdf8', 20, 8);
+            }
+            const isLast = i === hitTimes.length - 1;
+            const attackData = {
+              damage: Math.round(bs.damage / 3),
+              knockback: isLast ? 28 : 6,
+              knockdown: isLast,
+              isHeavy: isLast,
+              unblockable: true,
+              attackerPower: this.attackPower
+            };
+            target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 50 }, particles);
+          }
+        }
+      }
+
+      if (bs.timer >= 1.4) {
+        bs.active = false;
+        this.spongebobBubbleSpatula = null;
+      }
+    }
+
+    // 5.42 Homem de Ferro: Feixe Repulsor Stark (Q)
+    if (this.ironmanRepulsor && this.ironmanRepulsor.active) {
+      const ir = this.ironmanRepulsor;
+      ir.x += ir.vx * dt;
+
+      if (particles && Math.random() < 0.8) {
+        particles.emitElectricArc(ir.x - 20, ir.y, ir.x + 20, ir.y, '#38bdf8');
+        particles.emitSparks(ir.x, ir.y, '#facc15', 8, 6);
+      }
+
+      if (this.opponent && !this.opponent.isDead && !ir.hasHit) {
+        const dist = Math.hypot(ir.x - this.opponent.position.x, ir.y - (this.opponent.position.y - 65));
+        if (dist < 48) {
+          ir.hasHit = true;
+          ir.active = false;
+          sounds.playLaser();
+          sounds.playPunch(true);
+          if (particles) {
+            particles.emitShockwave(ir.x, ir.y, 110, '#38bdf8');
+            particles.emitSparks(ir.x, ir.y, '#facc15', 25, 9);
+            particles.emitFloatingText('REPULSOR STARK!', ir.x, ir.y - 30, '#38bdf8', true);
+          }
+          const attackData = {
+            damage: ir.damage,
+            knockback: 18,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: ir.x, y: ir.y }, particles);
+          this.ironmanRepulsor = null;
+        }
+      }
+
+      if (ir.x < -100 || ir.x > stageWidth + 100) {
+        ir.active = false;
+        this.ironmanRepulsor = null;
+      }
+    }
+
+    // 5.43 Homem de Ferro: Unibeam do Reator Arc (Ultimate)
+    if (this.ironmanUnibeam && this.ironmanUnibeam.active) {
+      const iu = this.ironmanUnibeam;
+      iu.timer += dt;
+      iu.tickTimer += dt;
+      const bx = this.position.x + this.facing * 35;
+      const by = this.position.y - 72;
+
+      if (particles && Math.random() < 0.9) {
+        particles.emitElectricArc(bx, by, bx + this.facing * 500, by, '#38bdf8', 4);
+        particles.emitSparks(bx + this.facing * 200, by, '#ffffff', 14, 8);
+        particles.emitShockwave(bx, by, 70, '#facc15');
+      }
+
+      // Aplica dano contínuo a cada 0.25s
+      if (iu.tickTimer >= 0.22 && this.opponent && !this.opponent.isDead) {
+        iu.tickTimer = 0;
+        const oppDist = (this.opponent.position.x - bx) * this.facing;
+        const vertDist = Math.abs(this.opponent.position.y - by);
+        if (oppDist > 0 && oppDist < iu.reach && vertDist < 75) {
+          sounds.playLaser();
+          if (particles) {
+            particles.emitShockwave(this.opponent.position.x, by, 120, '#38bdf8');
+            particles.emitSparks(this.opponent.position.x, by, '#facc15', 20, 8);
+          }
+          const isFinal = iu.timer >= 1.0;
+          const attackData = {
+            damage: Math.round(iu.damage / 4),
+            knockback: isFinal ? 34 : 8,
+            knockdown: isFinal,
+            isHeavy: true,
+            unblockable: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: by }, particles);
+        }
+      }
+
+      if (iu.timer >= 1.35) {
+        iu.active = false;
+        this.ironmanUnibeam = null;
+      }
+    }
+
+    // 5.44 Homem-Aranha: Teia Puxadora (Q)
+    if (this.spidermanWeb && this.spidermanWeb.active) {
+      const sw = this.spidermanWeb;
+      if (!sw.pulling) {
+        sw.x += sw.vx * dt;
+
+        if (particles && Math.random() < 0.5) {
+          particles.emitSparks(sw.x, sw.y, '#f8fafc', 3, 2);
+        }
+
+        if (this.opponent && !this.opponent.isDead && !sw.hasHit) {
+          const dist = Math.hypot(sw.x - this.opponent.position.x, sw.y - (this.opponent.position.y - 60));
+          if (dist < 50) {
+            sw.hasHit = true;
+            sw.pulling = true;
+            sounds.playWhoosh();
+            sounds.playPunch(false);
+            if (particles) {
+              particles.emitShockwave(sw.x, sw.y, 85, '#ffffff');
+              particles.emitFloatingText('TEIA PUXADORA!', sw.x, sw.y - 25, '#ef4444', true);
+            }
+          }
+        }
+
+        if (Math.abs(sw.x - this.position.x) > 680) {
+          sw.active = false;
+          this.spidermanWeb = null;
+        }
+      } else {
+        // Puxando o oponente para frente do Homem-Aranha seguido de voadora
+        if (this.opponent && !this.opponent.isDead) {
+          const pullSpeed = 950 * dt;
+          const targetX = this.position.x + this.facing * 55;
+          const dir = Math.sign(targetX - this.opponent.position.x);
+          this.opponent.position.x += dir * pullSpeed;
+
+          if (Math.abs(this.opponent.position.x - targetX) < 40) {
+            sw.active = false;
+            sounds.playPunch(true);
+            if (particles) {
+              particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 50, 110, '#ef4444');
+              particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 50, '#2563eb', 25, 9);
+            }
+            const attackData = {
+              damage: sw.damage,
+              knockback: 22,
+              knockdown: true,
+              isHeavy: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 50 }, particles);
+            this.spidermanWeb = null;
+          }
+        } else {
+          sw.active = false;
+          this.spidermanWeb = null;
+        }
+      }
+    }
+
+    // 5.45 Homem-Aranha: Casulo de Teia & Ataque Aéreo (Ultimate)
+    if (this.spidermanWebBarrage && this.spidermanWebBarrage.active) {
+      const wb = this.spidermanWebBarrage;
+      wb.timer += dt;
+      const target = wb.target;
+
+      if (target && !target.isDead) {
+        if (wb.timer < 0.7) {
+          target.velocity.set(0, 0);
+          if (particles && Math.random() < 0.6) {
+            particles.emitSparks(target.position.x, target.position.y - 50, '#ffffff', 8, 5);
+          }
+        }
+
+        const hits = [0.35, 0.65, 0.95, 1.2];
+        for (let i = wb.hitsLanded; i < hits.length; i++) {
+          if (wb.timer >= hits[i]) {
+            wb.hitsLanded = i + 1;
+            sounds.playWhoosh();
+            sounds.playPunch(true);
+            const isLast = i === hits.length - 1;
+            if (particles) {
+              particles.emitShockwave(target.position.x, target.position.y - 50, isLast ? 180 : 100, '#ef4444');
+              particles.emitSparks(target.position.x, target.position.y - 50, '#38bdf8', isLast ? 35 : 15, 8);
+              if (isLast) {
+                particles.emitFloatingText('COMBO ARACNÍDEO!', target.position.x, target.position.y - 85, '#ef4444', true);
+              }
+            }
+            const attackData = {
+              damage: Math.round(wb.damage / 4),
+              knockback: isLast ? 32 : 5,
+              knockdown: isLast,
+              isHeavy: isLast,
+              unblockable: true,
+              attackerPower: this.attackPower
+            };
+            target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 50 }, particles);
+          }
+        }
+      }
+
+      if (wb.timer >= 1.45) {
+        wb.active = false;
+        this.spidermanWebBarrage = null;
+      }
+    }
+
     // 6. Watchdog de Segurança Anti-Travamento (Golpes comuns 0.8s, Super Move 1.6s)
     const attackStates = [
       FIGHTER_STATE.LIGHT_PUNCH,
@@ -4640,6 +5153,222 @@ export class Fighter {
       ctx.fill();
 
       ctx.restore();
+    }
+
+    // 34. Sasuke Uchiha: Chidori Relâmpago (Q)
+    if (this.sasukeChidori && this.sasukeChidori.active) {
+      const cx = this.position.x + this.facing * 38;
+      const cy = this.position.y - 65;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.shadowColor = '#818cf8';
+      ctx.shadowBlur = 24;
+
+      // Núcleo elétrico de plasma azul-violeta
+      const cgrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 22);
+      cgrad.addColorStop(0, '#ffffff');
+      cgrad.addColorStop(0.5, '#818cf8');
+      cgrad.addColorStop(1, '#312e81');
+      ctx.fillStyle = cgrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 18, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Arcos de faísca elétrica
+      ctx.strokeStyle = '#c084fc';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 5; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const len = 12 + Math.random() * 18;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(ang) * (len * 0.5) + (Math.random() - 0.5) * 8, Math.sin(ang) * (len * 0.5));
+        ctx.lineTo(Math.cos(ang) * len, Math.sin(ang) * len);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 35. Sasuke Uchiha: Kirin dos Céus (Ultimate)
+    if (this.sasukeKirin && this.sasukeKirin.active) {
+      const sk = this.sasukeKirin;
+      ctx.save();
+      ctx.shadowColor = '#818cf8';
+      ctx.shadowBlur = 32;
+
+      // Fera dragão relâmpago descendo das nuvens
+      ctx.strokeStyle = '#c7d2fe';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(sk.x, sk.y - 300);
+      ctx.quadraticCurveTo(sk.x - 40, sk.y - 120, sk.x + 20, sk.y - 40);
+      ctx.lineTo(sk.x, this.groundY);
+      ctx.stroke();
+
+      // Cabeça de dragão elétrico com chifres
+      ctx.fillStyle = '#818cf8';
+      ctx.beginPath();
+      ctx.moveTo(sk.x - 30, sk.y - 40);
+      ctx.lineTo(sk.x + 30, sk.y - 40);
+      ctx.lineTo(sk.x, sk.y + 20);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // 36. Bob Esponja: Hambúrguer de Siri Giratório (Q)
+    if (this.spongebobPatty && this.spongebobPatty.active) {
+      const sp = this.spongebobPatty;
+      ctx.save();
+      ctx.translate(sp.x, sp.y);
+      ctx.rotate(sp.rot);
+      ctx.shadowColor = '#facc15';
+      ctx.shadowBlur = 15;
+
+      // Pão superior
+      ctx.fillStyle = '#d97706';
+      ctx.beginPath();
+      ctx.arc(0, -3, 14, Math.PI, 0);
+      ctx.fill();
+
+      // Alface verde
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect(-15, -2, 30, 3);
+
+      // Hambúrguer de carne
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-14, 2, 28, 5);
+
+      // Pão inferior
+      ctx.fillStyle = '#b45309';
+      ctx.fillRect(-13, 8, 26, 4);
+
+      ctx.restore();
+    }
+
+    // 37. Bob Esponja: Bolha Gigante & Espátula (Ultimate)
+    if (this.spongebobBubbleSpatula && this.spongebobBubbleSpatula.active) {
+      const bs = this.spongebobBubbleSpatula;
+      const target = bs.target;
+      if (target) {
+        ctx.save();
+        ctx.translate(target.position.x, target.position.y - 50);
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 25;
+
+        // Bolha translúcida iridescente
+        const bGrad = ctx.createRadialGradient(-10, -15, 5, 0, 0, 55);
+        bGrad.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
+        bGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.35)');
+        bGrad.addColorStop(1, 'rgba(168, 85, 247, 0.45)');
+        ctx.fillStyle = bGrad;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, 55, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+      }
+    }
+
+    // 38. Homem de Ferro: Disparo Repulsor Stark (Q)
+    if (this.ironmanRepulsor && this.ironmanRepulsor.active) {
+      const ir = this.ironmanRepulsor;
+      ctx.save();
+      ctx.translate(ir.x, ir.y);
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 22;
+
+      // Raio de plasma cilíndrico
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 22, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 39. Homem de Ferro: Colossal Unibeam do Peito (Ultimate)
+    if (this.ironmanUnibeam && this.ironmanUnibeam.active) {
+      const iu = this.ironmanUnibeam;
+      const bx = this.position.x + this.facing * 35;
+      const by = this.position.y - 72;
+      ctx.save();
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 35;
+
+      const beamLen = iu.reach;
+      // Feixe massivo do peito
+      const uGrad = ctx.createLinearGradient(bx, by - iu.width, bx, by + iu.width);
+      uGrad.addColorStop(0, 'rgba(56, 189, 248, 0.2)');
+      uGrad.addColorStop(0.3, '#38bdf8');
+      uGrad.addColorStop(0.5, '#ffffff');
+      uGrad.addColorStop(0.7, '#38bdf8');
+      uGrad.addColorStop(1, 'rgba(56, 189, 248, 0.2)');
+
+      ctx.fillStyle = uGrad;
+      ctx.fillRect(this.facing === 1 ? bx : bx - beamLen, by - iu.width / 2, beamLen, iu.width);
+
+      // Flare no peito
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(bx, by, 22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 40. Homem-Aranha: Linha de Teia (Q)
+    if (this.spidermanWeb && this.spidermanWeb.active) {
+      const sw = this.spidermanWeb;
+      const sx = this.position.x + this.facing * 30;
+      const sy = this.position.y - 65;
+      ctx.save();
+      ctx.shadowColor = '#ffffff';
+      ctx.shadowBlur = 10;
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 2.5;
+
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(sw.x, sw.y);
+      ctx.stroke();
+
+      // Ponta de teia esférica
+      ctx.fillStyle = '#e2e8f0';
+      ctx.beginPath();
+      ctx.arc(sw.x, sw.y, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 41. Homem-Aranha: Casulo de Teia (Ultimate)
+    if (this.spidermanWebBarrage && this.spidermanWebBarrage.active) {
+      const wb = this.spidermanWebBarrage;
+      const target = wb.target;
+      if (target) {
+        ctx.save();
+        ctx.translate(target.position.x, target.position.y - 50);
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 16;
+
+        // Fios cruzados de teia envolvendo o oponente
+        ctx.strokeStyle = 'rgba(248, 250, 252, 0.9)';
+        ctx.lineWidth = 2.5;
+        for (let i = 0; i < 8; i++) {
+          const ang = (i * Math.PI) / 4;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(ang) * 35, Math.sin(ang) * 45);
+          ctx.lineTo(-Math.cos(ang) * 35, -Math.sin(ang) * 45);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
     }
   }
 

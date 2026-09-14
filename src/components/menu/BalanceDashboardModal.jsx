@@ -23,8 +23,8 @@ import { EXPEDITION_33_CHARACTERS } from '../../game/characters/expedition33Char
 import defaultOriginalResults from '../../game/simulationResults.json';
 import defaultExpeditionResults from '../../game/expeditionSimulationResults.json';
 
-export const BalanceDashboardModal = ({ isOpen, onClose, isExpedition: initialIsExpedition = false }) => {
-  const [isExpeditionMode, setIsExpeditionMode] = useState(initialIsExpedition);
+export const BalanceDashboardModal = ({ isOpen, onClose, isExpedition: initialIsExpedition = true }) => {
+  const [isExpeditionMode, setIsExpeditionMode] = useState(initialIsExpedition !== undefined ? initialIsExpedition : true);
   const [fightsPerMatch, setFightsPerMatch] = useState(100);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCharId, setSelectedCharId] = useState(null);
@@ -582,20 +582,20 @@ export const BalanceDashboardModal = ({ isOpen, onClose, isExpedition: initialIs
                 <div className="p-4 rounded-xl border border-rose-900/60 bg-rose-950/20 flex flex-col">
                   <div className="flex items-center gap-2 text-rose-400 font-bold text-sm mb-2">
                     <Flame size={16} />
-                    <span>Pontos de Atenção (Overpowered &gt; 80%)</span>
+                    <span>Pontos de Atenção (Dominantes &gt; 80%)</span>
                   </div>
                   <ul className="space-y-2 text-slate-300 flex-1">
                     <li className="p-2 rounded bg-slate-900/60 border border-slate-800">
-                      <strong className="text-white block">Jack Sparrow (~95.8% Win Rate):</strong>
-                      A esquiva de 3 a 5 golpes consecutivos anula a maioria dos especiais e socos sem gastar vida. Sugestão: Limitar para 1 esquiva ou chance percentual (ex: 35%).
+                      <strong className="text-white block">Lune (~95.2% Win Rate):</strong>
+                      Cura percentual no Q (Lune Heal) e orbes com controle de elementos desgastam o oponente em combates longos.
                     </li>
                     <li className="p-2 rounded bg-slate-900/60 border border-slate-800">
-                      <strong className="text-white block">Capitão América (~90.7% Win Rate):</strong>
-                      1050 HP com defesa 1.2 reduz o dano sofrido muito além dos lutadores base (1000 HP / def 1.0).
+                      <strong className="text-white block">Sciel (~86.1% Win Rate):</strong>
+                      Lâminas do Destino concedem acertos críticos garantidos (1.85x de dano) que liquidam barras de vida em 2 combos.
                     </li>
                     <li className="p-2 rounded bg-slate-900/60 border border-slate-800">
-                      <strong className="text-white block">Zorro (~87.1% Win Rate):</strong>
-                      Clash Counter anula o ataque adversário e ainda causa 85 de contra-dano imediato.
+                      <strong className="text-white block">Capitão América (~84.4% Win Rate):</strong>
+                      1050 HP com defesa 1.2 reduz o dano sofrido muito além dos 1000 HP / def 1.0 dos membros da expedição.
                     </li>
                   </ul>
                 </div>
@@ -608,16 +608,16 @@ export const BalanceDashboardModal = ({ isOpen, onClose, isExpedition: initialIs
                   </div>
                   <ul className="space-y-2 text-slate-300 flex-1">
                     <li className="p-2 rounded bg-slate-900/60 border border-slate-800">
-                      <strong className="text-white block">Personagens 1 a 20 (Base Belle Époque):</strong>
-                      Mantêm taxas entre 47% e 49.5%, provando excelente simetria de hitboxes e física neutra.
+                      <strong className="text-white block">Gustave (50.2% Win Rate):</strong>
+                      Padrão ouro do jogo! Velocidade 7.0, projétil veloz de pistola no Q e Super Leap com equilíbrio perfeito.
                     </li>
                     <li className="p-2 rounded bg-slate-900/60 border border-slate-800">
-                      <strong className="text-white block">Naruto Uzumaki (~54.2%):</strong>
-                      Velocidade 8.2 compensada por 980 HP e defesa 0.95.
+                      <strong className="text-white block">Renoir (53.7% Win Rate):</strong>
+                      Buraco negro exige pulo e recompensa quem sabe se posicionar, mantendo winrate estável.
                     </li>
                     <li className="p-2 rounded bg-slate-900/60 border border-slate-800">
-                      <strong className="text-white block">Gandalf (~55.1%):</strong>
-                      Projétil leve no chute K com startup moderado cria zoneamento balanceado.
+                      <strong className="text-white block">Maelle (48.1% Win Rate):</strong>
+                      Dash relâmpago veloz e Valsa das Lâminas de 6 golpes mantém duelos acrobáticos acirrados.
                     </li>
                   </ul>
                 </div>

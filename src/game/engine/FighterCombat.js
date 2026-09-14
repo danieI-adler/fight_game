@@ -22,7 +22,7 @@ export class FighterCombat {
         // Gera 8% de energia (o dobro do normal) para recompensar agressividade de curta distância.
         if (fighter.stateTime > 0.03 && fighter.stateTime < 0.12) {
           fighter.activeHitbox = fighter.createHitbox(15, 95, 55, 30);
-          fighter.activeHitbox.damage = 38;
+          fighter.activeHitbox.damage = 40;
           fighter.activeHitbox.knockback = 3; // Quase sem knockback, mantém o oponente perto para combear!
           fighter.activeHitbox.isHeavy = false;
           fighter.activeHitbox.hitstun = 0.28; // Vantagem massiva de quadros para conectar novos golpes
@@ -1424,6 +1424,58 @@ export class FighterCombat {
           fighter.isInvulnerable = true;
           fighter.velocity.x = 0;
           if (fighter.stateTime >= 1.35) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 26. SASUKE UCHIHA: KIRIN DOS CÉUS ---
+        if (fighter.superType === 'SASUKE_KIRIN') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.4) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 27. BOB ESPONJA: BOLHA GIGANTE & ESPÁTULA ---
+        if (fighter.superType === 'SPONGEBOB_BUBBLE_SPATULA') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.4) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 28. HOMEM DE FERRO: UNIBEAM DO REATOR ARC ---
+        if (fighter.superType === 'IRONMAN_UNIBEAM') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.35) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 29. HOMEM-ARANHA: CASULO DE TEIA & WEB BARRAGE ---
+        if (fighter.superType === 'SPIDERMAN_WEB_BARRAGE') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.45) {
             fighter.isInvulnerable = false;
             fighter.superPhase = null;
             fighter.superType = null;

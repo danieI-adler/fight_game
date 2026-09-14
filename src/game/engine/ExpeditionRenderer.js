@@ -836,6 +836,73 @@ export class ExpeditionRenderer {
       ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 1.5;
       ctx.stroke();
+    } else if (vis.weaponType === 'kusanagi_sword') {
+      // Espada Kusanagi de Sasuke com faíscas de Chidori
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(hx + 42 * f, hy - 14);
+      ctx.stroke();
+
+      // Bainha/cabo preto minimalista
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(hx - 8 * f, hy + 3);
+      ctx.lineTo(hx, hy);
+      ctx.stroke();
+
+      // Brilho elétrico
+      ctx.shadowColor = '#818cf8';
+      ctx.shadowBlur = 8;
+      ctx.strokeStyle = '#818cf8';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    } else if (vis.weaponType === 'golden_spatula') {
+      // Espátula Dourada do Bob Esponja
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(hx + 16 * f, hy - 10);
+      ctx.stroke();
+
+      // Palheta da espátula dourada
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(hx + 16 * f, hy - 16, 12 * f, 12);
+      ctx.strokeStyle = '#ca8a04';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(hx + 16 * f, hy - 16, 12 * f, 12);
+    } else if (vis.weaponType === 'repulsor_gauntlets') {
+      // Manoplas Repulsoras Stark do Homem de Ferro
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(hx - 4 * f, hy - 4, 10 * f, 8);
+      // Núcleo repulsor na palma
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(hx + 4 * f, hy, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(hx + 4 * f, hy, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    } else if (vis.weaponType === 'web_shooters') {
+      // Lançador de Teia no pulso do Homem-Aranha
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(hx - 3 * f, hy - 3, 8 * f, 6);
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.arc(hx + 2 * f, hy, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.arc(hx + 4 * f, hy, 1, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     ctx.restore();
@@ -982,6 +1049,91 @@ export class ExpeditionRenderer {
       ctx.font = 'bold 8px system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('A', hx + 2 * f, hy - 4);
+    } else if (vis.headgear === 'spiky_sasuke_hair' || vis.hairStyle === 'spiky_black') {
+      // Sasuke Uchiha: Cabelo preto espetado para trás e franjas laterais
+      ctx.fillStyle = '#1e1b4b';
+      for (let i = 0; i < 6; i++) {
+        const ang = -Math.PI * 0.9 + i * 0.35;
+        ctx.beginPath();
+        ctx.moveTo(hx + Math.cos(ang) * 9, hy + Math.sin(ang) * 9);
+        ctx.lineTo(hx + Math.cos(ang) * 20 - 4 * f, hy + Math.sin(ang) * 20 - 6);
+        ctx.lineTo(hx + Math.cos(ang + 0.25) * 10, hy + Math.sin(ang + 0.25) * 10);
+        ctx.fill();
+      }
+      // Franja lateral
+      ctx.beginPath();
+      ctx.moveTo(hx + 4 * f, hy - 6);
+      ctx.lineTo(hx + 8 * f, hy + 8);
+      ctx.lineTo(hx + 2 * f, hy);
+      ctx.fill();
+    } else if (vis.headgear === 'sponge_head') {
+      // Bob Esponja: Cabeça amarela quadrada com poros
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(hx - 10, hy - 12, 20, 20);
+      ctx.strokeStyle = '#ca8a04';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(hx - 10, hy - 12, 20, 20);
+      // Poros verdes/oliva
+      ctx.fillStyle = '#ca8a04';
+      ctx.beginPath();
+      ctx.arc(hx - 5, hy - 6, 1.8, 0, Math.PI * 2);
+      ctx.arc(hx + 4, hy - 8, 2.2, 0, Math.PI * 2);
+      ctx.arc(hx - 6, hy + 3, 2, 0, Math.PI * 2);
+      ctx.fill();
+      // Olhos grandes azuis esféricos
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(hx + 2 * f, hy - 3, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#0284c7';
+      ctx.beginPath();
+      ctx.arc(hx + 3.5 * f, hy - 3, 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (vis.headgear === 'iron_helmet') {
+      // Homem de Ferro: Capacete dourado e vermelho com fendas dos olhos reluzentes
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 4, 11, 11, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Placa frontal dourada
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.moveTo(hx - 5, hy - 10);
+      ctx.lineTo(hx + 8 * f, hy - 10);
+      ctx.lineTo(hx + 8 * f, hy + 3);
+      ctx.lineTo(hx - 3, hy + 6);
+      ctx.closePath();
+      ctx.fill();
+      // Visor ocular ciano reluzente
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(hx + 2 * f, hy - 3, 5 * f, 2);
+      ctx.shadowBlur = 0;
+    } else if (vis.headgear === 'spider_mask') {
+      // Homem-Aranha: Máscara vermelha com lentes angulares brancas e padrão de teia
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 4, 11, 11, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Linhas da teia na máscara
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(hx, hy - 14);
+      ctx.lineTo(hx, hy + 6);
+      ctx.moveTo(hx - 10, hy - 4);
+      ctx.lineTo(hx + 10, hy - 4);
+      ctx.stroke();
+      // Lente ocular branca com borda preta
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.ellipse(hx + 3 * f, hy - 3, 5, 3.5, 0.2 * f, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(hx + 3 * f, hy - 3, 3.8, 2.4, 0.2 * f, 0, Math.PI * 2);
+      ctx.fill();
     } else {
       // Cabelo clássico
       ctx.beginPath();
