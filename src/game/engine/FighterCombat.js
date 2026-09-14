@@ -1350,6 +1350,88 @@ export class FighterCombat {
           break;
         }
 
+        // --- 22. CAPITÃO NASCIMENTO: FACA NA CAVEIRA / INCURSÃO TÁTICA BOPE ---
+        if (fighter.superType === 'NASCIMENTO_FACA_NA_CAVEIRA') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.45) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 23. RAPUNZEL: CABELO DOURADO SOLAR / CONSTRIÇÃO & CURA ---
+        if (fighter.superType === 'RAPUNZEL_GOLDEN_HAIR_STORM') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.55) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 24. CAPITÃO AMÉRICA: VIBRANIUM SHIELD SLAM ("I Can Do This All Day") ---
+        if (fighter.superType === 'CAPTAIN_SHIELD_SLAM') {
+          fighter.isInvulnerable = true;
+          if (fighter.stateTime < 0.35) {
+            fighter.velocity.x = fighter.facing * (fighter.getEffectiveSpeed() * 2.8);
+            if (particles && Math.random() < 0.6) {
+              particles.emitDust(fighter.position.x, fighter.groundY, 4, '#3b82f6');
+            }
+          } else if (fighter.stateTime >= 0.35 && fighter.stateTime < 0.7) {
+            if (!fighter.captainShieldSlam?.hasHit) {
+              fighter.captainShieldSlam.hasHit = true;
+              fighter.velocity.x = 0;
+              sounds.playPunch(true);
+              sounds.playThunderSlam();
+              if (particles) {
+                const sx = fighter.position.x + fighter.facing * 45;
+                particles.emitShockwave(sx, fighter.groundY, 220, '#3b82f6');
+                particles.emitSparks(sx, fighter.position.y - 50, '#ef4444', 35, 12);
+                particles.emitFloatingText('I CAN DO THIS ALL DAY!', sx, fighter.position.y - 90, '#3b82f6', true);
+              }
+              const attackData = {
+                damage: 390,
+                knockback: 26,
+                knockdown: true,
+                isHeavy: true,
+                unblockable: true,
+                attackerPower: fighter.attackPower
+              };
+              if (fighter.opponent && !fighter.opponent.isDead) {
+                fighter.opponent.receiveHit(attackData, { x: fighter.position.x + fighter.facing * 45, y: fighter.position.y - 50 }, particles);
+              }
+            }
+          }
+
+          if (fighter.stateTime >= 1.25) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 25. NARUTO UZUMAKI: FUUTON RASEN SHURIKEN DOS CLONES ---
+        if (fighter.superType === 'NARUTO_RASEN_SHURIKEN') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.35) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
         // --- 7. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
         if (fighter.stateTime < 0.5) {
           fighter.velocity.x = 0;

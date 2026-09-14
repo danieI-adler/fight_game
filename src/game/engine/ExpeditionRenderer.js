@@ -747,6 +747,95 @@ export class ExpeditionRenderer {
       ctx.beginPath();
       ctx.arc(hx + 4 * f, hy, 5, 0, Math.PI);
       ctx.stroke();
+    } else if (vis.weaponType === 'tactical_rifle') {
+      // Fuzil FAL tático do Capitão Nascimento (BOPE)
+      ctx.strokeStyle = '#18181b';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(hx - 10 * f, hy + 4);
+      ctx.lineTo(hx + 28 * f, hy - 4);
+      ctx.stroke();
+      // Cano e mira
+      ctx.strokeStyle = '#27272a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(hx + 28 * f, hy - 4);
+      ctx.lineTo(hx + 38 * f, hy - 4);
+      ctx.stroke();
+      // Carregador curvado
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(hx + 10 * f, hy);
+      ctx.lineTo(hx + 8 * f, hy + 10);
+      ctx.stroke();
+    } else if (vis.weaponType === 'heavy_frying_pan') {
+      // Frigideira de Ferro fundido de Rapunzel
+      ctx.strokeStyle = '#27272a';
+      ctx.lineWidth = 3;
+      // Cabo
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(hx + 14 * f, hy - 8);
+      ctx.stroke();
+      // Corpo redondo da frigideira
+      ctx.fillStyle = '#18181b';
+      ctx.beginPath();
+      ctx.arc(hx + 24 * f, hy - 14, 11, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#52525b';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    } else if (vis.weaponType === 'vibranium_shield') {
+      // Escudo de Vibranium acoplado no antebraço do Capitão América
+      ctx.save();
+      ctx.translate(hx + 8 * f, hy);
+      // Vermelho externo
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.arc(0, 0, 18, 0, Math.PI * 2);
+      ctx.fill();
+      // Branco
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.arc(0, 0, 13.5, 0, Math.PI * 2);
+      ctx.fill();
+      // Vermelho
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.arc(0, 0, 9.5, 0, Math.PI * 2);
+      ctx.fill();
+      // Azul centro
+      ctx.fillStyle = '#1d4ed8';
+      ctx.beginPath();
+      ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+      // Estrela
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    } else if (vis.weaponType === 'kunai_chakra') {
+      // Kunai com chakra azul de Naruto
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(hx + 18 * f, hy - 8);
+      ctx.stroke();
+      // Lâmina afiada
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.moveTo(hx + 18 * f, hy - 8);
+      ctx.lineTo(hx + 28 * f, hy - 12);
+      ctx.lineTo(hx + 22 * f, hy - 4);
+      ctx.closePath();
+      ctx.fill();
+      // Brilho de chakra
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
     }
 
     ctx.restore();
@@ -834,12 +923,65 @@ export class ExpeditionRenderer {
       ctx.lineTo(hx + 5 * f, hy - 2);
       ctx.closePath();
       ctx.fill();
-    } else if (vis.hairStyle === 'white_fur_mane') {
-      // Monoco: Juba de pelos brancos
-      ctx.fillStyle = '#f1f5f9';
+    } else if (vis.hairStyle === 'golden_braid' || vis.headgear === 'golden_braid') {
+      // Rapunzel: Trança dourada mágica gigante descendo pelas costas
+      ctx.fillStyle = '#facc15';
       ctx.beginPath();
-      ctx.arc(hx, hy - 4, 15, 0, Math.PI * 2);
+      ctx.ellipse(hx, hy - 7, 12, 8, 0, 0, Math.PI * 2);
       ctx.fill();
+      // Trança longa esvoaçante
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(hx - 6 * f, hy - 2);
+      ctx.quadraticCurveTo(hx - 24 * f, hy + 20, hx - 16 * f, hy + 50);
+      ctx.quadraticCurveTo(hx - 8 * f, hy + 75, hx - 20 * f, hy + 95);
+      ctx.stroke();
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    } else if (vis.hairStyle === 'spiky_blonde' || vis.headgear === 'ninja_headband') {
+      // Naruto: Cabelo loiro espetado e bandana de Konoha
+      ctx.fillStyle = '#eab308';
+      for (let i = 0; i < 5; i++) {
+        const ang = -Math.PI * 0.8 + i * 0.4;
+        ctx.beginPath();
+        ctx.moveTo(hx + Math.cos(ang) * 9, hy + Math.sin(ang) * 9);
+        ctx.lineTo(hx + Math.cos(ang) * 18, hy + Math.sin(ang) * 18 - 4);
+        ctx.lineTo(hx + Math.cos(ang + 0.3) * 10, hy + Math.sin(ang + 0.3) * 10);
+        ctx.fill();
+      }
+      // Bandana azul de Konoha com placa de metal
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(hx - 9, hy - 8, 18, 5);
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillRect(hx - 5, hy - 8, 10, 4);
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(hx, hy - 6, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (vis.headgear === 'bope_beret') {
+      // Capitão Nascimento: Boina preta tática do BOPE
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 8, 13, 5, -0.2 * f, 0, Math.PI * 2);
+      ctx.fill();
+      // Brasão / Faca na Caveira no lado da boina
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.arc(hx + 5 * f, hy - 8, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (vis.headgear === 'avenger_helmet') {
+      // Capitão América: Capacete azul tático com 'A' branco
+      ctx.fillStyle = '#1d4ed8';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 4, 11.5, 11, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Letra 'A' branca na testa
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 8px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('A', hx + 2 * f, hy - 4);
     } else {
       // Cabelo clássico
       ctx.beginPath();

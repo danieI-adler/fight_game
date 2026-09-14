@@ -13,7 +13,8 @@ export const MainMenu = ({
   isExpedition,
   onToggleExpedition,
   isMuted,
-  onToggleMute
+  onToggleMute,
+  onOpenBalanceDashboard
 }) => {
   const handleSelect = (mode) => {
     sounds.playPunch(false);
@@ -239,6 +240,19 @@ export const MainMenu = ({
             <span>Modo Gráfico:</span>
             <span className="font-bold text-[11px] bg-slate-800 px-2 py-0.5 rounded text-white font-serif">
               {getGraphicsModeLabel()}
+            </span>
+          </button>
+
+          <button
+            onClick={onOpenBalanceDashboard}
+            className="w-full py-2.5 px-4 rounded-lg bg-gradient-to-r from-amber-600/30 via-orange-600/30 to-amber-600/30 hover:from-amber-600/40 hover:to-orange-600/40 border border-amber-500/50 text-amber-300 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-between shadow-lg mt-1"
+          >
+            <span className="flex items-center gap-2">
+              <span className="text-sm">📊</span>
+              <span>Dashboard de Balanceamento</span>
+            </span>
+            <span className="text-[10px] bg-amber-500 text-black px-1.5 py-0.5 rounded font-black">
+              100 Lutas / Par
             </span>
           </button>
         </div>

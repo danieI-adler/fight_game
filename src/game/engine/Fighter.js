@@ -93,6 +93,12 @@ export class Fighter {
     this.isWalterWhite = Boolean(cNameLower.includes('walter') || cNameLower.includes('heisenberg'));
     this.isMessi = Boolean(cNameLower.includes('messi'));
 
+    // Identificação do Lote 3 dos Novos Personagens (Capitão Nascimento, Rapunzel, Capitão América, Naruto)
+    this.isNascimento = Boolean(cNameLower.includes('nascimento') || cNameLower.includes('bope'));
+    this.isRapunzel = Boolean(cNameLower.includes('rapunzel') || charData.superType === 'RAPUNZEL_GOLDEN_HAIR_STORM');
+    this.isCaptainAmerica = Boolean(cNameLower.includes('amrica') || cNameLower.includes('america') || cNameLower.includes('capito amrica') || cNameLower.includes('capitao america'));
+    this.isNaruto = Boolean(cNameLower.includes('naruto') || charData.superType === 'NARUTO_RASEN_SHURIKEN');
+
     // Estado e Animação
     this.state = FIGHTER_STATE.IDLE;
     this.stateTime = 0;
@@ -181,6 +187,16 @@ export class Fighter {
     this.walterM60Turret = null; // { timer, x, y, shotsFired, maxShots, interval, bullets: [] }
     this.messiSoccerBall = null; // { x, y, vx, vy, curve, damage, active, hasHit }
     this.messiAnkaraRush = null; // { timer, startX, targetX, active, hasHit }
+
+    // Projéteis e Habilidades Especiais: Capitão Nascimento, Rapunzel, Capitão América e Naruto (Lote 3)
+    this.nascimentoSlap = null; // { timer, reach, damage, active, hasHit }
+    this.nascimentoIncursion = null; // { timer, x, y, shotsFired, maxShots, interval, bullets: [] }
+    this.rapunzelFryingPan = null; // { timer, reach, damage, active, hasHit }
+    this.rapunzelHairStorm = null; // { timer, duration, x, y, damage, active, healed }
+    this.captainShield = null; // { x, y, vx, returning, originX, damage, active, hasHit }
+    this.captainShieldSlam = null; // { timer, phase, active, hasHit }
+    this.narutoRasengan = null; // { timer, startX, targetX, active, hasHit }
+    this.narutoRasenShuriken = null; // { x, y, vx, vy, active, hasHit, timer, expanded }
 
     // Articulação Esquelética
     this.pose = {
@@ -967,6 +983,100 @@ export class Fighter {
         hasHit: false
       };
     }
+    // 21. Capitão Nascimento: Tapa na Cara Tático / Pede pra Sair (Q)
+    else if (this.isNascimento) {
+      this.extraType = 'NASCIMENTO_SLAP';
+      sounds.playPunch(true);
+      sounds.playWhoosh();
+      const reach = level === 2 ? 120 : 95;
+      const dmg = level === 2 ? 190 : 130;
+      this.nascimentoSlap = {
+        timer: 0.28,
+        reach: reach,
+        damage: dmg,
+        active: true,
+        hasHit: false
+      };
+      if (this.opponent && !this.opponent.isDead) {
+        const dist = Math.abs(this.opponent.position.x - this.position.x);
+        const facingOpp = (this.opponent.position.x - this.position.x) * this.facing > 0;
+        if (facingOpp && dist < reach) {
+          const attackData = {
+            damage: dmg,
+            knockback: 18,
+            knockdown: false,
+            hitstun: 0.42,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 85 }, null);
+        }
+      }
+    }
+    // 22. Rapunzel: Pancada de Frigideira de Ferro Pesada (Q)
+    else if (this.isRapunzel) {
+      this.extraType = 'RAPUNZEL_FRYING_PAN';
+      sounds.playThunderSlam();
+      sounds.playParryReflect();
+      const reach = level === 2 ? 115 : 90;
+      const dmg = level === 2 ? 185 : 125;
+      this.rapunzelFryingPan = {
+        timer: 0.32,
+        reach: reach,
+        damage: dmg,
+        active: true,
+        hasHit: false
+      };
+      if (this.opponent && !this.opponent.isDead) {
+        const dist = Math.abs(this.opponent.position.x - this.position.x);
+        const facingOpp = (this.opponent.position.x - this.position.x) * this.facing > 0;
+        if (facingOpp && dist < reach) {
+          const attackData = {
+            damage: dmg,
+            knockback: 16,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 70 }, null);
+        }
+      }
+    }
+    // 23. Capitão América: Arremesso de Escudo de Vibranium com Ricochete (Q)
+    else if (this.isCaptainAmerica) {
+      this.extraType = 'CAPTAIN_SHIELD_THROW';
+      sounds.playWhoosh();
+      sounds.playParryReflect();
+      const sx = this.position.x + this.facing * 35;
+      const sy = this.position.y - 65;
+      this.captainShield = {
+        x: sx,
+        y: sy,
+        vx: this.facing * (level === 2 ? 1150 : 950),
+        returning: false,
+        originX: this.position.x,
+        damage: level === 2 ? 175 : 120,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 24. Naruto Uzumaki: Rasengan em Avanço Veloz com Clone (Q)
+    else if (this.isNaruto) {
+      this.extraType = 'NARUTO_RASENGAN_RUSH';
+      sounds.playSuperCharge();
+      sounds.playWindTornado();
+      sounds.playDash();
+      const target = this.opponent;
+      const targetX = target ? target.position.x : this.position.x + this.facing * 240;
+      this.narutoRasengan = {
+        timer: 0,
+        startX: this.position.x,
+        targetX: targetX,
+        damage: level === 2 ? 210 : 145,
+        active: true,
+        hasHit: false
+      };
+    }
     // Personagens genéricos: golpe padrão fortificado
     else {
       this.extraType = 'GENERIC_EXTRA';
@@ -1232,6 +1342,60 @@ export class Fighter {
         active: true,
         hasHit: false
       };
+    } else if (this.superType === 'NASCIMENTO_FACA_NA_CAVEIRA') {
+      this.superPhase = 'INCURSION_TACTICAL';
+      sounds.playSuperCharge();
+      sounds.playGunshot();
+      this.nascimentoIncursion = {
+        timer: 0,
+        x: this.position.x,
+        y: this.position.y - 75,
+        shotsFired: 0,
+        maxShots: 12,
+        interval: 0.08,
+        bullets: []
+      };
+    } else if (this.superType === 'RAPUNZEL_GOLDEN_HAIR_STORM') {
+      this.superPhase = 'HAIR_SWIRL';
+      sounds.playSuperCharge();
+      sounds.playWindTornado();
+      this.rapunzelHairStorm = {
+        timer: 0,
+        duration: 1.5,
+        x: this.position.x,
+        y: this.position.y - 65,
+        damage: 360,
+        active: true,
+        healed: false
+      };
+      // Cura 10% da vida máxima de Rapunzel
+      this.health = Math.min(this.maxHealth, this.health + Math.round(this.maxHealth * 0.1));
+    } else if (this.superType === 'CAPTAIN_SHIELD_SLAM') {
+      this.superPhase = 'SHIELD_CHARGE';
+      sounds.playSuperCharge();
+      sounds.playSuper();
+      this.captainShieldSlam = {
+        timer: 0,
+        phase: 'CHARGE',
+        active: true,
+        hasHit: false
+      };
+    } else if (this.superType === 'NARUTO_RASEN_SHURIKEN') {
+      this.superPhase = 'SHURIKEN_EXPANSION';
+      sounds.playSuperCharge();
+      sounds.playWindTornado();
+      const sx = this.position.x + this.facing * 50;
+      const sy = this.position.y - 75;
+      this.narutoRasenShuriken = {
+        x: sx,
+        y: sy,
+        vx: this.facing * 750,
+        vy: 0,
+        active: true,
+        hasHit: false,
+        timer: 0,
+        expanded: false
+      };
     } else {
       this.superType = 'GUSTAVE_SMASH';
       this.superPhase = 'CHARGE'; // 'CHARGE' (0-0.5s), 'LEAP' (0.5-0.85s), 'SLAM' (0.85-1.45s)
@@ -1355,7 +1519,9 @@ export class Fighter {
     const isGuarding = this.isBlocking || (this.state === FIGHTER_STATE.WALK_BACK && this.isGrounded);
 
     if (isGuarding && !attackData.unblockable) {
-      const chipDamage = Math.max(1, Math.round(attackData.damage * 0.15 / this.defense));
+      // Capitão América: Passiva Defesa Impenetrável reduz o dano de bloqueio pela metade (50% menos chip damage)
+      const chipFactor = this.isCaptainAmerica ? 0.075 : 0.15;
+      const chipDamage = Math.max(1, Math.round(attackData.damage * chipFactor / this.defense));
       this.health = Math.max(0, this.health - chipDamage);
 
       // Guard cancel / recuperação acelerada se o lutador for IA Crazy ou Boss
@@ -2932,6 +3098,234 @@ export class Fighter {
       }
     }
 
+    // 5.33 Capitão Nascimento: Incursão Tática BOPE / Faca na Caveira (Rajada tática de Fuzil)
+    if (this.nascimentoIncursion && this.superPhase === 'INCURSION_TACTICAL') {
+      const inc = this.nascimentoIncursion;
+      inc.timer += dt;
+      if (inc.shotsFired < inc.maxShots && inc.timer >= inc.shotsFired * inc.interval) {
+        inc.shotsFired++;
+        sounds.playGunshot();
+        if (particles) {
+          const mx = this.position.x + this.facing * 45;
+          const my = this.position.y - 70;
+          particles.emitSparks(mx, my, '#ef4444', 6, 4);
+          particles.emitDust(mx, my, 4, '#fbbf24');
+        }
+        inc.bullets.push({
+          x: this.position.x + this.facing * 45,
+          y: this.position.y - 70 + (Math.random() - 0.5) * 10,
+          vx: this.facing * 1900,
+          damage: 26,
+          active: true,
+          hasHit: false
+        });
+      }
+
+      for (const bullet of inc.bullets) {
+        if (!bullet.active) continue;
+        bullet.x += bullet.vx * dt;
+        if (this.opponent && !this.opponent.isDead && !bullet.hasHit) {
+          const dist = Math.abs(bullet.x - this.opponent.position.x);
+          const hDiff = Math.abs(bullet.y - (this.opponent.position.y - 50));
+          if (dist < 45 && hDiff < 65) {
+            bullet.hasHit = true;
+            bullet.active = false;
+            sounds.playPunch(true);
+            if (particles) {
+              particles.emitSparks(bullet.x, bullet.y, '#ef4444', 12, 6);
+            }
+            const attackData = {
+              damage: bullet.damage,
+              knockback: 6,
+              knockdown: false,
+              isHeavy: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: bullet.x, y: bullet.y }, particles);
+          }
+        }
+        if (bullet.x < -100 || bullet.x > stageWidth + 100) bullet.active = false;
+      }
+      inc.bullets = inc.bullets.filter(b => b.active);
+      if (inc.shotsFired >= inc.maxShots && inc.bullets.length === 0 && inc.timer > 1.4) {
+        this.nascimentoIncursion = null;
+      }
+    }
+
+    // 5.34 Rapunzel: Cabelo Dourado Solar / Turbilhão (Ultimate)
+    if (this.rapunzelHairStorm && this.rapunzelHairStorm.active) {
+      const storm = this.rapunzelHairStorm;
+      storm.timer += dt;
+      storm.x = this.position.x;
+      storm.y = this.position.y - 60;
+
+      if (particles && Math.random() < 0.8) {
+        particles.emitSparks(storm.x + (Math.random() - 0.5) * 80, storm.y + (Math.random() - 0.5) * 60, '#facc15', 8, 6);
+        particles.emitShockwave(storm.x, storm.y, 110, '#fef08a');
+      }
+
+      if (this.opponent && !this.opponent.isDead && !storm.hasHit && storm.timer > 0.4) {
+        const dist = Math.hypot(storm.x - this.opponent.position.x, storm.y - (this.opponent.position.y - 50));
+        if (dist < 140) {
+          storm.hasHit = true;
+          sounds.playThunderSlam();
+          if (particles) {
+            particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 50, 220, '#facc15');
+            particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 50, '#fef08a', 40, 14);
+            particles.emitFloatingText('CABELOS DOURADOS!', this.opponent.position.x, this.opponent.position.y - 90, '#facc15', true);
+          }
+          const attackData = {
+            damage: storm.damage,
+            knockback: 28,
+            knockdown: true,
+            isHeavy: true,
+            unblockable: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 50 }, particles);
+        }
+      }
+
+      if (storm.timer >= storm.duration) {
+        storm.active = false;
+        this.rapunzelHairStorm = null;
+      }
+    }
+
+    // 5.35 Capitão América: Arremesso de Escudo de Vibranium (Q - vai e volta)
+    if (this.captainShield && this.captainShield.active) {
+      const cs = this.captainShield;
+      cs.x += cs.vx * dt;
+
+      if (particles && Math.random() < 0.6) {
+        particles.emitSparks(cs.x, cs.y, '#3b82f6', 4, 3);
+      }
+
+      if (!cs.returning) {
+        if (this.opponent && !this.opponent.isDead && !cs.hasHit) {
+          const dist = Math.abs(cs.x - this.opponent.position.x);
+          const hDiff = Math.abs(cs.y - (this.opponent.position.y - 50));
+          if (dist < 45 && hDiff < 60) {
+            cs.hasHit = true;
+            cs.returning = true;
+            cs.vx = -cs.vx * 1.1; // Inverte direção para retornar
+            sounds.playPunch(true);
+            sounds.playParryReflect();
+            if (particles) {
+              particles.emitShockwave(cs.x, cs.y, 95, '#3b82f6');
+              particles.emitSparks(cs.x, cs.y, '#ef4444', 16, 8);
+            }
+            const attackData = {
+              damage: cs.damage,
+              knockback: 12,
+              knockdown: false,
+              isHeavy: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: cs.x, y: cs.y }, particles);
+          }
+        }
+        // Se voar longe sem atingir, inverte e retorna
+        if (Math.abs(cs.x - cs.originX) > 650) {
+          cs.returning = true;
+          cs.vx = -cs.vx;
+        }
+      } else {
+        // Retornando para as mãos do Capitão
+        const dirToCap = Math.sign(this.position.x - cs.x);
+        cs.vx = dirToCap * 1200;
+        if (Math.abs(cs.x - this.position.x) < 50) {
+          cs.active = false;
+          this.captainShield = null;
+          sounds.playParryReflect();
+        }
+      }
+    }
+
+    // 5.36 Naruto Uzumaki: Rasengan em Avanço (Q)
+    if (this.narutoRasengan && this.narutoRasengan.active) {
+      const nr = this.narutoRasengan;
+      nr.timer += dt;
+      const progress = Math.min(1, nr.timer / 0.26);
+      this.position.x = nr.startX + (nr.targetX - nr.startX) * progress;
+
+      if (particles && Math.random() < 0.75) {
+        particles.emitElectricArc(this.position.x - 20, this.position.y - 60, this.position.x + 20, this.position.y - 60, '#38bdf8');
+        particles.emitSparks(this.position.x + this.facing * 35, this.position.y - 65, '#0ea5e9', 6, 5);
+      }
+
+      if (this.opponent && !this.opponent.isDead && !nr.hasHit && progress > 0.3) {
+        const dist = Math.abs(this.position.x - this.opponent.position.x);
+        if (dist < 75) {
+          nr.hasHit = true;
+          sounds.playThunderSlam();
+          sounds.playPunch(true);
+          if (particles) {
+            particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 150, '#0ea5e9');
+            particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 60, '#38bdf8', 35, 12);
+            particles.emitFloatingText('RASENGAN!', this.opponent.position.x, this.opponent.position.y - 85, '#0ea5e9', true);
+          }
+          const attackData = {
+            damage: nr.damage,
+            knockback: 22,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
+        }
+      }
+
+      if (progress >= 1) {
+        nr.active = false;
+        this.narutoRasengan = null;
+      }
+    }
+
+    // 5.37 Naruto Uzumaki: Fuuton Rasen Shuriken (Ultimate)
+    if (this.narutoRasenShuriken && this.narutoRasenShuriken.active) {
+      const rs = this.narutoRasenShuriken;
+      rs.timer += dt;
+      rs.x += rs.vx * dt;
+
+      if (particles && Math.random() < 0.8) {
+        particles.emitElectricArc(rs.x - 25, rs.y - 25, rs.x + 25, rs.y + 25, '#38bdf8');
+        particles.emitSparks(rs.x, rs.y, '#f8fafc', 8, 6);
+        particles.emitShockwave(rs.x, rs.y, 65, '#0284c7');
+      }
+
+      if (this.opponent && !this.opponent.isDead && !rs.hasHit) {
+        const dist = Math.hypot(rs.x - this.opponent.position.x, rs.y - (this.opponent.position.y - 50));
+        if (dist < 80) {
+          rs.hasHit = true;
+          rs.active = false;
+          sounds.playThunderSlam();
+          sounds.playKO();
+          if (particles) {
+            particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 260, '#0284c7');
+            particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 160, '#38bdf8');
+            particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 60, '#ffffff', 55, 18);
+            particles.emitFloatingText('FUUTON: RASEN SHURIKEN!', this.opponent.position.x, this.opponent.position.y - 95, '#0284c7', true);
+          }
+          const attackData = {
+            damage: 410,
+            knockback: 35,
+            knockdown: true,
+            isHeavy: true,
+            unblockable: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
+          this.narutoRasenShuriken = null;
+        }
+      }
+
+      if (rs.x < -150 || rs.x > stageWidth + 150) {
+        rs.active = false;
+        this.narutoRasenShuriken = null;
+      }
+    }
+
     // 6. Watchdog de Segurança Anti-Travamento (Golpes comuns 0.8s, Super Move 1.6s)
     const attackStates = [
       FIGHTER_STATE.LIGHT_PUNCH,
@@ -4114,6 +4508,137 @@ export class Fighter {
       ctx.beginPath();
       ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
+    }
+
+    // 30. Capitão Nascimento: Rajada de Balas de Fuzil FAL (Incursão Tática)
+    if (this.nascimentoIncursion && this.nascimentoIncursion.bullets) {
+      for (const bullet of this.nascimentoIncursion.bullets) {
+        if (!bullet.active) continue;
+        ctx.save();
+        ctx.shadowColor = '#ef4444';
+        ctx.shadowBlur = 14;
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.ellipse(bullet.x, bullet.y, 10, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(bullet.x, bullet.y);
+        ctx.lineTo(bullet.x - this.facing * 32, bullet.y);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // 31. Capitão América: Escudo de Vibranium em Voo / Ricochete
+    if (this.captainShield && this.captainShield.active) {
+      const cs = this.captainShield;
+      ctx.save();
+      ctx.translate(cs.x, cs.y);
+      ctx.rotate(Date.now() * 0.03 * (cs.vx > 0 ? 1 : -1));
+      ctx.shadowColor = '#3b82f6';
+      ctx.shadowBlur = 20;
+
+      // Anéis concêntricos do escudo: Vermelho, Branco, Vermelho, Centro Azul com Estrela
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.arc(0, 0, 22, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.arc(0, 0, 17, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.arc(0, 0, 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#1d4ed8';
+      ctx.beginPath();
+      ctx.arc(0, 0, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Estrela central branca
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // 32. Naruto Uzumaki: Esfera Rasengan de Chakra (Q)
+    if (this.narutoRasengan && this.narutoRasengan.active) {
+      const rx = this.position.x + this.facing * 42;
+      const ry = this.position.y - 60;
+      ctx.save();
+      ctx.translate(rx, ry);
+      ctx.shadowColor = '#0ea5e9';
+      ctx.shadowBlur = 22;
+
+      // Esfera de vórtice azul vibrante
+      const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, 18);
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(0.4, '#38bdf8');
+      grad.addColorStop(1, '#0284c7');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 18, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Espirais rotativas de vento dentro do Rasengan
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.lineWidth = 1.8;
+      const now = Date.now() * 0.02;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.arc(0, 0, 12, now + i * 2, now + i * 2 + 1.6);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 33. Naruto Uzumaki: Fuuton Rasen Shuriken com 4 Lâminas de Vento (Ultimate)
+    if (this.narutoRasenShuriken && this.narutoRasenShuriken.active) {
+      const rs = this.narutoRasenShuriken;
+      ctx.save();
+      ctx.translate(rs.x, rs.y);
+      const spin = Date.now() * 0.035;
+      ctx.rotate(spin);
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 28;
+
+      // 4 Lâminas afiadas de vento
+      ctx.fillStyle = 'rgba(240, 249, 255, 0.85)';
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 2.5;
+
+      for (let b = 0; b < 4; b++) {
+        ctx.save();
+        ctx.rotate((b * Math.PI) / 2);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(18, -25, 45, 0);
+        ctx.quadraticCurveTo(18, 25, 0, 0);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Núcleo esférico do Rasengan
+      const coreGrad = ctx.createRadialGradient(0, 0, 3, 0, 0, 16);
+      coreGrad.addColorStop(0, '#ffffff');
+      coreGrad.addColorStop(0.6, '#38bdf8');
+      coreGrad.addColorStop(1, '#0369a1');
+      ctx.fillStyle = coreGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 16, 0, Math.PI * 2);
+      ctx.fill();
+
       ctx.restore();
     }
   }

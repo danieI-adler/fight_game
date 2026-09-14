@@ -1,0 +1,7524 @@
+{
+  "totalCharacters": 26,
+  "fightsPerPair": 100,
+  "totalFights": 32500,
+  "durationMs": 200,
+  "leaderboard": [
+    {
+      "id": 103,
+      "name": "Lune",
+      "title": "",
+      "themeColor": "#a855f7",
+      "wins": 2369,
+      "losses": 131,
+      "totalFights": 2500,
+      "winRate": 94.8,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 56,
+          "losses": 44,
+          "winRate": 56
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 87,
+          "losses": 13,
+          "winRate": 87
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 98,
+          "losses": 2,
+          "winRate": 98
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 37,
+          "losses": 63,
+          "winRate": 37
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 99,
+          "losses": 1,
+          "winRate": 99
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 98,
+          "losses": 2,
+          "winRate": 98
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 94,
+          "losses": 6,
+          "winRate": 94
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        }
+      }
+    },
+    {
+      "id": 114,
+      "name": "Jack Sparrow",
+      "title": "",
+      "themeColor": "#f59e0b",
+      "wins": 2249,
+      "losses": 251,
+      "totalFights": 2500,
+      "winRate": 90,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 99,
+          "losses": 1,
+          "winRate": 99
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 13,
+          "losses": 87,
+          "winRate": 13
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 68,
+          "losses": 32,
+          "winRate": 68
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 99,
+          "losses": 1,
+          "winRate": 99
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 99,
+          "losses": 1,
+          "winRate": 99
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 98,
+          "losses": 2,
+          "winRate": 98
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 99,
+          "losses": 1,
+          "winRate": 99
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 98,
+          "losses": 2,
+          "winRate": 98
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 99,
+          "losses": 1,
+          "winRate": 99
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 99,
+          "losses": 1,
+          "winRate": 99
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 96,
+          "losses": 4,
+          "winRate": 96
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 99,
+          "losses": 1,
+          "winRate": 99
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 25,
+          "losses": 75,
+          "winRate": 25
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 99,
+          "losses": 1,
+          "winRate": 99
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 99,
+          "losses": 1,
+          "winRate": 99
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 96,
+          "losses": 4,
+          "winRate": 96
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 89,
+          "losses": 11,
+          "winRate": 89
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 77,
+          "losses": 23,
+          "winRate": 77
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 98,
+          "losses": 2,
+          "winRate": 98
+        }
+      }
+    },
+    {
+      "id": 104,
+      "name": "Sciel",
+      "title": "",
+      "themeColor": "#f59e0b",
+      "wins": 2159,
+      "losses": 341,
+      "totalFights": 2500,
+      "winRate": 86.4,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 96,
+          "losses": 4,
+          "winRate": 96
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 94,
+          "losses": 6,
+          "winRate": 94
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 44,
+          "losses": 56,
+          "winRate": 44
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 92,
+          "losses": 8,
+          "winRate": 92
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 95,
+          "losses": 5,
+          "winRate": 95
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 93,
+          "losses": 7,
+          "winRate": 93
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 96,
+          "losses": 4,
+          "winRate": 96
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 94,
+          "losses": 6,
+          "winRate": 94
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 95,
+          "losses": 5,
+          "winRate": 95
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 94,
+          "losses": 6,
+          "winRate": 94
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 93,
+          "losses": 7,
+          "winRate": 93
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 32,
+          "losses": 68,
+          "winRate": 32
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 95,
+          "losses": 5,
+          "winRate": 95
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 91,
+          "losses": 9,
+          "winRate": 91
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 97,
+          "losses": 3,
+          "winRate": 97
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 95,
+          "losses": 5,
+          "winRate": 95
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 94,
+          "losses": 6,
+          "winRate": 94
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 96,
+          "losses": 4,
+          "winRate": 96
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 93,
+          "losses": 7,
+          "winRate": 93
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 78,
+          "losses": 22,
+          "winRate": 78
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 96,
+          "losses": 4,
+          "winRate": 96
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 65,
+          "losses": 35,
+          "winRate": 65
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 92,
+          "losses": 8,
+          "winRate": 92
+        }
+      }
+    },
+    {
+      "id": 119,
+      "name": "Zorro",
+      "title": "A Raposa da Califórnia",
+      "themeColor": "#f59e0b",
+      "wins": 2089,
+      "losses": 411,
+      "totalFights": 2500,
+      "winRate": 83.6,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 89,
+          "losses": 11,
+          "winRate": 89
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 93,
+          "losses": 7,
+          "winRate": 93
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 63,
+          "losses": 37,
+          "winRate": 63
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 91,
+          "losses": 9,
+          "winRate": 91
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 89,
+          "losses": 11,
+          "winRate": 89
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 88,
+          "losses": 12,
+          "winRate": 88
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 91,
+          "losses": 9,
+          "winRate": 91
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 85,
+          "losses": 15,
+          "winRate": 85
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 80,
+          "losses": 20,
+          "winRate": 80
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 92,
+          "losses": 8,
+          "winRate": 92
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 92,
+          "losses": 8,
+          "winRate": 92
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 75,
+          "losses": 25,
+          "winRate": 75
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 83,
+          "losses": 17,
+          "winRate": 83
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 88,
+          "losses": 12,
+          "winRate": 88
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 92,
+          "losses": 8,
+          "winRate": 92
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 88,
+          "losses": 12,
+          "winRate": 88
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 89,
+          "losses": 11,
+          "winRate": 89
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 76,
+          "losses": 24,
+          "winRate": 76
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 89,
+          "losses": 11,
+          "winRate": 89
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 72,
+          "losses": 28,
+          "winRate": 72
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 87,
+          "losses": 13,
+          "winRate": 87
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 59,
+          "losses": 41,
+          "winRate": 59
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 87,
+          "losses": 13,
+          "winRate": 87
+        }
+      }
+    },
+    {
+      "id": 126,
+      "name": "Capitão América",
+      "title": "O Primeiro Vingador",
+      "themeColor": "#2563eb",
+      "wins": 2066,
+      "losses": 434,
+      "totalFights": 2500,
+      "winRate": 82.6,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 96,
+          "losses": 4,
+          "winRate": 96
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 96,
+          "losses": 4,
+          "winRate": 96
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 6,
+          "losses": 94,
+          "winRate": 6
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 35,
+          "losses": 65,
+          "winRate": 35
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 94,
+          "losses": 6,
+          "winRate": 94
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 91,
+          "losses": 9,
+          "winRate": 91
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 90,
+          "losses": 10,
+          "winRate": 90
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 94,
+          "losses": 6,
+          "winRate": 94
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 93,
+          "losses": 7,
+          "winRate": 93
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 96,
+          "losses": 4,
+          "winRate": 96
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 90,
+          "losses": 10,
+          "winRate": 90
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 96,
+          "losses": 4,
+          "winRate": 96
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 23,
+          "losses": 77,
+          "winRate": 23
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 96,
+          "losses": 4,
+          "winRate": 96
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 93,
+          "losses": 7,
+          "winRate": 93
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 96,
+          "losses": 4,
+          "winRate": 96
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 41,
+          "losses": 59,
+          "winRate": 41
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 97,
+          "losses": 3,
+          "winRate": 97
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 88,
+          "losses": 12,
+          "winRate": 88
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 98,
+          "losses": 2,
+          "winRate": 98
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 98,
+          "losses": 2,
+          "winRate": 98
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 64,
+          "losses": 36,
+          "winRate": 64
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 99,
+          "losses": 1,
+          "winRate": 99
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 96,
+          "losses": 4,
+          "winRate": 96
+        }
+      }
+    },
+    {
+      "id": 124,
+      "name": "Capitão Nascimento",
+      "title": "Comandante do BOPE",
+      "themeColor": "#09090b",
+      "wins": 1769,
+      "losses": 731,
+      "totalFights": 2500,
+      "winRate": 70.8,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 80,
+          "losses": 20,
+          "winRate": 80
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 87,
+          "losses": 13,
+          "winRate": 87
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 2,
+          "losses": 98,
+          "winRate": 2
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 22,
+          "losses": 78,
+          "winRate": 22
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 84,
+          "losses": 16,
+          "winRate": 84
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 90,
+          "losses": 10,
+          "winRate": 90
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 84,
+          "losses": 16,
+          "winRate": 84
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 80,
+          "losses": 20,
+          "winRate": 80
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 75,
+          "losses": 25,
+          "winRate": 75
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 86,
+          "losses": 14,
+          "winRate": 86
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 84,
+          "losses": 16,
+          "winRate": 84
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 80,
+          "losses": 20,
+          "winRate": 80
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 11,
+          "losses": 89,
+          "winRate": 11
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 81,
+          "losses": 19,
+          "winRate": 81
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 77,
+          "losses": 23,
+          "winRate": 77
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 83,
+          "losses": 17,
+          "winRate": 83
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 28,
+          "losses": 72,
+          "winRate": 28
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 87,
+          "losses": 13,
+          "winRate": 87
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 74,
+          "losses": 26,
+          "winRate": 74
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 86,
+          "losses": 14,
+          "winRate": 86
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 83,
+          "losses": 17,
+          "winRate": 83
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 91,
+          "losses": 9,
+          "winRate": 91
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 36,
+          "losses": 64,
+          "winRate": 36
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 78,
+          "losses": 22,
+          "winRate": 78
+        }
+      }
+    },
+    {
+      "id": 116,
+      "name": "Gandalf",
+      "title": "O Mago Branco",
+      "themeColor": "#f8fafc",
+      "wins": 1277,
+      "losses": 1223,
+      "totalFights": 2500,
+      "winRate": 51.1,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 68,
+          "losses": 32,
+          "winRate": 68
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 60,
+          "losses": 40,
+          "winRate": 60
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 2,
+          "losses": 98,
+          "winRate": 2
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 9,
+          "losses": 91,
+          "winRate": 9
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 63,
+          "losses": 37,
+          "winRate": 63
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 63,
+          "losses": 37,
+          "winRate": 63
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 60,
+          "losses": 40,
+          "winRate": 60
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 55,
+          "losses": 45,
+          "winRate": 55
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 67,
+          "losses": 33,
+          "winRate": 67
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 52,
+          "losses": 48,
+          "winRate": 52
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 55,
+          "losses": 45,
+          "winRate": 55
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 57,
+          "losses": 43,
+          "winRate": 57
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 4,
+          "losses": 96,
+          "winRate": 4
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 55,
+          "losses": 45,
+          "winRate": 55
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 73,
+          "losses": 27,
+          "winRate": 73
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 12,
+          "losses": 88,
+          "winRate": 12
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 76,
+          "losses": 24,
+          "winRate": 76
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 57,
+          "losses": 43,
+          "winRate": 57
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 67,
+          "losses": 33,
+          "winRate": 67
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 71,
+          "losses": 29,
+          "winRate": 71
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 23,
+          "losses": 77,
+          "winRate": 23
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 72,
+          "losses": 28,
+          "winRate": 72
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 7,
+          "losses": 93,
+          "winRate": 7
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        }
+      }
+    },
+    {
+      "id": 121,
+      "name": "Doutor Estranho",
+      "title": "O Mago Supremo",
+      "themeColor": "#f59e0b",
+      "wins": 1247,
+      "losses": 1253,
+      "totalFights": 2500,
+      "winRate": 49.9,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 62,
+          "losses": 38,
+          "winRate": 62
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 56,
+          "losses": 44,
+          "winRate": 56
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 6,
+          "losses": 94,
+          "winRate": 6
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 62,
+          "losses": 38,
+          "winRate": 62
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 68,
+          "losses": 32,
+          "winRate": 68
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 66,
+          "losses": 34,
+          "winRate": 66
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 62,
+          "losses": 38,
+          "winRate": 62
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 59,
+          "losses": 41,
+          "winRate": 59
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 63,
+          "losses": 37,
+          "winRate": 63
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 1,
+          "losses": 99,
+          "winRate": 1
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 59,
+          "losses": 41,
+          "winRate": 59
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 43,
+          "losses": 57,
+          "winRate": 43
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 65,
+          "losses": 35,
+          "winRate": 65
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 11,
+          "losses": 89,
+          "winRate": 11
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 69,
+          "losses": 31,
+          "winRate": 69
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 75,
+          "losses": 25,
+          "winRate": 75
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 61,
+          "losses": 39,
+          "winRate": 61
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 26,
+          "losses": 74,
+          "winRate": 26
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 64,
+          "losses": 36,
+          "winRate": 64
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 12,
+          "losses": 88,
+          "winRate": 12
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        }
+      }
+    },
+    {
+      "id": 127,
+      "name": "Naruto Uzumaki",
+      "title": "O Sétimo Hokage",
+      "themeColor": "#f97316",
+      "wins": 1237,
+      "losses": 1263,
+      "totalFights": 2500,
+      "winRate": 49.5,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 63,
+          "losses": 37,
+          "winRate": 63
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 64,
+          "losses": 36,
+          "winRate": 64
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 8,
+          "losses": 92,
+          "winRate": 8
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 64,
+          "losses": 36,
+          "winRate": 64
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 62,
+          "losses": 38,
+          "winRate": 62
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 67,
+          "losses": 33,
+          "winRate": 67
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 57,
+          "losses": 43,
+          "winRate": 57
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 56,
+          "losses": 44,
+          "winRate": 56
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 55,
+          "losses": 45,
+          "winRate": 55
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 59,
+          "losses": 41,
+          "winRate": 59
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 2,
+          "losses": 98,
+          "winRate": 2
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 66,
+          "losses": 34,
+          "winRate": 66
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 63,
+          "losses": 37,
+          "winRate": 63
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 13,
+          "losses": 87,
+          "winRate": 13
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 77,
+          "losses": 23,
+          "winRate": 77
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 64,
+          "losses": 36,
+          "winRate": 64
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 61,
+          "losses": 39,
+          "winRate": 61
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 22,
+          "losses": 78,
+          "winRate": 22
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 62,
+          "losses": 38,
+          "winRate": 62
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 4,
+          "losses": 96,
+          "winRate": 4
+        }
+      }
+    },
+    {
+      "id": 111,
+      "name": "Darth Vader",
+      "title": "",
+      "themeColor": "#ef4444",
+      "wins": 1101,
+      "losses": 1399,
+      "totalFights": 2500,
+      "winRate": 44,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 43,
+          "losses": 57,
+          "winRate": 43
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 5,
+          "losses": 95,
+          "winRate": 5
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 56,
+          "losses": 44,
+          "winRate": 56
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 48,
+          "losses": 52,
+          "winRate": 48
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 55,
+          "losses": 45,
+          "winRate": 55
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 54,
+          "losses": 46,
+          "winRate": 54
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 2,
+          "losses": 98,
+          "winRate": 2
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 52,
+          "losses": 48,
+          "winRate": 52
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 48,
+          "losses": 52,
+          "winRate": 48
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 68,
+          "losses": 32,
+          "winRate": 68
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 20,
+          "losses": 80,
+          "winRate": 20
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 76,
+          "losses": 24,
+          "winRate": 76
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 41,
+          "losses": 59,
+          "winRate": 41
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 14,
+          "losses": 86,
+          "winRate": 14
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 61,
+          "losses": 39,
+          "winRate": 61
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 4,
+          "losses": 96,
+          "winRate": 4
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 44,
+          "losses": 56,
+          "winRate": 44
+        }
+      }
+    },
+    {
+      "id": 110,
+      "name": "Batman",
+      "title": "",
+      "themeColor": "#38bdf8",
+      "wins": 1096,
+      "losses": 1404,
+      "totalFights": 2500,
+      "winRate": 43.8,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 48,
+          "losses": 52,
+          "winRate": 48
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 55,
+          "losses": 45,
+          "winRate": 55
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 6,
+          "losses": 94,
+          "winRate": 6
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 54,
+          "losses": 46,
+          "winRate": 54
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 46,
+          "losses": 54,
+          "winRate": 46
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 61,
+          "losses": 39,
+          "winRate": 61
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 1,
+          "losses": 99,
+          "winRate": 1
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 33,
+          "losses": 67,
+          "winRate": 33
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 65,
+          "losses": 35,
+          "winRate": 65
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 15,
+          "losses": 85,
+          "winRate": 15
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 69,
+          "losses": 31,
+          "winRate": 69
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 38,
+          "losses": 62,
+          "winRate": 38
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 67,
+          "losses": 33,
+          "winRate": 67
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 25,
+          "losses": 75,
+          "winRate": 25
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 61,
+          "losses": 39,
+          "winRate": 61
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 7,
+          "losses": 93,
+          "winRate": 7
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 43,
+          "losses": 57,
+          "winRate": 43
+        }
+      }
+    },
+    {
+      "id": 113,
+      "name": "Coringa",
+      "title": "",
+      "themeColor": "#10b981",
+      "wins": 1094,
+      "losses": 1406,
+      "totalFights": 2500,
+      "winRate": 43.8,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 54,
+          "losses": 46,
+          "winRate": 54
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 67,
+          "losses": 33,
+          "winRate": 67
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 7,
+          "losses": 93,
+          "winRate": 7
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 48,
+          "losses": 52,
+          "winRate": 48
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 39,
+          "losses": 61,
+          "winRate": 39
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 46,
+          "losses": 54,
+          "winRate": 46
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 1,
+          "losses": 99,
+          "winRate": 1
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 43,
+          "losses": 57,
+          "winRate": 43
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 64,
+          "losses": 36,
+          "winRate": 64
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 99,
+          "losses": 1,
+          "winRate": 99
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 8,
+          "losses": 92,
+          "winRate": 8
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 71,
+          "losses": 29,
+          "winRate": 71
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 70,
+          "losses": 30,
+          "winRate": 70
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 54,
+          "losses": 46,
+          "winRate": 54
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 20,
+          "losses": 80,
+          "winRate": 20
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 55,
+          "losses": 45,
+          "winRate": 55
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 4,
+          "losses": 96,
+          "winRate": 4
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 41,
+          "losses": 59,
+          "winRate": 41
+        }
+      }
+    },
+    {
+      "id": 112,
+      "name": "Palpatine",
+      "title": "",
+      "themeColor": "#a855f7",
+      "wins": 1068,
+      "losses": 1432,
+      "totalFights": 2500,
+      "winRate": 42.7,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 6,
+          "losses": 94,
+          "winRate": 6
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 56,
+          "losses": 44,
+          "winRate": 56
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 46,
+          "losses": 54,
+          "winRate": 46
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 1,
+          "losses": 99,
+          "winRate": 1
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 45,
+          "losses": 55,
+          "winRate": 45
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 58,
+          "losses": 42,
+          "winRate": 58
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 8,
+          "losses": 92,
+          "winRate": 8
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 63,
+          "losses": 37,
+          "winRate": 63
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 37,
+          "losses": 63,
+          "winRate": 37
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 58,
+          "losses": 42,
+          "winRate": 58
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 61,
+          "losses": 39,
+          "winRate": 61
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 16,
+          "losses": 84,
+          "winRate": 16
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 59,
+          "losses": 41,
+          "winRate": 59
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 10,
+          "losses": 90,
+          "winRate": 10
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 45,
+          "losses": 55,
+          "winRate": 45
+        }
+      }
+    },
+    {
+      "id": 105,
+      "name": "Renoir",
+      "title": "",
+      "themeColor": "#78716c",
+      "wins": 1059,
+      "losses": 1441,
+      "totalFights": 2500,
+      "winRate": 42.4,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 52,
+          "losses": 48,
+          "winRate": 52
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 8,
+          "losses": 92,
+          "winRate": 8
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 43,
+          "losses": 57,
+          "winRate": 43
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 46,
+          "losses": 54,
+          "winRate": 46
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 52,
+          "losses": 48,
+          "winRate": 52
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 44,
+          "losses": 56,
+          "winRate": 44
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 44,
+          "losses": 56,
+          "winRate": 44
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 1,
+          "losses": 99,
+          "winRate": 1
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 37,
+          "losses": 63,
+          "winRate": 37
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 56,
+          "losses": 44,
+          "winRate": 56
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 9,
+          "losses": 91,
+          "winRate": 9
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 68,
+          "losses": 32,
+          "winRate": 68
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 38,
+          "losses": 62,
+          "winRate": 38
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 66,
+          "losses": 34,
+          "winRate": 66
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 16,
+          "losses": 84,
+          "winRate": 16
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 66,
+          "losses": 34,
+          "winRate": 66
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 6,
+          "losses": 94,
+          "winRate": 6
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        }
+      }
+    },
+    {
+      "id": 107,
+      "name": "Monoco",
+      "title": "",
+      "themeColor": "#d97706",
+      "wins": 1060,
+      "losses": 1440,
+      "totalFights": 2500,
+      "winRate": 42.4,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 7,
+          "losses": 93,
+          "winRate": 7
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 54,
+          "losses": 46,
+          "winRate": 54
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 60,
+          "losses": 40,
+          "winRate": 60
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 52,
+          "losses": 48,
+          "winRate": 52
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 46,
+          "losses": 54,
+          "winRate": 46
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 45,
+          "losses": 55,
+          "winRate": 45
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 2,
+          "losses": 98,
+          "winRate": 2
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 52,
+          "losses": 48,
+          "winRate": 52
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 40,
+          "losses": 60,
+          "winRate": 40
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 12,
+          "losses": 88,
+          "winRate": 12
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 69,
+          "losses": 31,
+          "winRate": 69
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 59,
+          "losses": 41,
+          "winRate": 59
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 46,
+          "losses": 54,
+          "winRate": 46
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 16,
+          "losses": 84,
+          "winRate": 16
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 10,
+          "losses": 90,
+          "winRate": 10
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 38,
+          "losses": 62,
+          "winRate": 38
+        }
+      }
+    },
+    {
+      "id": 115,
+      "name": "Relâmpago McQueen",
+      "title": "",
+      "themeColor": "#ef4444",
+      "wins": 1061,
+      "losses": 1439,
+      "totalFights": 2500,
+      "winRate": 42.4,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 59,
+          "losses": 41,
+          "winRate": 59
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 54,
+          "losses": 46,
+          "winRate": 54
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 5,
+          "losses": 95,
+          "winRate": 5
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 44,
+          "losses": 56,
+          "winRate": 44
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 48,
+          "losses": 52,
+          "winRate": 48
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 57,
+          "losses": 43,
+          "winRate": 57
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 48,
+          "losses": 52,
+          "winRate": 48
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 45,
+          "losses": 55,
+          "winRate": 45
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 59,
+          "losses": 41,
+          "winRate": 59
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 17,
+          "losses": 83,
+          "winRate": 17
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 68,
+          "losses": 32,
+          "winRate": 68
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 41,
+          "losses": 59,
+          "winRate": 41
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 58,
+          "losses": 42,
+          "winRate": 58
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 19,
+          "losses": 81,
+          "winRate": 19
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 4,
+          "losses": 96,
+          "winRate": 4
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 34,
+          "losses": 66,
+          "winRate": 34
+        }
+      }
+    },
+    {
+      "id": 101,
+      "name": "Gustave",
+      "title": "",
+      "themeColor": "#0ea5e9",
+      "wins": 1055,
+      "losses": 1445,
+      "totalFights": 2500,
+      "winRate": 42.2,
+      "matchups": {
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 4,
+          "losses": 96,
+          "winRate": 4
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 48,
+          "losses": 52,
+          "winRate": 48
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 54,
+          "losses": 46,
+          "winRate": 54
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 56,
+          "losses": 44,
+          "winRate": 56
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 52,
+          "losses": 48,
+          "winRate": 52
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 57,
+          "losses": 43,
+          "winRate": 57
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 46,
+          "losses": 54,
+          "winRate": 46
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 41,
+          "losses": 59,
+          "winRate": 41
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 32,
+          "losses": 68,
+          "winRate": 32
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 54,
+          "losses": 46,
+          "winRate": 54
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 11,
+          "losses": 89,
+          "winRate": 11
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 65,
+          "losses": 35,
+          "winRate": 65
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 38,
+          "losses": 62,
+          "winRate": 38
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 61,
+          "losses": 39,
+          "winRate": 61
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 60,
+          "losses": 40,
+          "winRate": 60
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 20,
+          "losses": 80,
+          "winRate": 20
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 67,
+          "losses": 33,
+          "winRate": 67
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 4,
+          "losses": 96,
+          "winRate": 4
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 37,
+          "losses": 63,
+          "winRate": 37
+        }
+      }
+    },
+    {
+      "id": 106,
+      "name": "Verso",
+      "title": "",
+      "themeColor": "#6366f1",
+      "wins": 1036,
+      "losses": 1464,
+      "totalFights": 2500,
+      "winRate": 41.4,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 46,
+          "losses": 54,
+          "winRate": 46
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 5,
+          "losses": 95,
+          "winRate": 5
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 57,
+          "losses": 43,
+          "winRate": 57
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 40,
+          "losses": 60,
+          "winRate": 40
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 52,
+          "losses": 48,
+          "winRate": 52
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 52,
+          "losses": 48,
+          "winRate": 52
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 54,
+          "losses": 46,
+          "winRate": 54
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 1,
+          "losses": 99,
+          "winRate": 1
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 56,
+          "losses": 44,
+          "winRate": 56
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 37,
+          "losses": 63,
+          "winRate": 37
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 62,
+          "losses": 38,
+          "winRate": 62
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 11,
+          "losses": 89,
+          "winRate": 11
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 71,
+          "losses": 29,
+          "winRate": 71
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 32,
+          "losses": 68,
+          "winRate": 32
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 10,
+          "losses": 90,
+          "winRate": 10
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 63,
+          "losses": 37,
+          "winRate": 63
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 9,
+          "losses": 91,
+          "winRate": 9
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 36,
+          "losses": 64,
+          "winRate": 36
+        }
+      }
+    },
+    {
+      "id": 102,
+      "name": "Maelle",
+      "title": "",
+      "themeColor": "#38bdf8",
+      "wins": 1013,
+      "losses": 1487,
+      "totalFights": 2500,
+      "winRate": 40.5,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 6,
+          "losses": 94,
+          "winRate": 6
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 45,
+          "losses": 55,
+          "winRate": 45
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 33,
+          "losses": 67,
+          "winRate": 33
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 1,
+          "losses": 99,
+          "winRate": 1
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 46,
+          "losses": 54,
+          "winRate": 46
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 40,
+          "losses": 60,
+          "winRate": 40
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 57,
+          "losses": 43,
+          "winRate": 57
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 7,
+          "losses": 93,
+          "winRate": 7
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 72,
+          "losses": 28,
+          "winRate": 72
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 44,
+          "losses": 56,
+          "winRate": 44
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 55,
+          "losses": 45,
+          "winRate": 55
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 13,
+          "losses": 87,
+          "winRate": 13
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 55,
+          "losses": 45,
+          "winRate": 55
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 4,
+          "losses": 96,
+          "winRate": 4
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 36,
+          "losses": 64,
+          "winRate": 36
+        }
+      }
+    },
+    {
+      "id": 109,
+      "name": "La Peintresse",
+      "title": "",
+      "themeColor": "#fbbf24",
+      "wins": 1007,
+      "losses": 1493,
+      "totalFights": 2500,
+      "winRate": 40.3,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 44,
+          "losses": 56,
+          "winRate": 44
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 4,
+          "losses": 96,
+          "winRate": 4
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 48,
+          "losses": 52,
+          "winRate": 48
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 48,
+          "losses": 52,
+          "winRate": 48
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 48,
+          "losses": 52,
+          "winRate": 48
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 54,
+          "losses": 46,
+          "winRate": 54
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 52,
+          "losses": 48,
+          "winRate": 52
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 43,
+          "losses": 57,
+          "winRate": 43
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 45,
+          "losses": 55,
+          "winRate": 45
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 52,
+          "losses": 48,
+          "winRate": 52
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 9,
+          "losses": 91,
+          "winRate": 9
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 64,
+          "losses": 36,
+          "winRate": 64
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 34,
+          "losses": 66,
+          "winRate": 34
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 48,
+          "losses": 52,
+          "winRate": 48
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 56,
+          "losses": 44,
+          "winRate": 56
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 20,
+          "losses": 80,
+          "winRate": 20
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 55,
+          "losses": 45,
+          "winRate": 55
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 6,
+          "losses": 94,
+          "winRate": 6
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 33,
+          "losses": 67,
+          "winRate": 33
+        }
+      }
+    },
+    {
+      "id": 123,
+      "name": "Messi",
+      "title": "La Pulga & Campeão do Mundo",
+      "themeColor": "#38bdf8",
+      "wins": 969,
+      "losses": 1531,
+      "totalFights": 2500,
+      "winRate": 38.8,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 40,
+          "losses": 60,
+          "winRate": 40
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 45,
+          "losses": 55,
+          "winRate": 45
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 7,
+          "losses": 93,
+          "winRate": 7
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 54,
+          "losses": 46,
+          "winRate": 54
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 44,
+          "losses": 56,
+          "winRate": 44
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 39,
+          "losses": 61,
+          "winRate": 39
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 46,
+          "losses": 54,
+          "winRate": 46
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 4,
+          "losses": 96,
+          "winRate": 4
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 42,
+          "losses": 58,
+          "winRate": 42
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 29,
+          "losses": 71,
+          "winRate": 29
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 11,
+          "losses": 89,
+          "winRate": 11
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 60,
+          "losses": 40,
+          "winRate": 60
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 39,
+          "losses": 61,
+          "winRate": 39
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 17,
+          "losses": 83,
+          "winRate": 17
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 55,
+          "losses": 45,
+          "winRate": 55
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 2,
+          "losses": 98,
+          "winRate": 2
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 39,
+          "losses": 61,
+          "winRate": 39
+        }
+      }
+    },
+    {
+      "id": 122,
+      "name": "Walter White",
+      "title": "Heisenberg",
+      "themeColor": "#0284c7",
+      "wins": 916,
+      "losses": 1584,
+      "totalFights": 2500,
+      "winRate": 36.6,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 39,
+          "losses": 61,
+          "winRate": 39
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 1,
+          "losses": 99,
+          "winRate": 1
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 4,
+          "losses": 96,
+          "winRate": 4
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 34,
+          "losses": 66,
+          "winRate": 34
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 41,
+          "losses": 59,
+          "winRate": 41
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 52,
+          "losses": 48,
+          "winRate": 52
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 33,
+          "losses": 67,
+          "winRate": 33
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 42,
+          "losses": 58,
+          "winRate": 42
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 30,
+          "losses": 70,
+          "winRate": 30
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 33,
+          "losses": 67,
+          "winRate": 33
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 53,
+          "losses": 47,
+          "winRate": 53
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 98,
+          "losses": 2,
+          "winRate": 98
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 24,
+          "losses": 76,
+          "winRate": 24
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 54,
+          "losses": 46,
+          "winRate": 54
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 25,
+          "losses": 75,
+          "winRate": 25
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 14,
+          "losses": 86,
+          "winRate": 14
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 56,
+          "losses": 44,
+          "winRate": 56
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 2,
+          "losses": 98,
+          "winRate": 2
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 36,
+          "losses": 64,
+          "winRate": 36
+        }
+      }
+    },
+    {
+      "id": 125,
+      "name": "Rapunzel",
+      "title": "Princesa da Torre Dourada",
+      "themeColor": "#facc15",
+      "wins": 892,
+      "losses": 1608,
+      "totalFights": 2500,
+      "winRate": 35.7,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 33,
+          "losses": 67,
+          "winRate": 33
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 45,
+          "losses": 55,
+          "winRate": 45
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 4,
+          "losses": 96,
+          "winRate": 4
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 34,
+          "losses": 66,
+          "winRate": 34
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 37,
+          "losses": 63,
+          "winRate": 37
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 45,
+          "losses": 55,
+          "winRate": 45
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 39,
+          "losses": 61,
+          "winRate": 39
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 39,
+          "losses": 61,
+          "winRate": 39
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 41,
+          "losses": 59,
+          "winRate": 41
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 45,
+          "losses": 55,
+          "winRate": 45
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 28,
+          "losses": 72,
+          "winRate": 28
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 13,
+          "losses": 87,
+          "winRate": 13
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 68,
+          "losses": 32,
+          "winRate": 68
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 36,
+          "losses": 64,
+          "winRate": 36
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 44,
+          "losses": 56,
+          "winRate": 44
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 45,
+          "losses": 55,
+          "winRate": 45
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 9,
+          "losses": 91,
+          "winRate": 9
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 1,
+          "losses": 99,
+          "winRate": 1
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 38,
+          "losses": 62,
+          "winRate": 38
+        }
+      }
+    },
+    {
+      "id": 117,
+      "name": "Arqueiro Verde",
+      "title": "O Arqueiro Esmeralda",
+      "themeColor": "#22c55e",
+      "wins": 890,
+      "losses": 1610,
+      "totalFights": 2500,
+      "winRate": 35.6,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 46,
+          "losses": 54,
+          "winRate": 46
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 43,
+          "losses": 57,
+          "winRate": 43
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 3,
+          "losses": 97,
+          "winRate": 3
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 44,
+          "losses": 56,
+          "winRate": 44
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 38,
+          "losses": 62,
+          "winRate": 38
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 51,
+          "losses": 49,
+          "winRate": 51
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 48,
+          "losses": 52,
+          "winRate": 48
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 35,
+          "losses": 65,
+          "winRate": 35
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 32,
+          "losses": 68,
+          "winRate": 32
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 42,
+          "losses": 58,
+          "winRate": 42
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 36,
+          "losses": 64,
+          "winRate": 36
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 1,
+          "losses": 99,
+          "winRate": 1
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 41,
+          "losses": 59,
+          "winRate": 41
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 27,
+          "losses": 73,
+          "winRate": 27
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 100,
+          "losses": 0,
+          "winRate": 100
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 8,
+          "losses": 92,
+          "winRate": 8
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 56,
+          "losses": 44,
+          "winRate": 56
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 35,
+          "losses": 65,
+          "winRate": 35
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 47,
+          "losses": 53,
+          "winRate": 47
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 49,
+          "losses": 51,
+          "winRate": 49
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 17,
+          "losses": 83,
+          "winRate": 17
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 50,
+          "losses": 50,
+          "winRate": 50
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 4,
+          "losses": 96,
+          "winRate": 4
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 37,
+          "losses": 63,
+          "winRate": 37
+        }
+      }
+    },
+    {
+      "id": 120,
+      "name": "Aang",
+      "title": "O Último Mestre do Ar & Avatar",
+      "themeColor": "#0ea5e9",
+      "wins": 717,
+      "losses": 1783,
+      "totalFights": 2500,
+      "winRate": 28.7,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 35,
+          "losses": 65,
+          "winRate": 35
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 28,
+          "losses": 72,
+          "winRate": 28
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 5,
+          "losses": 95,
+          "winRate": 5
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 32,
+          "losses": 68,
+          "winRate": 32
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 29,
+          "losses": 71,
+          "winRate": 29
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 31,
+          "losses": 69,
+          "winRate": 31
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 36,
+          "losses": 64,
+          "winRate": 36
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 31,
+          "losses": 69,
+          "winRate": 31
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 24,
+          "losses": 76,
+          "winRate": 24
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 37,
+          "losses": 63,
+          "winRate": 37
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 29,
+          "losses": 71,
+          "winRate": 29
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 1,
+          "losses": 99,
+          "winRate": 1
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 32,
+          "losses": 68,
+          "winRate": 32
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 24,
+          "losses": 76,
+          "winRate": 24
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 44,
+          "losses": 56,
+          "winRate": 44
+        },
+        "118": {
+          "opponentName": "Bruce Banner",
+          "wins": 99,
+          "losses": 1,
+          "winRate": 99
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 12,
+          "losses": 88,
+          "winRate": 12
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 31,
+          "losses": 69,
+          "winRate": 31
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 46,
+          "losses": 54,
+          "winRate": 46
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 40,
+          "losses": 60,
+          "winRate": 40
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 13,
+          "losses": 87,
+          "winRate": 13
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 32,
+          "losses": 68,
+          "winRate": 32
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 3,
+          "losses": 97,
+          "winRate": 3
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 23,
+          "losses": 77,
+          "winRate": 23
+        }
+      }
+    },
+    {
+      "id": 118,
+      "name": "Bruce Banner",
+      "title": "O Gigante Esmeralda",
+      "themeColor": "#84cc16",
+      "wins": 4,
+      "losses": 2496,
+      "totalFights": 2500,
+      "winRate": 0.2,
+      "matchups": {
+        "101": {
+          "opponentName": "Gustave",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "102": {
+          "opponentName": "Maelle",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "103": {
+          "opponentName": "Lune",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "104": {
+          "opponentName": "Sciel",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "105": {
+          "opponentName": "Renoir",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "106": {
+          "opponentName": "Verso",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "107": {
+          "opponentName": "Monoco",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "109": {
+          "opponentName": "La Peintresse",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "110": {
+          "opponentName": "Batman",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "111": {
+          "opponentName": "Darth Vader",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "112": {
+          "opponentName": "Palpatine",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "113": {
+          "opponentName": "Coringa",
+          "wins": 1,
+          "losses": 99,
+          "winRate": 1
+        },
+        "114": {
+          "opponentName": "Jack Sparrow",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "115": {
+          "opponentName": "Relâmpago McQueen",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "116": {
+          "opponentName": "Gandalf",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "117": {
+          "opponentName": "Arqueiro Verde",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "119": {
+          "opponentName": "Zorro",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "120": {
+          "opponentName": "Aang",
+          "wins": 1,
+          "losses": 99,
+          "winRate": 1
+        },
+        "121": {
+          "opponentName": "Doutor Estranho",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "122": {
+          "opponentName": "Walter White",
+          "wins": 2,
+          "losses": 98,
+          "winRate": 2
+        },
+        "123": {
+          "opponentName": "Messi",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "124": {
+          "opponentName": "Capitão Nascimento",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "125": {
+          "opponentName": "Rapunzel",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "126": {
+          "opponentName": "Capitão América",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        },
+        "127": {
+          "opponentName": "Naruto Uzumaki",
+          "wins": 0,
+          "losses": 100,
+          "winRate": 0
+        }
+      }
+    }
+  ],
+  "matrix": {
+    "101": {
+      "102": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 4,
+        "losses": 96,
+        "winRate": 4
+      },
+      "105": {
+        "wins": 48,
+        "losses": 52,
+        "winRate": 48
+      },
+      "106": {
+        "wins": 54,
+        "losses": 46,
+        "winRate": 54
+      },
+      "107": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "109": {
+        "wins": 56,
+        "losses": 44,
+        "winRate": 56.00000000000001
+      },
+      "110": {
+        "wins": 52,
+        "losses": 48,
+        "winRate": 52
+      },
+      "111": {
+        "wins": 57,
+        "losses": 43,
+        "winRate": 56.99999999999999
+      },
+      "112": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "113": {
+        "wins": 46,
+        "losses": 54,
+        "winRate": 46
+      },
+      "114": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "115": {
+        "wins": 41,
+        "losses": 59,
+        "winRate": 41
+      },
+      "116": {
+        "wins": 32,
+        "losses": 68,
+        "winRate": 32
+      },
+      "117": {
+        "wins": 54,
+        "losses": 46,
+        "winRate": 54
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 11,
+        "losses": 89,
+        "winRate": 11
+      },
+      "120": {
+        "wins": 65,
+        "losses": 35,
+        "winRate": 65
+      },
+      "121": {
+        "wins": 38,
+        "losses": 62,
+        "winRate": 38
+      },
+      "122": {
+        "wins": 61,
+        "losses": 39,
+        "winRate": 61
+      },
+      "123": {
+        "wins": 60,
+        "losses": 40,
+        "winRate": 60
+      },
+      "124": {
+        "wins": 20,
+        "losses": 80,
+        "winRate": 20
+      },
+      "125": {
+        "wins": 67,
+        "losses": 33,
+        "winRate": 67
+      },
+      "126": {
+        "wins": 4,
+        "losses": 96,
+        "winRate": 4
+      },
+      "127": {
+        "wins": 37,
+        "losses": 63,
+        "winRate": 37
+      }
+    },
+    "102": {
+      "101": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 6,
+        "losses": 94,
+        "winRate": 6
+      },
+      "105": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "106": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "107": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "109": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      },
+      "110": {
+        "wins": 45,
+        "losses": 55,
+        "winRate": 45
+      },
+      "111": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "112": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "113": {
+        "wins": 33,
+        "losses": 67,
+        "winRate": 33
+      },
+      "114": {
+        "wins": 1,
+        "losses": 99,
+        "winRate": 1
+      },
+      "115": {
+        "wins": 46,
+        "losses": 54,
+        "winRate": 46
+      },
+      "116": {
+        "wins": 40,
+        "losses": 60,
+        "winRate": 40
+      },
+      "117": {
+        "wins": 57,
+        "losses": 43,
+        "winRate": 56.99999999999999
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 7,
+        "losses": 93,
+        "winRate": 7.000000000000001
+      },
+      "120": {
+        "wins": 72,
+        "losses": 28,
+        "winRate": 72
+      },
+      "121": {
+        "wins": 44,
+        "losses": 56,
+        "winRate": 44
+      },
+      "122": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "123": {
+        "wins": 55,
+        "losses": 45,
+        "winRate": 55.00000000000001
+      },
+      "124": {
+        "wins": 13,
+        "losses": 87,
+        "winRate": 13
+      },
+      "125": {
+        "wins": 55,
+        "losses": 45,
+        "winRate": 55.00000000000001
+      },
+      "126": {
+        "wins": 4,
+        "losses": 96,
+        "winRate": 4
+      },
+      "127": {
+        "wins": 36,
+        "losses": 64,
+        "winRate": 36
+      }
+    },
+    "103": {
+      "101": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "102": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "104": {
+        "wins": 56,
+        "losses": 44,
+        "winRate": 56.00000000000001
+      },
+      "105": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "106": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "107": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "109": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "110": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "111": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "112": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "113": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "114": {
+        "wins": 87,
+        "losses": 13,
+        "winRate": 87
+      },
+      "115": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "116": {
+        "wins": 98,
+        "losses": 2,
+        "winRate": 98
+      },
+      "117": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 37,
+        "losses": 63,
+        "winRate": 37
+      },
+      "120": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "121": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "122": {
+        "wins": 99,
+        "losses": 1,
+        "winRate": 99
+      },
+      "123": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "124": {
+        "wins": 98,
+        "losses": 2,
+        "winRate": 98
+      },
+      "125": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "126": {
+        "wins": 94,
+        "losses": 6,
+        "winRate": 94
+      },
+      "127": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      }
+    },
+    "104": {
+      "101": {
+        "wins": 96,
+        "losses": 4,
+        "winRate": 96
+      },
+      "102": {
+        "wins": 94,
+        "losses": 6,
+        "winRate": 94
+      },
+      "103": {
+        "wins": 44,
+        "losses": 56,
+        "winRate": 44
+      },
+      "105": {
+        "wins": 92,
+        "losses": 8,
+        "winRate": 92
+      },
+      "106": {
+        "wins": 95,
+        "losses": 5,
+        "winRate": 95
+      },
+      "107": {
+        "wins": 93,
+        "losses": 7,
+        "winRate": 93
+      },
+      "109": {
+        "wins": 96,
+        "losses": 4,
+        "winRate": 96
+      },
+      "110": {
+        "wins": 94,
+        "losses": 6,
+        "winRate": 94
+      },
+      "111": {
+        "wins": 95,
+        "losses": 5,
+        "winRate": 95
+      },
+      "112": {
+        "wins": 94,
+        "losses": 6,
+        "winRate": 94
+      },
+      "113": {
+        "wins": 93,
+        "losses": 7,
+        "winRate": 93
+      },
+      "114": {
+        "wins": 32,
+        "losses": 68,
+        "winRate": 32
+      },
+      "115": {
+        "wins": 95,
+        "losses": 5,
+        "winRate": 95
+      },
+      "116": {
+        "wins": 91,
+        "losses": 9,
+        "winRate": 91
+      },
+      "117": {
+        "wins": 97,
+        "losses": 3,
+        "winRate": 97
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "120": {
+        "wins": 95,
+        "losses": 5,
+        "winRate": 95
+      },
+      "121": {
+        "wins": 94,
+        "losses": 6,
+        "winRate": 94
+      },
+      "122": {
+        "wins": 96,
+        "losses": 4,
+        "winRate": 96
+      },
+      "123": {
+        "wins": 93,
+        "losses": 7,
+        "winRate": 93
+      },
+      "124": {
+        "wins": 78,
+        "losses": 22,
+        "winRate": 78
+      },
+      "125": {
+        "wins": 96,
+        "losses": 4,
+        "winRate": 96
+      },
+      "126": {
+        "wins": 65,
+        "losses": 35,
+        "winRate": 65
+      },
+      "127": {
+        "wins": 92,
+        "losses": 8,
+        "winRate": 92
+      }
+    },
+    "105": {
+      "101": {
+        "wins": 52,
+        "losses": 48,
+        "winRate": 52
+      },
+      "102": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 8,
+        "losses": 92,
+        "winRate": 8
+      },
+      "106": {
+        "wins": 43,
+        "losses": 57,
+        "winRate": 43
+      },
+      "107": {
+        "wins": 46,
+        "losses": 54,
+        "winRate": 46
+      },
+      "109": {
+        "wins": 52,
+        "losses": 48,
+        "winRate": 52
+      },
+      "110": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "111": {
+        "wins": 44,
+        "losses": 56,
+        "winRate": 44
+      },
+      "112": {
+        "wins": 44,
+        "losses": 56,
+        "winRate": 44
+      },
+      "113": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "114": {
+        "wins": 1,
+        "losses": 99,
+        "winRate": 1
+      },
+      "115": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      },
+      "116": {
+        "wins": 37,
+        "losses": 63,
+        "winRate": 37
+      },
+      "117": {
+        "wins": 56,
+        "losses": 44,
+        "winRate": 56.00000000000001
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 9,
+        "losses": 91,
+        "winRate": 9
+      },
+      "120": {
+        "wins": 68,
+        "losses": 32,
+        "winRate": 68
+      },
+      "121": {
+        "wins": 38,
+        "losses": 62,
+        "winRate": 38
+      },
+      "122": {
+        "wins": 66,
+        "losses": 34,
+        "winRate": 66
+      },
+      "123": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      },
+      "124": {
+        "wins": 16,
+        "losses": 84,
+        "winRate": 16
+      },
+      "125": {
+        "wins": 66,
+        "losses": 34,
+        "winRate": 66
+      },
+      "126": {
+        "wins": 6,
+        "losses": 94,
+        "winRate": 6
+      },
+      "127": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      }
+    },
+    "106": {
+      "101": {
+        "wins": 46,
+        "losses": 54,
+        "winRate": 46
+      },
+      "102": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 5,
+        "losses": 95,
+        "winRate": 5
+      },
+      "105": {
+        "wins": 57,
+        "losses": 43,
+        "winRate": 56.99999999999999
+      },
+      "107": {
+        "wins": 40,
+        "losses": 60,
+        "winRate": 40
+      },
+      "109": {
+        "wins": 52,
+        "losses": 48,
+        "winRate": 52
+      },
+      "110": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "111": {
+        "wins": 52,
+        "losses": 48,
+        "winRate": 52
+      },
+      "112": {
+        "wins": 54,
+        "losses": 46,
+        "winRate": 54
+      },
+      "113": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "114": {
+        "wins": 1,
+        "losses": 99,
+        "winRate": 1
+      },
+      "115": {
+        "wins": 56,
+        "losses": 44,
+        "winRate": 56.00000000000001
+      },
+      "116": {
+        "wins": 37,
+        "losses": 63,
+        "winRate": 37
+      },
+      "117": {
+        "wins": 62,
+        "losses": 38,
+        "winRate": 62
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 11,
+        "losses": 89,
+        "winRate": 11
+      },
+      "120": {
+        "wins": 71,
+        "losses": 29,
+        "winRate": 71
+      },
+      "121": {
+        "wins": 32,
+        "losses": 68,
+        "winRate": 32
+      },
+      "122": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "123": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "124": {
+        "wins": 10,
+        "losses": 90,
+        "winRate": 10
+      },
+      "125": {
+        "wins": 63,
+        "losses": 37,
+        "winRate": 63
+      },
+      "126": {
+        "wins": 9,
+        "losses": 91,
+        "winRate": 9
+      },
+      "127": {
+        "wins": 36,
+        "losses": 64,
+        "winRate": 36
+      }
+    },
+    "107": {
+      "101": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "102": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 7,
+        "losses": 93,
+        "winRate": 7.000000000000001
+      },
+      "105": {
+        "wins": 54,
+        "losses": 46,
+        "winRate": 54
+      },
+      "106": {
+        "wins": 60,
+        "losses": 40,
+        "winRate": 60
+      },
+      "109": {
+        "wins": 52,
+        "losses": 48,
+        "winRate": 52
+      },
+      "110": {
+        "wins": 46,
+        "losses": 54,
+        "winRate": 46
+      },
+      "111": {
+        "wins": 45,
+        "losses": 55,
+        "winRate": 45
+      },
+      "112": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "113": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      },
+      "114": {
+        "wins": 2,
+        "losses": 98,
+        "winRate": 2
+      },
+      "115": {
+        "wins": 52,
+        "losses": 48,
+        "winRate": 52
+      },
+      "116": {
+        "wins": 40,
+        "losses": 60,
+        "winRate": 40
+      },
+      "117": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 12,
+        "losses": 88,
+        "winRate": 12
+      },
+      "120": {
+        "wins": 69,
+        "losses": 31,
+        "winRate": 69
+      },
+      "121": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "122": {
+        "wins": 59,
+        "losses": 41,
+        "winRate": 59
+      },
+      "123": {
+        "wins": 46,
+        "losses": 54,
+        "winRate": 46
+      },
+      "124": {
+        "wins": 16,
+        "losses": 84,
+        "winRate": 16
+      },
+      "125": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "126": {
+        "wins": 10,
+        "losses": 90,
+        "winRate": 10
+      },
+      "127": {
+        "wins": 38,
+        "losses": 62,
+        "winRate": 38
+      }
+    },
+    "109": {
+      "101": {
+        "wins": 44,
+        "losses": 56,
+        "winRate": 44
+      },
+      "102": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 4,
+        "losses": 96,
+        "winRate": 4
+      },
+      "105": {
+        "wins": 48,
+        "losses": 52,
+        "winRate": 48
+      },
+      "106": {
+        "wins": 48,
+        "losses": 52,
+        "winRate": 48
+      },
+      "107": {
+        "wins": 48,
+        "losses": 52,
+        "winRate": 48
+      },
+      "110": {
+        "wins": 54,
+        "losses": 46,
+        "winRate": 54
+      },
+      "111": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "112": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "113": {
+        "wins": 52,
+        "losses": 48,
+        "winRate": 52
+      },
+      "114": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "115": {
+        "wins": 43,
+        "losses": 57,
+        "winRate": 43
+      },
+      "116": {
+        "wins": 45,
+        "losses": 55,
+        "winRate": 45
+      },
+      "117": {
+        "wins": 52,
+        "losses": 48,
+        "winRate": 52
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 9,
+        "losses": 91,
+        "winRate": 9
+      },
+      "120": {
+        "wins": 64,
+        "losses": 36,
+        "winRate": 64
+      },
+      "121": {
+        "wins": 34,
+        "losses": 66,
+        "winRate": 34
+      },
+      "122": {
+        "wins": 48,
+        "losses": 52,
+        "winRate": 48
+      },
+      "123": {
+        "wins": 56,
+        "losses": 44,
+        "winRate": 56.00000000000001
+      },
+      "124": {
+        "wins": 20,
+        "losses": 80,
+        "winRate": 20
+      },
+      "125": {
+        "wins": 55,
+        "losses": 45,
+        "winRate": 55.00000000000001
+      },
+      "126": {
+        "wins": 6,
+        "losses": 94,
+        "winRate": 6
+      },
+      "127": {
+        "wins": 33,
+        "losses": 67,
+        "winRate": 33
+      }
+    },
+    "110": {
+      "101": {
+        "wins": 48,
+        "losses": 52,
+        "winRate": 48
+      },
+      "102": {
+        "wins": 55,
+        "losses": 45,
+        "winRate": 55.00000000000001
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 6,
+        "losses": 94,
+        "winRate": 6
+      },
+      "105": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "106": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      },
+      "107": {
+        "wins": 54,
+        "losses": 46,
+        "winRate": 54
+      },
+      "109": {
+        "wins": 46,
+        "losses": 54,
+        "winRate": 46
+      },
+      "111": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "112": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "113": {
+        "wins": 61,
+        "losses": 39,
+        "winRate": 61
+      },
+      "114": {
+        "wins": 1,
+        "losses": 99,
+        "winRate": 1
+      },
+      "115": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "116": {
+        "wins": 33,
+        "losses": 67,
+        "winRate": 33
+      },
+      "117": {
+        "wins": 65,
+        "losses": 35,
+        "winRate": 65
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 15,
+        "losses": 85,
+        "winRate": 15
+      },
+      "120": {
+        "wins": 69,
+        "losses": 31,
+        "winRate": 69
+      },
+      "121": {
+        "wins": 38,
+        "losses": 62,
+        "winRate": 38
+      },
+      "122": {
+        "wins": 67,
+        "losses": 33,
+        "winRate": 67
+      },
+      "123": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "124": {
+        "wins": 25,
+        "losses": 75,
+        "winRate": 25
+      },
+      "125": {
+        "wins": 61,
+        "losses": 39,
+        "winRate": 61
+      },
+      "126": {
+        "wins": 7,
+        "losses": 93,
+        "winRate": 7.000000000000001
+      },
+      "127": {
+        "wins": 43,
+        "losses": 57,
+        "winRate": 43
+      }
+    },
+    "111": {
+      "101": {
+        "wins": 43,
+        "losses": 57,
+        "winRate": 43
+      },
+      "102": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 5,
+        "losses": 95,
+        "winRate": 5
+      },
+      "105": {
+        "wins": 56,
+        "losses": 44,
+        "winRate": 56.00000000000001
+      },
+      "106": {
+        "wins": 48,
+        "losses": 52,
+        "winRate": 48
+      },
+      "107": {
+        "wins": 55,
+        "losses": 45,
+        "winRate": 55.00000000000001
+      },
+      "109": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      },
+      "110": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "112": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "113": {
+        "wins": 54,
+        "losses": 46,
+        "winRate": 54
+      },
+      "114": {
+        "wins": 2,
+        "losses": 98,
+        "winRate": 2
+      },
+      "115": {
+        "wins": 52,
+        "losses": 48,
+        "winRate": 52
+      },
+      "116": {
+        "wins": 48,
+        "losses": 52,
+        "winRate": 48
+      },
+      "117": {
+        "wins": 68,
+        "losses": 32,
+        "winRate": 68
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 20,
+        "losses": 80,
+        "winRate": 20
+      },
+      "120": {
+        "wins": 76,
+        "losses": 24,
+        "winRate": 76
+      },
+      "121": {
+        "wins": 41,
+        "losses": 59,
+        "winRate": 41
+      },
+      "122": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "123": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      },
+      "124": {
+        "wins": 14,
+        "losses": 86,
+        "winRate": 14.000000000000002
+      },
+      "125": {
+        "wins": 61,
+        "losses": 39,
+        "winRate": 61
+      },
+      "126": {
+        "wins": 4,
+        "losses": 96,
+        "winRate": 4
+      },
+      "127": {
+        "wins": 44,
+        "losses": 56,
+        "winRate": 44
+      }
+    },
+    "112": {
+      "101": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "102": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 6,
+        "losses": 94,
+        "winRate": 6
+      },
+      "105": {
+        "wins": 56,
+        "losses": 44,
+        "winRate": 56.00000000000001
+      },
+      "106": {
+        "wins": 46,
+        "losses": 54,
+        "winRate": 46
+      },
+      "107": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "109": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "110": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "111": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "113": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "114": {
+        "wins": 1,
+        "losses": 99,
+        "winRate": 1
+      },
+      "115": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "116": {
+        "wins": 45,
+        "losses": 55,
+        "winRate": 45
+      },
+      "117": {
+        "wins": 58,
+        "losses": 42,
+        "winRate": 57.99999999999999
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 8,
+        "losses": 92,
+        "winRate": 8
+      },
+      "120": {
+        "wins": 63,
+        "losses": 37,
+        "winRate": 63
+      },
+      "121": {
+        "wins": 37,
+        "losses": 63,
+        "winRate": 37
+      },
+      "122": {
+        "wins": 58,
+        "losses": 42,
+        "winRate": 57.99999999999999
+      },
+      "123": {
+        "wins": 61,
+        "losses": 39,
+        "winRate": 61
+      },
+      "124": {
+        "wins": 16,
+        "losses": 84,
+        "winRate": 16
+      },
+      "125": {
+        "wins": 59,
+        "losses": 41,
+        "winRate": 59
+      },
+      "126": {
+        "wins": 10,
+        "losses": 90,
+        "winRate": 10
+      },
+      "127": {
+        "wins": 45,
+        "losses": 55,
+        "winRate": 45
+      }
+    },
+    "113": {
+      "101": {
+        "wins": 54,
+        "losses": 46,
+        "winRate": 54
+      },
+      "102": {
+        "wins": 67,
+        "losses": 33,
+        "winRate": 67
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 7,
+        "losses": 93,
+        "winRate": 7.000000000000001
+      },
+      "105": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "106": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      },
+      "107": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "109": {
+        "wins": 48,
+        "losses": 52,
+        "winRate": 48
+      },
+      "110": {
+        "wins": 39,
+        "losses": 61,
+        "winRate": 39
+      },
+      "111": {
+        "wins": 46,
+        "losses": 54,
+        "winRate": 46
+      },
+      "112": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      },
+      "114": {
+        "wins": 1,
+        "losses": 99,
+        "winRate": 1
+      },
+      "115": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "116": {
+        "wins": 43,
+        "losses": 57,
+        "winRate": 43
+      },
+      "117": {
+        "wins": 64,
+        "losses": 36,
+        "winRate": 64
+      },
+      "118": {
+        "wins": 99,
+        "losses": 1,
+        "winRate": 99
+      },
+      "119": {
+        "wins": 8,
+        "losses": 92,
+        "winRate": 8
+      },
+      "120": {
+        "wins": 71,
+        "losses": 29,
+        "winRate": 71
+      },
+      "121": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "122": {
+        "wins": 70,
+        "losses": 30,
+        "winRate": 70
+      },
+      "123": {
+        "wins": 54,
+        "losses": 46,
+        "winRate": 54
+      },
+      "124": {
+        "wins": 20,
+        "losses": 80,
+        "winRate": 20
+      },
+      "125": {
+        "wins": 55,
+        "losses": 45,
+        "winRate": 55.00000000000001
+      },
+      "126": {
+        "wins": 4,
+        "losses": 96,
+        "winRate": 4
+      },
+      "127": {
+        "wins": 41,
+        "losses": 59,
+        "winRate": 41
+      }
+    },
+    "114": {
+      "101": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "102": {
+        "wins": 99,
+        "losses": 1,
+        "winRate": 99
+      },
+      "103": {
+        "wins": 13,
+        "losses": 87,
+        "winRate": 13
+      },
+      "104": {
+        "wins": 68,
+        "losses": 32,
+        "winRate": 68
+      },
+      "105": {
+        "wins": 99,
+        "losses": 1,
+        "winRate": 99
+      },
+      "106": {
+        "wins": 99,
+        "losses": 1,
+        "winRate": 99
+      },
+      "107": {
+        "wins": 98,
+        "losses": 2,
+        "winRate": 98
+      },
+      "109": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "110": {
+        "wins": 99,
+        "losses": 1,
+        "winRate": 99
+      },
+      "111": {
+        "wins": 98,
+        "losses": 2,
+        "winRate": 98
+      },
+      "112": {
+        "wins": 99,
+        "losses": 1,
+        "winRate": 99
+      },
+      "113": {
+        "wins": 99,
+        "losses": 1,
+        "winRate": 99
+      },
+      "115": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "116": {
+        "wins": 96,
+        "losses": 4,
+        "winRate": 96
+      },
+      "117": {
+        "wins": 99,
+        "losses": 1,
+        "winRate": 99
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 25,
+        "losses": 75,
+        "winRate": 25
+      },
+      "120": {
+        "wins": 99,
+        "losses": 1,
+        "winRate": 99
+      },
+      "121": {
+        "wins": 99,
+        "losses": 1,
+        "winRate": 99
+      },
+      "122": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "123": {
+        "wins": 96,
+        "losses": 4,
+        "winRate": 96
+      },
+      "124": {
+        "wins": 89,
+        "losses": 11,
+        "winRate": 89
+      },
+      "125": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "126": {
+        "wins": 77,
+        "losses": 23,
+        "winRate": 77
+      },
+      "127": {
+        "wins": 98,
+        "losses": 2,
+        "winRate": 98
+      }
+    },
+    "115": {
+      "101": {
+        "wins": 59,
+        "losses": 41,
+        "winRate": 59
+      },
+      "102": {
+        "wins": 54,
+        "losses": 46,
+        "winRate": 54
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 5,
+        "losses": 95,
+        "winRate": 5
+      },
+      "105": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "106": {
+        "wins": 44,
+        "losses": 56,
+        "winRate": 44
+      },
+      "107": {
+        "wins": 48,
+        "losses": 52,
+        "winRate": 48
+      },
+      "109": {
+        "wins": 57,
+        "losses": 43,
+        "winRate": 56.99999999999999
+      },
+      "110": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "111": {
+        "wins": 48,
+        "losses": 52,
+        "winRate": 48
+      },
+      "112": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "113": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "114": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "116": {
+        "wins": 45,
+        "losses": 55,
+        "winRate": 45
+      },
+      "117": {
+        "wins": 59,
+        "losses": 41,
+        "winRate": 59
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 17,
+        "losses": 83,
+        "winRate": 17
+      },
+      "120": {
+        "wins": 68,
+        "losses": 32,
+        "winRate": 68
+      },
+      "121": {
+        "wins": 41,
+        "losses": 59,
+        "winRate": 41
+      },
+      "122": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      },
+      "123": {
+        "wins": 58,
+        "losses": 42,
+        "winRate": 57.99999999999999
+      },
+      "124": {
+        "wins": 19,
+        "losses": 81,
+        "winRate": 19
+      },
+      "125": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "126": {
+        "wins": 4,
+        "losses": 96,
+        "winRate": 4
+      },
+      "127": {
+        "wins": 34,
+        "losses": 66,
+        "winRate": 34
+      }
+    },
+    "116": {
+      "101": {
+        "wins": 68,
+        "losses": 32,
+        "winRate": 68
+      },
+      "102": {
+        "wins": 60,
+        "losses": 40,
+        "winRate": 60
+      },
+      "103": {
+        "wins": 2,
+        "losses": 98,
+        "winRate": 2
+      },
+      "104": {
+        "wins": 9,
+        "losses": 91,
+        "winRate": 9
+      },
+      "105": {
+        "wins": 63,
+        "losses": 37,
+        "winRate": 63
+      },
+      "106": {
+        "wins": 63,
+        "losses": 37,
+        "winRate": 63
+      },
+      "107": {
+        "wins": 60,
+        "losses": 40,
+        "winRate": 60
+      },
+      "109": {
+        "wins": 55,
+        "losses": 45,
+        "winRate": 55.00000000000001
+      },
+      "110": {
+        "wins": 67,
+        "losses": 33,
+        "winRate": 67
+      },
+      "111": {
+        "wins": 52,
+        "losses": 48,
+        "winRate": 52
+      },
+      "112": {
+        "wins": 55,
+        "losses": 45,
+        "winRate": 55.00000000000001
+      },
+      "113": {
+        "wins": 57,
+        "losses": 43,
+        "winRate": 56.99999999999999
+      },
+      "114": {
+        "wins": 4,
+        "losses": 96,
+        "winRate": 4
+      },
+      "115": {
+        "wins": 55,
+        "losses": 45,
+        "winRate": 55.00000000000001
+      },
+      "117": {
+        "wins": 73,
+        "losses": 27,
+        "winRate": 73
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 12,
+        "losses": 88,
+        "winRate": 12
+      },
+      "120": {
+        "wins": 76,
+        "losses": 24,
+        "winRate": 76
+      },
+      "121": {
+        "wins": 57,
+        "losses": 43,
+        "winRate": 56.99999999999999
+      },
+      "122": {
+        "wins": 67,
+        "losses": 33,
+        "winRate": 67
+      },
+      "123": {
+        "wins": 71,
+        "losses": 29,
+        "winRate": 71
+      },
+      "124": {
+        "wins": 23,
+        "losses": 77,
+        "winRate": 23
+      },
+      "125": {
+        "wins": 72,
+        "losses": 28,
+        "winRate": 72
+      },
+      "126": {
+        "wins": 7,
+        "losses": 93,
+        "winRate": 7.000000000000001
+      },
+      "127": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      }
+    },
+    "117": {
+      "101": {
+        "wins": 46,
+        "losses": 54,
+        "winRate": 46
+      },
+      "102": {
+        "wins": 43,
+        "losses": 57,
+        "winRate": 43
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 3,
+        "losses": 97,
+        "winRate": 3
+      },
+      "105": {
+        "wins": 44,
+        "losses": 56,
+        "winRate": 44
+      },
+      "106": {
+        "wins": 38,
+        "losses": 62,
+        "winRate": 38
+      },
+      "107": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "109": {
+        "wins": 48,
+        "losses": 52,
+        "winRate": 48
+      },
+      "110": {
+        "wins": 35,
+        "losses": 65,
+        "winRate": 35
+      },
+      "111": {
+        "wins": 32,
+        "losses": 68,
+        "winRate": 32
+      },
+      "112": {
+        "wins": 42,
+        "losses": 58,
+        "winRate": 42
+      },
+      "113": {
+        "wins": 36,
+        "losses": 64,
+        "winRate": 36
+      },
+      "114": {
+        "wins": 1,
+        "losses": 99,
+        "winRate": 1
+      },
+      "115": {
+        "wins": 41,
+        "losses": 59,
+        "winRate": 41
+      },
+      "116": {
+        "wins": 27,
+        "losses": 73,
+        "winRate": 27
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 8,
+        "losses": 92,
+        "winRate": 8
+      },
+      "120": {
+        "wins": 56,
+        "losses": 44,
+        "winRate": 56.00000000000001
+      },
+      "121": {
+        "wins": 35,
+        "losses": 65,
+        "winRate": 35
+      },
+      "122": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "123": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "124": {
+        "wins": 17,
+        "losses": 83,
+        "winRate": 17
+      },
+      "125": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "126": {
+        "wins": 4,
+        "losses": 96,
+        "winRate": 4
+      },
+      "127": {
+        "wins": 37,
+        "losses": 63,
+        "winRate": 37
+      }
+    },
+    "118": {
+      "101": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "102": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "105": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "106": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "107": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "109": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "110": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "111": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "112": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "113": {
+        "wins": 1,
+        "losses": 99,
+        "winRate": 1
+      },
+      "114": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "115": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "116": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "117": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "119": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "120": {
+        "wins": 1,
+        "losses": 99,
+        "winRate": 1
+      },
+      "121": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "122": {
+        "wins": 2,
+        "losses": 98,
+        "winRate": 2
+      },
+      "123": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "124": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "125": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "126": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "127": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      }
+    },
+    "119": {
+      "101": {
+        "wins": 89,
+        "losses": 11,
+        "winRate": 89
+      },
+      "102": {
+        "wins": 93,
+        "losses": 7,
+        "winRate": 93
+      },
+      "103": {
+        "wins": 63,
+        "losses": 37,
+        "winRate": 63
+      },
+      "104": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "105": {
+        "wins": 91,
+        "losses": 9,
+        "winRate": 91
+      },
+      "106": {
+        "wins": 89,
+        "losses": 11,
+        "winRate": 89
+      },
+      "107": {
+        "wins": 88,
+        "losses": 12,
+        "winRate": 88
+      },
+      "109": {
+        "wins": 91,
+        "losses": 9,
+        "winRate": 91
+      },
+      "110": {
+        "wins": 85,
+        "losses": 15,
+        "winRate": 85
+      },
+      "111": {
+        "wins": 80,
+        "losses": 20,
+        "winRate": 80
+      },
+      "112": {
+        "wins": 92,
+        "losses": 8,
+        "winRate": 92
+      },
+      "113": {
+        "wins": 92,
+        "losses": 8,
+        "winRate": 92
+      },
+      "114": {
+        "wins": 75,
+        "losses": 25,
+        "winRate": 75
+      },
+      "115": {
+        "wins": 83,
+        "losses": 17,
+        "winRate": 83
+      },
+      "116": {
+        "wins": 88,
+        "losses": 12,
+        "winRate": 88
+      },
+      "117": {
+        "wins": 92,
+        "losses": 8,
+        "winRate": 92
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "120": {
+        "wins": 88,
+        "losses": 12,
+        "winRate": 88
+      },
+      "121": {
+        "wins": 89,
+        "losses": 11,
+        "winRate": 89
+      },
+      "122": {
+        "wins": 76,
+        "losses": 24,
+        "winRate": 76
+      },
+      "123": {
+        "wins": 89,
+        "losses": 11,
+        "winRate": 89
+      },
+      "124": {
+        "wins": 72,
+        "losses": 28,
+        "winRate": 72
+      },
+      "125": {
+        "wins": 87,
+        "losses": 13,
+        "winRate": 87
+      },
+      "126": {
+        "wins": 59,
+        "losses": 41,
+        "winRate": 59
+      },
+      "127": {
+        "wins": 87,
+        "losses": 13,
+        "winRate": 87
+      }
+    },
+    "120": {
+      "101": {
+        "wins": 35,
+        "losses": 65,
+        "winRate": 35
+      },
+      "102": {
+        "wins": 28,
+        "losses": 72,
+        "winRate": 28.000000000000004
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 5,
+        "losses": 95,
+        "winRate": 5
+      },
+      "105": {
+        "wins": 32,
+        "losses": 68,
+        "winRate": 32
+      },
+      "106": {
+        "wins": 29,
+        "losses": 71,
+        "winRate": 28.999999999999996
+      },
+      "107": {
+        "wins": 31,
+        "losses": 69,
+        "winRate": 31
+      },
+      "109": {
+        "wins": 36,
+        "losses": 64,
+        "winRate": 36
+      },
+      "110": {
+        "wins": 31,
+        "losses": 69,
+        "winRate": 31
+      },
+      "111": {
+        "wins": 24,
+        "losses": 76,
+        "winRate": 24
+      },
+      "112": {
+        "wins": 37,
+        "losses": 63,
+        "winRate": 37
+      },
+      "113": {
+        "wins": 29,
+        "losses": 71,
+        "winRate": 28.999999999999996
+      },
+      "114": {
+        "wins": 1,
+        "losses": 99,
+        "winRate": 1
+      },
+      "115": {
+        "wins": 32,
+        "losses": 68,
+        "winRate": 32
+      },
+      "116": {
+        "wins": 24,
+        "losses": 76,
+        "winRate": 24
+      },
+      "117": {
+        "wins": 44,
+        "losses": 56,
+        "winRate": 44
+      },
+      "118": {
+        "wins": 99,
+        "losses": 1,
+        "winRate": 99
+      },
+      "119": {
+        "wins": 12,
+        "losses": 88,
+        "winRate": 12
+      },
+      "121": {
+        "wins": 31,
+        "losses": 69,
+        "winRate": 31
+      },
+      "122": {
+        "wins": 46,
+        "losses": 54,
+        "winRate": 46
+      },
+      "123": {
+        "wins": 40,
+        "losses": 60,
+        "winRate": 40
+      },
+      "124": {
+        "wins": 13,
+        "losses": 87,
+        "winRate": 13
+      },
+      "125": {
+        "wins": 32,
+        "losses": 68,
+        "winRate": 32
+      },
+      "126": {
+        "wins": 3,
+        "losses": 97,
+        "winRate": 3
+      },
+      "127": {
+        "wins": 23,
+        "losses": 77,
+        "winRate": 23
+      }
+    },
+    "121": {
+      "101": {
+        "wins": 62,
+        "losses": 38,
+        "winRate": 62
+      },
+      "102": {
+        "wins": 56,
+        "losses": 44,
+        "winRate": 56.00000000000001
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 6,
+        "losses": 94,
+        "winRate": 6
+      },
+      "105": {
+        "wins": 62,
+        "losses": 38,
+        "winRate": 62
+      },
+      "106": {
+        "wins": 68,
+        "losses": 32,
+        "winRate": 68
+      },
+      "107": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      },
+      "109": {
+        "wins": 66,
+        "losses": 34,
+        "winRate": 66
+      },
+      "110": {
+        "wins": 62,
+        "losses": 38,
+        "winRate": 62
+      },
+      "111": {
+        "wins": 59,
+        "losses": 41,
+        "winRate": 59
+      },
+      "112": {
+        "wins": 63,
+        "losses": 37,
+        "winRate": 63
+      },
+      "113": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "114": {
+        "wins": 1,
+        "losses": 99,
+        "winRate": 1
+      },
+      "115": {
+        "wins": 59,
+        "losses": 41,
+        "winRate": 59
+      },
+      "116": {
+        "wins": 43,
+        "losses": 57,
+        "winRate": 43
+      },
+      "117": {
+        "wins": 65,
+        "losses": 35,
+        "winRate": 65
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 11,
+        "losses": 89,
+        "winRate": 11
+      },
+      "120": {
+        "wins": 69,
+        "losses": 31,
+        "winRate": 69
+      },
+      "122": {
+        "wins": 75,
+        "losses": 25,
+        "winRate": 75
+      },
+      "123": {
+        "wins": 61,
+        "losses": 39,
+        "winRate": 61
+      },
+      "124": {
+        "wins": 26,
+        "losses": 74,
+        "winRate": 26
+      },
+      "125": {
+        "wins": 64,
+        "losses": 36,
+        "winRate": 64
+      },
+      "126": {
+        "wins": 12,
+        "losses": 88,
+        "winRate": 12
+      },
+      "127": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      }
+    },
+    "122": {
+      "101": {
+        "wins": 39,
+        "losses": 61,
+        "winRate": 39
+      },
+      "102": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "103": {
+        "wins": 1,
+        "losses": 99,
+        "winRate": 1
+      },
+      "104": {
+        "wins": 4,
+        "losses": 96,
+        "winRate": 4
+      },
+      "105": {
+        "wins": 34,
+        "losses": 66,
+        "winRate": 34
+      },
+      "106": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "107": {
+        "wins": 41,
+        "losses": 59,
+        "winRate": 41
+      },
+      "109": {
+        "wins": 52,
+        "losses": 48,
+        "winRate": 52
+      },
+      "110": {
+        "wins": 33,
+        "losses": 67,
+        "winRate": 33
+      },
+      "111": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "112": {
+        "wins": 42,
+        "losses": 58,
+        "winRate": 42
+      },
+      "113": {
+        "wins": 30,
+        "losses": 70,
+        "winRate": 30
+      },
+      "114": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "115": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "116": {
+        "wins": 33,
+        "losses": 67,
+        "winRate": 33
+      },
+      "117": {
+        "wins": 53,
+        "losses": 47,
+        "winRate": 53
+      },
+      "118": {
+        "wins": 98,
+        "losses": 2,
+        "winRate": 98
+      },
+      "119": {
+        "wins": 24,
+        "losses": 76,
+        "winRate": 24
+      },
+      "120": {
+        "wins": 54,
+        "losses": 46,
+        "winRate": 54
+      },
+      "121": {
+        "wins": 25,
+        "losses": 75,
+        "winRate": 25
+      },
+      "123": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "124": {
+        "wins": 14,
+        "losses": 86,
+        "winRate": 14.000000000000002
+      },
+      "125": {
+        "wins": 56,
+        "losses": 44,
+        "winRate": 56.00000000000001
+      },
+      "126": {
+        "wins": 2,
+        "losses": 98,
+        "winRate": 2
+      },
+      "127": {
+        "wins": 36,
+        "losses": 64,
+        "winRate": 36
+      }
+    },
+    "123": {
+      "101": {
+        "wins": 40,
+        "losses": 60,
+        "winRate": 40
+      },
+      "102": {
+        "wins": 45,
+        "losses": 55,
+        "winRate": 45
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 7,
+        "losses": 93,
+        "winRate": 7.000000000000001
+      },
+      "105": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "106": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "107": {
+        "wins": 54,
+        "losses": 46,
+        "winRate": 54
+      },
+      "109": {
+        "wins": 44,
+        "losses": 56,
+        "winRate": 44
+      },
+      "110": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "111": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "112": {
+        "wins": 39,
+        "losses": 61,
+        "winRate": 39
+      },
+      "113": {
+        "wins": 46,
+        "losses": 54,
+        "winRate": 46
+      },
+      "114": {
+        "wins": 4,
+        "losses": 96,
+        "winRate": 4
+      },
+      "115": {
+        "wins": 42,
+        "losses": 58,
+        "winRate": 42
+      },
+      "116": {
+        "wins": 29,
+        "losses": 71,
+        "winRate": 28.999999999999996
+      },
+      "117": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 11,
+        "losses": 89,
+        "winRate": 11
+      },
+      "120": {
+        "wins": 60,
+        "losses": 40,
+        "winRate": 60
+      },
+      "121": {
+        "wins": 39,
+        "losses": 61,
+        "winRate": 39
+      },
+      "122": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "124": {
+        "wins": 17,
+        "losses": 83,
+        "winRate": 17
+      },
+      "125": {
+        "wins": 55,
+        "losses": 45,
+        "winRate": 55.00000000000001
+      },
+      "126": {
+        "wins": 2,
+        "losses": 98,
+        "winRate": 2
+      },
+      "127": {
+        "wins": 39,
+        "losses": 61,
+        "winRate": 39
+      }
+    },
+    "124": {
+      "101": {
+        "wins": 80,
+        "losses": 20,
+        "winRate": 80
+      },
+      "102": {
+        "wins": 87,
+        "losses": 13,
+        "winRate": 87
+      },
+      "103": {
+        "wins": 2,
+        "losses": 98,
+        "winRate": 2
+      },
+      "104": {
+        "wins": 22,
+        "losses": 78,
+        "winRate": 22
+      },
+      "105": {
+        "wins": 84,
+        "losses": 16,
+        "winRate": 84
+      },
+      "106": {
+        "wins": 90,
+        "losses": 10,
+        "winRate": 90
+      },
+      "107": {
+        "wins": 84,
+        "losses": 16,
+        "winRate": 84
+      },
+      "109": {
+        "wins": 80,
+        "losses": 20,
+        "winRate": 80
+      },
+      "110": {
+        "wins": 75,
+        "losses": 25,
+        "winRate": 75
+      },
+      "111": {
+        "wins": 86,
+        "losses": 14,
+        "winRate": 86
+      },
+      "112": {
+        "wins": 84,
+        "losses": 16,
+        "winRate": 84
+      },
+      "113": {
+        "wins": 80,
+        "losses": 20,
+        "winRate": 80
+      },
+      "114": {
+        "wins": 11,
+        "losses": 89,
+        "winRate": 11
+      },
+      "115": {
+        "wins": 81,
+        "losses": 19,
+        "winRate": 81
+      },
+      "116": {
+        "wins": 77,
+        "losses": 23,
+        "winRate": 77
+      },
+      "117": {
+        "wins": 83,
+        "losses": 17,
+        "winRate": 83
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 28,
+        "losses": 72,
+        "winRate": 28.000000000000004
+      },
+      "120": {
+        "wins": 87,
+        "losses": 13,
+        "winRate": 87
+      },
+      "121": {
+        "wins": 74,
+        "losses": 26,
+        "winRate": 74
+      },
+      "122": {
+        "wins": 86,
+        "losses": 14,
+        "winRate": 86
+      },
+      "123": {
+        "wins": 83,
+        "losses": 17,
+        "winRate": 83
+      },
+      "125": {
+        "wins": 91,
+        "losses": 9,
+        "winRate": 91
+      },
+      "126": {
+        "wins": 36,
+        "losses": 64,
+        "winRate": 36
+      },
+      "127": {
+        "wins": 78,
+        "losses": 22,
+        "winRate": 78
+      }
+    },
+    "125": {
+      "101": {
+        "wins": 33,
+        "losses": 67,
+        "winRate": 33
+      },
+      "102": {
+        "wins": 45,
+        "losses": 55,
+        "winRate": 45
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 4,
+        "losses": 96,
+        "winRate": 4
+      },
+      "105": {
+        "wins": 34,
+        "losses": 66,
+        "winRate": 34
+      },
+      "106": {
+        "wins": 37,
+        "losses": 63,
+        "winRate": 37
+      },
+      "107": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "109": {
+        "wins": 45,
+        "losses": 55,
+        "winRate": 45
+      },
+      "110": {
+        "wins": 39,
+        "losses": 61,
+        "winRate": 39
+      },
+      "111": {
+        "wins": 39,
+        "losses": 61,
+        "winRate": 39
+      },
+      "112": {
+        "wins": 41,
+        "losses": 59,
+        "winRate": 41
+      },
+      "113": {
+        "wins": 45,
+        "losses": 55,
+        "winRate": 45
+      },
+      "114": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "115": {
+        "wins": 49,
+        "losses": 51,
+        "winRate": 49
+      },
+      "116": {
+        "wins": 28,
+        "losses": 72,
+        "winRate": 28.000000000000004
+      },
+      "117": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 13,
+        "losses": 87,
+        "winRate": 13
+      },
+      "120": {
+        "wins": 68,
+        "losses": 32,
+        "winRate": 68
+      },
+      "121": {
+        "wins": 36,
+        "losses": 64,
+        "winRate": 36
+      },
+      "122": {
+        "wins": 44,
+        "losses": 56,
+        "winRate": 44
+      },
+      "123": {
+        "wins": 45,
+        "losses": 55,
+        "winRate": 45
+      },
+      "124": {
+        "wins": 9,
+        "losses": 91,
+        "winRate": 9
+      },
+      "126": {
+        "wins": 1,
+        "losses": 99,
+        "winRate": 1
+      },
+      "127": {
+        "wins": 38,
+        "losses": 62,
+        "winRate": 38
+      }
+    },
+    "126": {
+      "101": {
+        "wins": 96,
+        "losses": 4,
+        "winRate": 96
+      },
+      "102": {
+        "wins": 96,
+        "losses": 4,
+        "winRate": 96
+      },
+      "103": {
+        "wins": 6,
+        "losses": 94,
+        "winRate": 6
+      },
+      "104": {
+        "wins": 35,
+        "losses": 65,
+        "winRate": 35
+      },
+      "105": {
+        "wins": 94,
+        "losses": 6,
+        "winRate": 94
+      },
+      "106": {
+        "wins": 91,
+        "losses": 9,
+        "winRate": 91
+      },
+      "107": {
+        "wins": 90,
+        "losses": 10,
+        "winRate": 90
+      },
+      "109": {
+        "wins": 94,
+        "losses": 6,
+        "winRate": 94
+      },
+      "110": {
+        "wins": 93,
+        "losses": 7,
+        "winRate": 93
+      },
+      "111": {
+        "wins": 96,
+        "losses": 4,
+        "winRate": 96
+      },
+      "112": {
+        "wins": 90,
+        "losses": 10,
+        "winRate": 90
+      },
+      "113": {
+        "wins": 96,
+        "losses": 4,
+        "winRate": 96
+      },
+      "114": {
+        "wins": 23,
+        "losses": 77,
+        "winRate": 23
+      },
+      "115": {
+        "wins": 96,
+        "losses": 4,
+        "winRate": 96
+      },
+      "116": {
+        "wins": 93,
+        "losses": 7,
+        "winRate": 93
+      },
+      "117": {
+        "wins": 96,
+        "losses": 4,
+        "winRate": 96
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 41,
+        "losses": 59,
+        "winRate": 41
+      },
+      "120": {
+        "wins": 97,
+        "losses": 3,
+        "winRate": 97
+      },
+      "121": {
+        "wins": 88,
+        "losses": 12,
+        "winRate": 88
+      },
+      "122": {
+        "wins": 98,
+        "losses": 2,
+        "winRate": 98
+      },
+      "123": {
+        "wins": 98,
+        "losses": 2,
+        "winRate": 98
+      },
+      "124": {
+        "wins": 64,
+        "losses": 36,
+        "winRate": 64
+      },
+      "125": {
+        "wins": 99,
+        "losses": 1,
+        "winRate": 99
+      },
+      "127": {
+        "wins": 96,
+        "losses": 4,
+        "winRate": 96
+      }
+    },
+    "127": {
+      "101": {
+        "wins": 63,
+        "losses": 37,
+        "winRate": 63
+      },
+      "102": {
+        "wins": 64,
+        "losses": 36,
+        "winRate": 64
+      },
+      "103": {
+        "wins": 0,
+        "losses": 100,
+        "winRate": 0
+      },
+      "104": {
+        "wins": 8,
+        "losses": 92,
+        "winRate": 8
+      },
+      "105": {
+        "wins": 50,
+        "losses": 50,
+        "winRate": 50
+      },
+      "106": {
+        "wins": 64,
+        "losses": 36,
+        "winRate": 64
+      },
+      "107": {
+        "wins": 62,
+        "losses": 38,
+        "winRate": 62
+      },
+      "109": {
+        "wins": 67,
+        "losses": 33,
+        "winRate": 67
+      },
+      "110": {
+        "wins": 57,
+        "losses": 43,
+        "winRate": 56.99999999999999
+      },
+      "111": {
+        "wins": 56,
+        "losses": 44,
+        "winRate": 56.00000000000001
+      },
+      "112": {
+        "wins": 55,
+        "losses": 45,
+        "winRate": 55.00000000000001
+      },
+      "113": {
+        "wins": 59,
+        "losses": 41,
+        "winRate": 59
+      },
+      "114": {
+        "wins": 2,
+        "losses": 98,
+        "winRate": 2
+      },
+      "115": {
+        "wins": 66,
+        "losses": 34,
+        "winRate": 66
+      },
+      "116": {
+        "wins": 51,
+        "losses": 49,
+        "winRate": 51
+      },
+      "117": {
+        "wins": 63,
+        "losses": 37,
+        "winRate": 63
+      },
+      "118": {
+        "wins": 100,
+        "losses": 0,
+        "winRate": 100
+      },
+      "119": {
+        "wins": 13,
+        "losses": 87,
+        "winRate": 13
+      },
+      "120": {
+        "wins": 77,
+        "losses": 23,
+        "winRate": 77
+      },
+      "121": {
+        "wins": 47,
+        "losses": 53,
+        "winRate": 47
+      },
+      "122": {
+        "wins": 64,
+        "losses": 36,
+        "winRate": 64
+      },
+      "123": {
+        "wins": 61,
+        "losses": 39,
+        "winRate": 61
+      },
+      "124": {
+        "wins": 22,
+        "losses": 78,
+        "winRate": 22
+      },
+      "125": {
+        "wins": 62,
+        "losses": 38,
+        "winRate": 62
+      },
+      "126": {
+        "wins": 4,
+        "losses": 96,
+        "winRate": 4
+      }
+    }
+  }
+}
