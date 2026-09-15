@@ -1536,6 +1536,58 @@ export class FighterCombat {
           break;
         }
 
+        // --- 34. DRÁCULA: ECLIPSE DE SANGUE ---
+        if (fighter.superType === 'DRACULA_BLOOD_ECLIPSE') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.4) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 35. KIRITO: STARBURST STREAM ---
+        if (fighter.superType === 'KIRITO_STARBURST_STREAM') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.45) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 36. EREN YEAGER: TRANSFORMAÇÃO TITÃ ---
+        if (fighter.superType === 'EREN_TITAN_ROAR') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.4) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 37. BRUCE LEE: FÚRIA DO DRAGÃO ---
+        if (fighter.superType === 'BRUCE_LEE_DRAGON_FURY') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.4) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
         // --- 7. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
         if (fighter.stateTime < 0.5) {
           fighter.velocity.x = 0;

@@ -111,6 +111,12 @@ export class Fighter {
     this.isSonic = Boolean(cNameLower.includes('sonic') || charData.superType === 'SONIC_SUPER_TRANSFORMATION');
     this.isBane = Boolean(cNameLower.includes('bane') || charData.superType === 'BANE_BACKBREAKER');
 
+    // Identificação do Lote 6 dos Novos Personagens (Drácula, Kirito, Eren, Bruce Lee)
+    this.isDracula = Boolean(cNameLower.includes('dracula') || cNameLower.includes('drcula') || charData.superType === 'DRACULA_BLOOD_ECLIPSE');
+    this.isKirito = Boolean(cNameLower.includes('kirito') || charData.superType === 'KIRITO_STARBURST_STREAM');
+    this.isEren = Boolean(cNameLower.includes('eren') || charData.superType === 'EREN_TITAN_ROAR');
+    this.isBruceLee = Boolean(cNameLower.includes('bruce lee') || cNameLower.includes('lee') && !cNameLower.includes('banner') || charData.superType === 'BRUCE_LEE_DRAGON_FURY');
+
     // Estado e Animação
     this.state = FIGHTER_STATE.IDLE;
     this.stateTime = 0;
@@ -231,6 +237,16 @@ export class Fighter {
     this.baneVenomSmash = null; // { timer, reach, damage, active, hasHit }
     this.baneBackbreaker = null; // { timer, target, damage, active, phase: 'GRAB' }
 
+    // Projéteis e Habilidades Especiais: Drácula, Kirito, Eren, Bruce Lee (Lote 6)
+    this.draculaBats = null; // { x, y, vx, damage, active, hasHit }
+    this.draculaBloodEclipse = null; // { timer, x, y, damage, active, hitsLanded: 0 }
+    this.kiritoVorpal = null; // { timer, startX, targetX, damage, active, hasHit }
+    this.kiritoStarburst = null; // { timer, target, damage, active, hitsLanded: 0 }
+    this.erenDmtRush = null; // { timer, startX, targetX, damage, active, hasHit }
+    this.erenTitanRoar = null; // { timer, x, y, damage, active, hasHit }
+    this.bruceLeeOneInch = null; // { timer, reach, damage, active, hasHit }
+    this.bruceLeeDragonFury = null; // { timer, target, damage, active, hitsLanded: 0 }
+
     // Articulação Esquelética
     this.pose = {
       head: { x: 0, y: -115 },
@@ -347,6 +363,16 @@ export class Fighter {
     this.baneVenomBuffTimer = 0;
     this.baneVenomSmash = null;
     this.baneBackbreaker = null;
+
+    // Reset Lote 6
+    this.draculaBats = null;
+    this.draculaBloodEclipse = null;
+    this.kiritoVorpal = null;
+    this.kiritoStarburst = null;
+    this.erenDmtRush = null;
+    this.erenTitanRoar = null;
+    this.bruceLeeOneInch = null;
+    this.bruceLeeDragonFury = null;
 
     // Reinicia o rank do Verso em uma nova rodada
     if (this.isVerso) {
@@ -1282,6 +1308,85 @@ export class Fighter {
         }
       }
     }
+    // 33. Drácula: Enxame de Morcegos Sanguinários (Q)
+    else if (this.isDracula) {
+      this.extraType = 'DRACULA_BAT_SWARM';
+      sounds.playWhoosh();
+      sounds.playDash();
+      const sx = this.position.x + this.facing * 35;
+      const sy = this.position.y - 65;
+      this.draculaBats = {
+        x: sx,
+        y: sy,
+        vx: this.facing * (level === 2 ? 1050 : 850),
+        damage: level === 2 ? 190 : 130,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 34. Kirito: Vorpal Strike Cruzado (Q)
+    else if (this.isKirito) {
+      this.extraType = 'KIRITO_VORPAL_STRIKE';
+      sounds.playSuperCharge();
+      sounds.playDash();
+      const target = this.opponent;
+      const targetX = target ? target.position.x : this.position.x + this.facing * 280;
+      this.kiritoVorpal = {
+        timer: 0,
+        startX: this.position.x,
+        targetX: targetX,
+        damage: level === 2 ? 220 : 155,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 35. Eren Yeager: Dispositivo DMT & Lâminas de Aço (Q)
+    else if (this.isEren) {
+      this.extraType = 'EREN_DMT_DASH';
+      sounds.playWhoosh();
+      sounds.playDash();
+      const target = this.opponent;
+      const targetX = target ? target.position.x + this.facing * 40 : this.position.x + this.facing * 270;
+      this.erenDmtRush = {
+        timer: 0,
+        startX: this.position.x,
+        targetX: targetX,
+        damage: level === 2 ? 215 : 150,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 36. Bruce Lee: One-Inch Punch à Queima-Roupa (Q)
+    else if (this.isBruceLee) {
+      this.extraType = 'BRUCE_LEE_ONE_INCH_PUNCH';
+      sounds.playPunch(true);
+      sounds.playThunderSlam();
+      const reach = 85;
+      const dmg = level === 2 ? 240 : 170;
+      this.bruceLeeOneInch = {
+        timer: 0,
+        reach: reach,
+        damage: dmg,
+        active: true,
+        hasHit: false
+      };
+      if (this.opponent && !this.opponent.isDead) {
+        const dist = Math.abs(this.opponent.position.x - this.position.x);
+        const facingOpp = (this.opponent.position.x - this.position.x) * this.facing > 0;
+        if (facingOpp && dist < reach) {
+          this.bruceLeeOneInch.hasHit = true;
+          const attackData = {
+            damage: dmg,
+            knockback: 26,
+            knockdown: true,
+            isHeavy: true,
+            unblockable: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 65 }, null);
+        }
+      }
+    }
     // Personagens genéricos: golpe padrão fortificado
     else {
       this.extraType = 'GENERIC_EXTRA';
@@ -1705,6 +1810,59 @@ export class Fighter {
         target: target,
         damage: 420,
         active: true
+      };
+    } else if (this.superType === 'DRACULA_BLOOD_ECLIPSE') {
+      this.superPhase = 'BLOOD_ECLIPSE';
+      sounds.playSuperCharge();
+      sounds.playWhoosh();
+      sounds.playKO();
+      this.draculaBloodEclipse = {
+        timer: 0,
+        x: this.position.x,
+        y: this.position.y - 70,
+        damage: 390,
+        active: true,
+        hitsLanded: 0
+      };
+      // Drácula cura 15% de vida com o dreno de sangue do eclipse
+      this.health = Math.min(this.maxHealth, this.health + Math.round(this.maxHealth * 0.15));
+    } else if (this.superType === 'KIRITO_STARBURST_STREAM') {
+      this.superPhase = 'STARBURST_STREAM';
+      sounds.playSuperCharge();
+      sounds.playDash();
+      const target = this.opponent;
+      this.kiritoStarburst = {
+        timer: 0,
+        target: target,
+        damage: 410,
+        active: true,
+        hitsLanded: 0
+      };
+    } else if (this.superType === 'EREN_TITAN_ROAR') {
+      this.superPhase = 'TITAN_TRANSFORMATION';
+      sounds.playSuperCharge();
+      sounds.playThunderSlam();
+      const targetX = this.opponent ? this.opponent.position.x : this.position.x + this.facing * 220;
+      this.erenTitanRoar = {
+        timer: 0,
+        x: targetX,
+        y: this.groundY - 140,
+        damage: 425,
+        active: true,
+        hasHit: false
+      };
+    } else if (this.superType === 'BRUCE_LEE_DRAGON_FURY') {
+      this.superPhase = 'DRAGON_FURY';
+      sounds.playSuperCharge();
+      sounds.playPunch(true);
+      sounds.playThunderSlam();
+      const target = this.opponent;
+      this.bruceLeeDragonFury = {
+        timer: 0,
+        target: target,
+        damage: 415,
+        active: true,
+        hitsLanded: 0
       };
     } else {
       this.superType = 'GUSTAVE_SMASH';
@@ -4311,6 +4469,299 @@ export class Fighter {
       }
     }
 
+    // 5.53 Drácula: Enxame de Morcegos Sanguinários (Q)
+    if (this.draculaBats && this.draculaBats.active) {
+      const db = this.draculaBats;
+      db.x += db.vx * dt;
+
+      if (particles && Math.random() < 0.85) {
+        particles.emitSparks(db.x, db.y, '#991b1b', 6, 4);
+      }
+
+      if (this.opponent && !this.opponent.isDead && !db.hasHit) {
+        const dist = Math.hypot(db.x - this.opponent.position.x, db.y - (this.opponent.position.y - 65));
+        if (dist < 50) {
+          db.hasHit = true;
+          db.active = false;
+          sounds.playPunch(true);
+          sounds.playWhoosh();
+          if (particles) {
+            particles.emitShockwave(db.x, db.y, 110, '#991b1b');
+            particles.emitSparks(db.x, db.y, '#ef4444', 25, 8);
+            particles.emitFloatingText('MORCEGOS CARNÍVOROS!', db.x, db.y - 30, '#991b1b', true);
+          }
+          // Drácula cura 25 de vida ao sugar sangue
+          this.health = Math.min(this.maxHealth, this.health + 25);
+          const attackData = {
+            damage: db.damage,
+            knockback: 18,
+            knockdown: false,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: db.x, y: db.y }, particles);
+          this.draculaBats = null;
+        }
+      }
+
+      if (db.x < -100 || db.x > stageWidth + 100) {
+        db.active = false;
+        this.draculaBats = null;
+      }
+    }
+
+    // 5.54 Drácula: Eclipse de Sangue & Asas Demoníacas (Ultimate)
+    if (this.draculaBloodEclipse && this.draculaBloodEclipse.active) {
+      const de = this.draculaBloodEclipse;
+      de.timer += dt;
+
+      if (particles && Math.random() < 0.9) {
+        particles.emitShockwave(de.x, de.y, 180, '#991b1b');
+        particles.emitSparks(de.x, de.y, '#dc2626', 15, 8);
+      }
+
+      const pulseHits = [0.3, 0.65, 1.05];
+      for (let i = de.hitsLanded; i < pulseHits.length; i++) {
+        if (de.timer >= pulseHits[i]) {
+          de.hitsLanded = i + 1;
+          sounds.playThunderSlam();
+          if (this.opponent && !this.opponent.isDead) {
+            const oppDist = Math.abs(this.opponent.position.x - de.x);
+            if (oppDist < 260) {
+              const isFinal = i === pulseHits.length - 1;
+              const attackData = {
+                damage: Math.round(de.damage / 3),
+                knockback: isFinal ? 32 : 10,
+                knockdown: isFinal,
+                isHeavy: isFinal,
+                unblockable: true,
+                attackerPower: this.attackPower
+              };
+              this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
+            }
+          }
+        }
+      }
+
+      if (de.timer >= 1.4) {
+        de.active = false;
+        this.draculaBloodEclipse = null;
+      }
+    }
+
+    // 5.55 Kirito: Vorpal Strike Cruzado (Q)
+    if (this.kiritoVorpal && this.kiritoVorpal.active) {
+      const kv = this.kiritoVorpal;
+      kv.timer += dt;
+      const progress = Math.min(1, kv.timer / 0.18);
+      this.position.x = kv.startX + (kv.targetX - kv.startX) * progress;
+
+      if (particles && Math.random() < 0.8) {
+        particles.emitElectricArc(this.position.x - 20, this.position.y - 60, this.position.x + 20, this.position.y - 60, '#38bdf8');
+        particles.emitSparks(this.position.x, this.position.y - 60, '#0284c7', 8, 6);
+      }
+
+      if (this.opponent && !this.opponent.isDead && !kv.hasHit && progress > 0.3) {
+        const dist = Math.abs(this.position.x - this.opponent.position.x);
+        if (dist < 80) {
+          kv.hasHit = true;
+          sounds.playPunch(true);
+          sounds.playLaser();
+          if (particles) {
+            particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 160, '#38bdf8');
+            particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 60, '#ffffff', 30, 12);
+            particles.emitFloatingText('VORPAL STRIKE!', this.opponent.position.x, this.opponent.position.y - 85, '#38bdf8', true);
+          }
+          const attackData = {
+            damage: kv.damage,
+            knockback: 22,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
+        }
+      }
+
+      if (progress >= 1) {
+        kv.active = false;
+        this.kiritoVorpal = null;
+      }
+    }
+
+    // 5.56 Kirito: Starburst Stream de 16 Acertos (Ultimate)
+    if (this.kiritoStarburst && this.kiritoStarburst.active) {
+      const ks = this.kiritoStarburst;
+      ks.timer += dt;
+      const target = ks.target;
+
+      if (particles && Math.random() < 0.85) {
+        particles.emitSparks(this.position.x, this.position.y - 60, '#38bdf8', 6, 5);
+      }
+
+      // Combo acrobático de 5 salvas rápidas simulando a chuva de golpes de 16 acertos
+      const slashTimes = [0.2, 0.45, 0.7, 0.95, 1.25];
+      for (let i = ks.hitsLanded; i < slashTimes.length; i++) {
+        if (ks.timer >= slashTimes[i]) {
+          ks.hitsLanded = i + 1;
+          sounds.playPunch(true);
+          sounds.playLaser();
+          const isFinal = i === slashTimes.length - 1;
+          if (target && !target.isDead) {
+            this.position.x = target.position.x - this.facing * 50;
+            if (particles) {
+              particles.emitShockwave(target.position.x, target.position.y - 60, isFinal ? 220 : 110, isFinal ? '#0284c7' : '#38bdf8');
+              particles.emitSparks(target.position.x, target.position.y - 60, '#ffffff', isFinal ? 40 : 15, 8);
+              if (isFinal) {
+                particles.emitFloatingText('STARBURST STREAM!', target.position.x, target.position.y - 95, '#0284c7', true);
+              }
+            }
+            const attackData = {
+              damage: Math.round(ks.damage / 5),
+              knockback: isFinal ? 36 : 6,
+              knockdown: isFinal,
+              isHeavy: isFinal,
+              unblockable: true,
+              attackerPower: this.attackPower
+            };
+            target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 60 }, particles);
+          }
+        }
+      }
+
+      if (ks.timer >= 1.45) {
+        ks.active = false;
+        this.kiritoStarburst = null;
+      }
+    }
+
+    // 5.57 Eren Yeager: Avanço com Cabos do DMT (Q)
+    if (this.erenDmtRush && this.erenDmtRush.active) {
+      const ed = this.erenDmtRush;
+      ed.timer += dt;
+      const progress = Math.min(1, ed.timer / 0.22);
+      this.position.x = ed.startX + (ed.targetX - ed.startX) * progress;
+
+      if (particles && Math.random() < 0.75) {
+        particles.emitDust(this.position.x, this.groundY, 6, '#78350f');
+        particles.emitSparks(this.position.x, this.position.y - 55, '#ffffff', 4, 3);
+      }
+
+      if (this.opponent && !this.opponent.isDead && !ed.hasHit && progress > 0.3) {
+        const dist = Math.abs(this.position.x - this.opponent.position.x);
+        if (dist < 80) {
+          ed.hasHit = true;
+          sounds.playPunch(true);
+          sounds.playWhoosh();
+          if (particles) {
+            particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 140, '#15803d');
+            particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 60, '#ef4444', 25, 9);
+            particles.emitFloatingText('CORTE DUPLO DMT!', this.opponent.position.x, this.opponent.position.y - 85, '#15803d', true);
+          }
+          const attackData = {
+            damage: ed.damage,
+            knockback: 20,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
+        }
+      }
+
+      if (progress >= 1) {
+        ed.active = false;
+        this.erenDmtRush = null;
+      }
+    }
+
+    // 5.58 Eren Yeager: Transformação em Titã de Ataque (Ultimate)
+    if (this.erenTitanRoar && this.erenTitanRoar.active) {
+      const et = this.erenTitanRoar;
+      et.timer += dt;
+
+      if (particles && Math.random() < 0.9) {
+        particles.emitElectricArc(et.x, et.y - 400, et.x, this.groundY, '#facc15', 6);
+        particles.emitSparks(et.x, this.groundY, '#ffffff', 16, 9);
+      }
+
+      if (!et.hasHit && et.timer >= 0.5) {
+        et.hasHit = true;
+        sounds.playThunderSlam();
+        sounds.playKO();
+        if (particles) {
+          particles.emitShockwave(et.x, this.groundY, 320, '#facc15');
+          particles.emitShockwave(et.x, this.groundY, 200, '#ef4444');
+          particles.emitSparks(et.x, this.groundY - 80, '#ffffff', 65, 22);
+          particles.emitFloatingText('TRANSFORMAÇÃO TITÃ!', et.x, et.y - 40, '#ef4444', true);
+        }
+        if (this.opponent && !this.opponent.isDead) {
+          const dist = Math.abs(this.opponent.position.x - et.x);
+          if (dist < 260) {
+            const attackData = {
+              damage: et.damage,
+              knockback: 38,
+              knockdown: true,
+              isHeavy: true,
+              unblockable: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 70 }, particles);
+          }
+        }
+      }
+
+      if (et.timer >= 1.4) {
+        et.active = false;
+        this.erenTitanRoar = null;
+      }
+    }
+
+    // 5.59 Bruce Lee: Fúria do Dragão (Ultimate)
+    if (this.bruceLeeDragonFury && this.bruceLeeDragonFury.active) {
+      const bl = this.bruceLeeDragonFury;
+      bl.timer += dt;
+      const target = bl.target;
+
+      if (particles && Math.random() < 0.8) {
+        particles.emitSparks(this.position.x, this.position.y - 65, '#facc15', 6, 5);
+      }
+
+      const furyTimes = [0.25, 0.55, 0.85, 1.15];
+      for (let i = bl.hitsLanded; i < furyTimes.length; i++) {
+        if (bl.timer >= furyTimes[i]) {
+          bl.hitsLanded = i + 1;
+          sounds.playPunch(true);
+          sounds.playThunderSlam();
+          const isFinal = i === furyTimes.length - 1;
+          if (target && !target.isDead) {
+            this.position.x = target.position.x - this.facing * 45;
+            if (particles) {
+              particles.emitShockwave(target.position.x, target.position.y - 60, isFinal ? 220 : 115, '#eab308');
+              particles.emitSparks(target.position.x, target.position.y - 60, '#ef4444', isFinal ? 40 : 16, 9);
+              if (isFinal) {
+                particles.emitFloatingText('O GRITO DO DRAGÃO!', target.position.x, target.position.y - 90, '#eab308', true);
+              }
+            }
+            const attackData = {
+              damage: Math.round(bl.damage / 4),
+              knockback: isFinal ? 36 : 6,
+              knockdown: isFinal,
+              isHeavy: isFinal,
+              unblockable: true,
+              attackerPower: this.attackPower
+            };
+            target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 60 }, particles);
+          }
+        }
+      }
+
+      if (bl.timer >= 1.4) {
+        bl.active = false;
+        this.bruceLeeDragonFury = null;
+      }
+    }
+
     // 6. Watchdog de Segurança Anti-Travamento (Golpes comuns 0.8s, Super Move 1.6s)
     const attackStates = [
       FIGHTER_STATE.LIGHT_PUNCH,
@@ -5923,6 +6374,126 @@ export class Fighter {
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.arc(0, 0, 38 + Math.sin(Date.now() * 0.01) * 4, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 46. Drácula: Enxame de Morcegos Sanguinários (Q)
+    if (this.draculaBats && this.draculaBats.active) {
+      const db = this.draculaBats;
+      ctx.save();
+      ctx.translate(db.x, db.y);
+      ctx.shadowColor = '#991b1b';
+      ctx.shadowBlur = 18;
+
+      // 3 Silhuetas de morcegos batendo asas
+      for (let i = 0; i < 3; i++) {
+        const ox = (i - 1) * 14;
+        const oy = Math.sin(Date.now() * 0.02 + i) * 8;
+        ctx.fillStyle = '#09090b';
+        ctx.beginPath();
+        ctx.arc(ox, oy, 4, 0, Math.PI * 2);
+        // Asas abertas
+        ctx.moveTo(ox, oy);
+        ctx.lineTo(ox - 10, oy - 6);
+        ctx.lineTo(ox - 4, oy);
+        ctx.lineTo(ox + 10, oy - 6);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // 47. Drácula: Eclipse de Sangue e Asas Sombrias (Ultimate)
+    if (this.draculaBloodEclipse && this.draculaBloodEclipse.active) {
+      const de = this.draculaBloodEclipse;
+      ctx.save();
+      ctx.translate(de.x, de.y);
+      ctx.shadowColor = '#dc2626';
+      ctx.shadowBlur = 35;
+
+      // Lua de sangue escarlate
+      const moonGrad = ctx.createRadialGradient(0, 0, 5, 0, 0, 48);
+      moonGrad.addColorStop(0, '#ffffff');
+      moonGrad.addColorStop(0.3, '#ef4444');
+      moonGrad.addColorStop(0.8, '#7f1d1d');
+      moonGrad.addColorStop(1, '#09090b');
+      ctx.fillStyle = moonGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 48, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Asas demoníacas gigantescas projetadas
+      ctx.fillStyle = 'rgba(9, 9, 11, 0.85)';
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(-90, -70, -140, 20);
+      ctx.lineTo(-70, 10);
+      ctx.lineTo(0, 0);
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(90, -70, 140, 20);
+      ctx.lineTo(70, 10);
+      ctx.lineTo(0, 0);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // 48. Kirito: Rastro Celeste de Elucidator & Dark Repulser (Q / Ultimate)
+    if (this.kiritoVorpal && this.kiritoVorpal.active) {
+      const kx = this.position.x + this.facing * 35;
+      const ky = this.position.y - 60;
+      ctx.save();
+      ctx.translate(kx, ky);
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 24;
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(-20 * this.facing, 15);
+      ctx.lineTo(35 * this.facing, -15);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 49. Eren Yeager: Relâmpago Amarelo da Transformação Titã (Ultimate)
+    if (this.erenTitanRoar && this.erenTitanRoar.active) {
+      const et = this.erenTitanRoar;
+      ctx.save();
+      ctx.shadowColor = '#facc15';
+      ctx.shadowBlur = 36;
+
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 16;
+      ctx.beginPath();
+      ctx.moveTo(et.x, et.y - 450);
+      ctx.lineTo(et.x - 20, et.y - 200);
+      ctx.lineTo(et.x + 20, et.y - 80);
+      ctx.lineTo(et.x, this.groundY);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 6;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 50. Bruce Lee: Onda de Choque do One-Inch Punch (Q)
+    if (this.bruceLeeOneInch && this.bruceLeeOneInch.active && this.bruceLeeOneInch.hasHit) {
+      const bx = this.position.x + this.facing * 35;
+      const by = this.position.y - 65;
+      ctx.save();
+      ctx.shadowColor = '#eab308';
+      ctx.shadowBlur = 25;
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(bx, by, 35, -Math.PI / 2, Math.PI / 2, this.facing === -1);
       ctx.stroke();
       ctx.restore();
     }

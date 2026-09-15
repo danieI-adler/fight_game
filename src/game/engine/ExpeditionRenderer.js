@@ -948,6 +948,73 @@ export class ExpeditionRenderer {
       ctx.moveTo(hx - 2 * f, hy - 4);
       ctx.lineTo(hx + 6 * f, hy + 4);
       ctx.stroke();
+    } else if (vis.weaponType === 'bat_swarm') {
+      // Aura de névoa e morcegos de Drácula na mão
+      ctx.fillStyle = '#450a0a';
+      ctx.beginPath();
+      ctx.arc(hx + 4 * f, hy, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.arc(hx + 6 * f, hy - 3, 3, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (vis.weaponType === 'dual_elucidator_dark_repulser') {
+      // Espada Dupla de Kirito: Elucidator (preta) e Dark Repulser (azul-esverdeada)
+      // Elucidator (mão principal)
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(hx + 42 * f, hy - 16);
+      ctx.stroke();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      // Dark Repulser (mão secundária/cruzada)
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(hx - 4 * f, hy + 2);
+      ctx.lineTo(hx + 36 * f, hy + 16);
+      ctx.stroke();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    } else if (vis.weaponType === 'dmt_blades') {
+      // Duas Lâminas de Aço Ultra-Duro com empunhaduras de gatilho do DMT de Eren
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(hx + 38 * f, hy - 12);
+      ctx.stroke();
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      // Gatilho do cabo
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(hx - 6 * f, hy - 2, 6 * f, 4);
+    } else if (vis.weaponType === 'nunchaku') {
+      // Nunchaku de madeira e corrente de Bruce Lee
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(hx + 18 * f, hy - 14);
+      ctx.stroke();
+      // Corrente e bastão secundário pendente
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(hx + 18 * f, hy - 14);
+      ctx.lineTo(hx + 24 * f, hy - 12);
+      ctx.stroke();
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(hx + 24 * f, hy - 12);
+      ctx.lineTo(hx + 34 * f, hy + 2);
+      ctx.stroke();
     }
 
     ctx.restore();
@@ -1290,6 +1357,69 @@ export class ExpeditionRenderer {
       ctx.moveTo(hx - 6 * f, hy + 6);
       ctx.quadraticCurveTo(hx - 14 * f, hy - 2, hx - 4 * f, hy - 10);
       ctx.stroke();
+    } else if (vis.headgear === 'widows_peak' || vis.hairStyle === 'slick_back_dark') {
+      // Drácula: Cabelo preto penteado para trás com bico de viúva e tez pálida
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 7, 12, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Bico de viúva na testa
+      ctx.beginPath();
+      ctx.moveTo(hx - 6, hy - 6);
+      ctx.lineTo(hx, hy - 2);
+      ctx.lineTo(hx + 6, hy - 6);
+      ctx.fill();
+      // Olhar sombrio avermelhado
+      ctx.fillStyle = '#991b1b';
+      ctx.beginPath();
+      ctx.arc(hx + 4 * f, hy - 1, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (vis.headgear === 'kirito_hair' || vis.hairStyle === 'bangs_dark') {
+      // Kirito: Cabelo preto desfiado com franjas sobre a testa
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 6, 12, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Franjas pontudas
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(hx - 6 + i * 4, hy - 4);
+        ctx.lineTo(hx - 4 + i * 4, hy + 2);
+        ctx.lineTo(hx - 2 + i * 4, hy - 4);
+        ctx.fill();
+      }
+    } else if (vis.headgear === 'scout_hair' || vis.hairStyle === 'parted_brown') {
+      // Eren Yeager: Cabelo castanho escuro repartido com marcas de titã sob os olhos
+      ctx.fillStyle = '#451a03';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 6, 12, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(hx - 4, hy - 4);
+      ctx.lineTo(hx + 4 * f, hy + 3);
+      ctx.lineTo(hx + 2 * f, hy - 2);
+      ctx.fill();
+      // Marcas vermelhas de titã sob o olho
+      ctx.strokeStyle = '#dc2626';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(hx + 2 * f, hy + 2);
+      ctx.lineTo(hx + 6 * f, hy + 5);
+      ctx.stroke();
+    } else if (vis.headgear === 'bruce_hair' || vis.hairStyle === 'mop_top_black') {
+      // Bruce Lee: Corte de tigela clássico preto com expressão focada
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 7, 12, 6.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Linha reta da franja na testa
+      ctx.fillRect(hx - 8, hy - 5, 16, 3);
+      // Costeleta lateral
+      ctx.beginPath();
+      ctx.moveTo(hx - 6 * f, hy - 4);
+      ctx.lineTo(hx - 6 * f, hy + 3);
+      ctx.lineTo(hx - 4 * f, hy);
+      ctx.fill();
     } else {
       // Cabelo clássico
       ctx.beginPath();
