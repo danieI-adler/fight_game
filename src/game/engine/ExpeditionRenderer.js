@@ -1706,8 +1706,20 @@ export class ExpeditionRenderer {
       ctx.fill();
     }
 
-    // 8. Olho com Brilho Temático
-    if (!vis.hasRuneFaceSlab) {
+    // 8. Olho com Brilho Temático (Apenas se o personagem não tiver seus próprios olhos/lentes renderizados)
+    const hasCustomEyeOrMask = vis.hasRuneFaceSlab ||
+      vis.headgear === 'yoshi_snout' ||
+      vis.headgear === 'pikachu_ears' ||
+      vis.headgear === 'hedgehog_quills' ||
+      vis.headgear === 'sponge_head' ||
+      vis.headgear === 'iron_helmet' ||
+      vis.headgear === 'spider_mask' ||
+      vis.headgear === 'bat_cowl' ||
+      vis.headgear === 'luchador_mask' ||
+      vis.headgear === 'symbiote_fangs' ||
+      vis.headgear === 'carnage_crests';
+
+    if (!hasCustomEyeOrMask) {
       ctx.fillStyle = '#0f172a';
       ctx.beginPath();
       ctx.arc(hx + 4 * f, hy - 1, 2, 0, Math.PI * 2);

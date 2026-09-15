@@ -101,6 +101,34 @@ export class FighterRenderer {
       return;
     }
 
+    // SE FOR PERSONAGEM COM ANATOMIA NÃO-HUMANA OU PERSONAGENS EXPANDIDOS (id > 20 ou visual customizado):
+    // Personagens 1 a 20 são os arquétipos originais Belle Époque. Personagens 21+ (Batman, Vader, McQueen, Yoshi, Sonic, Mario, Kirito, etc.)
+    // possuem trajes, silhuetas, armaduras e traços únicos implementados no ExpeditionRenderer.
+    const isSpecialOrCustomCharacter = (char.id && Number(char.id) > 20) ||
+      vis.headgear === 'yoshi_snout' ||
+      vis.headgear === 'pikachu_ears' ||
+      vis.headgear === 'hedgehog_quills' ||
+      vis.headgear === 'yoda_ears' ||
+      vis.headgear === 'mario_cap' ||
+      vis.headgear === 'kirito_hair' ||
+      vis.headgear === 'bat_cowl' ||
+      vis.headgear === 'venom_symbiote' ||
+      vis.headgear === 'carnage_symbiote' ||
+      vis.headgear === 'spiderman_mask' ||
+      vis.headgear === 'ironman_helmet' ||
+      vis.headgear === 'sponge_head' ||
+      vis.coatType === 'dino_saddle' ||
+      vis.coatType === 'electric_fur' ||
+      vis.coatType === 'speed_runner' ||
+      vis.coatType === 'plumber_overalls' ||
+      vis.coatType === 'square_pants';
+
+    if (isSpecialOrCustomCharacter) {
+      ExpeditionRenderer.draw(ctx, fighter, showHitboxes);
+      ctx.restore();
+      return;
+    }
+
     // 3. Camada Traseira do Sobretudo (Caudas esvoaçantes com física de inércia)
     this.drawCoatTailsBack(ctx, x, y, f, p, coatColor, accentColor, fighter.velocity.x, fighter.stateTime);
 

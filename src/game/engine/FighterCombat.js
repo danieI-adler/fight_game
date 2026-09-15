@@ -196,18 +196,19 @@ export class FighterCombat {
             fighter.superPhase = null;
           }
         }
-        // Kirito: Starburst Stream (Q) – projétil rápido com som
-        else if (fighter.extraType === 'KIRITO_Q') {
-          // Cria hitbox frontal curta
+        // Kirito: Vorpal Strike Cruzado (Q) – corte supersônico com lâminas duplas
+        else if (fighter.extraType === 'KIRITO_VORPAL' || fighter.extraType === 'KIRITO_Q') {
+          // Hitbox ativa durante o corte rápido
           if (fighter.stateTime < 0.2) {
             fighter.activeHitbox = fighter.createHitbox(30, 70, 120, 50);
-            fighter.activeHitbox.damage = 190; // same as defined in Fighter.js
-            fighter.activeHitbox.knockback = 14;
+            fighter.activeHitbox.damage = 190;
+            fighter.activeHitbox.knockback = 18;
+            fighter.activeHitbox.knockdown = true;
             fighter.activeHitbox.isHeavy = true;
             fighter.activeHitbox.attackerPower = fighter.attackPower;
           }
-          // Encerrar após breve janela
-          if (fighter.stateTime >= 0.25) {
+          // Encerrar e restaurar IDLE
+          if (fighter.stateTime >= 0.22) {
             fighter.state = FIGHTER_STATE.IDLE;
             fighter.extraType = null;
             fighter.activeHitbox = null;
@@ -1586,6 +1587,7 @@ export class FighterCombat {
             fighter.isInvulnerable = false;
             fighter.superPhase = null;
             fighter.superType = null;
+            fighter.kiritoStarburst = null;
             fighter.state = FIGHTER_STATE.IDLE;
           }
           break;

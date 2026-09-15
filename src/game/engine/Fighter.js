@@ -1006,25 +1006,28 @@ export class Fighter {
         });
       }
     }
-    // 16. Kirito: Starburst Stream (Q) – projétil rápido com som
-    else if (charName.includes('kirito')) {
+    // 16. Kirito: Vorpal Strike Cruzado (Q) – avanço supersônico com lâmina reluzente
+    else if (this.isKirito || charName.includes('kirito')) {
       if (this.kiritoStarburstCooldown > 0) {
         // cooldown still active, abort
         this.extraType = null;
         this.state = FIGHTER_STATE.IDLE;
         return;
       }
-      this.extraType = 'KIRITO_Q';
-      // inicia cooldown de 4 segundos
-      this.kiritoStarburstCooldown = 4.0;
-      // cria estrutura do projétil (timer pode ser usado em atualização)
-      this.kiritoStarburst = {
+      this.extraType = 'KIRITO_VORPAL';
+      this.kiritoStarburstCooldown = 3.5;
+      sounds.playLaser();
+      sounds.playDash();
+      const target = this.opponent;
+      const targetX = target ? target.position.x - this.facing * 40 : this.position.x + this.facing * 220;
+      this.kiritoVorpal = {
         timer: 0,
+        startX: this.position.x,
+        targetX: targetX,
         damage: 190,
         active: true,
-        hitsLanded: 0
+        hasHit: false
       };
-      sounds.playStarburstStream();
     }
 
     else if (this.isBanner) {
