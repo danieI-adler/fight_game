@@ -125,6 +125,11 @@ export class Fighter {
     this.isWolverine = Boolean(cNameLower.includes('wolverine') || cNameLower.includes('wolwerine') || cNameLower.includes('logan') || charData.superType === 'WOLVERINE_BERSERKER_BARRAGE');
     this.isKratos = Boolean(cNameLower.includes('kratos') || charData.superType === 'KRATOS_SPARTAN_RAGE');
 
+    // Identificação do Lote 8 dos Novos Personagens (Venom, Carnificina, Capitão Pátria / Homelander)
+    this.isVenom = Boolean(cNameLower.includes('venom') || cNameLower.includes('venon') || charData.superType === 'VENOM_WE_ARE_VENOM');
+    this.isCarnage = Boolean(cNameLower.includes('carnificina') || cNameLower.includes('carnage') || charData.superType === 'CARNAGE_MAXIMUM_CARNAGE');
+    this.isHomelander = Boolean(cNameLower.includes('homelander') || cNameLower.includes('pátria') || cNameLower.includes('patria') || charData.superType === 'HOMELANDER_LASER_EYES');
+
     // Estado e Animação
     this.state = FIGHTER_STATE.IDLE;
     this.stateTime = 0;
@@ -269,6 +274,14 @@ export class Fighter {
     this.kratosBlades = null; // { timer, reach, damage, active, hasHit }
     this.kratosRage = null; // { timer, x, y, damage, active, hitsLanded: 0 }
 
+    // Projéteis e Habilidades Especiais: Venom, Carnificina, Capitão Pátria / Homelander (Lote 8)
+    this.venomTendril = null; // { timer, reach, damage, active, hasHit }
+    this.venomChomp = null; // { timer, target, damage, active, hitsLanded: 0 }
+    this.carnageScythe = null; // { timer, reach, damage, active, hasHit }
+    this.carnageSpikes = null; // { timer, x, y, damage, active, spikesFired: 0 }
+    this.homelanderLaser = null; // { timer, reach, damage, active, hasHit }
+    this.homelanderEyeBlast = null; // { timer, reach, width, damage, active, tickTimer: 0 }
+
     // Articulação Esquelética
     this.pose = {
       head: { x: 0, y: -115 },
@@ -407,6 +420,12 @@ export class Fighter {
     this.wolverineBerserker = null;
     this.kratosBlades = null;
     this.kratosRage = null;
+    this.venomTendril = null;
+    this.venomChomp = null;
+    this.carnageScythe = null;
+    this.carnageSpikes = null;
+    this.homelanderLaser = null;
+    this.homelanderEyeBlast = null;
 
     // Reinicia o rank do Verso em uma nova rodada
     if (this.isVerso) {
@@ -1560,6 +1579,97 @@ export class Fighter {
         }
       }
     }
+    // 43. Venom: Gavinhas Simbióticas Perfurantes (Q)
+    else if (this.isVenom) {
+      this.extraType = 'VENOM_TENDRILS';
+      sounds.playWhoosh();
+      sounds.playPunch(true);
+      const reach = 190;
+      const dmg = level === 2 ? 235 : 165;
+      this.venomTendril = {
+        timer: 0,
+        reach: reach,
+        damage: dmg,
+        active: true,
+        hasHit: false
+      };
+      if (this.opponent && !this.opponent.isDead) {
+        const dist = Math.abs(this.opponent.position.x - this.position.x);
+        const facingOpp = (this.opponent.position.x - this.position.x) * this.facing > 0;
+        if (facingOpp && dist < reach) {
+          this.venomTendril.hasHit = true;
+          const attackData = {
+            damage: dmg,
+            knockback: 18,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, null);
+        }
+      }
+    }
+    // 44. Carnificina: Foice e Machados de Sangue (Q)
+    else if (this.isCarnage) {
+      this.extraType = 'CARNAGE_SCYTHES';
+      sounds.playRapierSlash();
+      sounds.playPunch(true);
+      const reach = 135;
+      const dmg = level === 2 ? 245 : 175;
+      this.carnageScythe = {
+        timer: 0,
+        reach: reach,
+        damage: dmg,
+        active: true,
+        hasHit: false
+      };
+      if (this.opponent && !this.opponent.isDead) {
+        const dist = Math.abs(this.opponent.position.x - this.position.x);
+        const facingOpp = (this.opponent.position.x - this.position.x) * this.facing > 0;
+        if (facingOpp && dist < reach) {
+          this.carnageScythe.hasHit = true;
+          const attackData = {
+            damage: dmg,
+            knockback: 22,
+            knockdown: true,
+            isHeavy: true,
+            unblockable: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, null);
+        }
+      }
+    }
+    // 45. Capitão Pátria (Homelander): Visão de Calor / Laser Óptico (Q)
+    else if (this.isHomelander) {
+      this.extraType = 'HOMELANDER_LASER';
+      sounds.playLaser();
+      sounds.playFireCast();
+      const reach = 950;
+      const dmg = level === 2 ? 240 : 170;
+      this.homelanderLaser = {
+        timer: 0,
+        reach: reach,
+        damage: dmg,
+        active: true,
+        hasHit: false
+      };
+      if (this.opponent && !this.opponent.isDead) {
+        const dist = Math.abs(this.opponent.position.x - this.position.x);
+        const facingOpp = (this.opponent.position.x - this.position.x) * this.facing > 0;
+        if (facingOpp && dist < reach) {
+          this.homelanderLaser.hasHit = true;
+          const attackData = {
+            damage: dmg,
+            knockback: 24,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 75 }, null);
+        }
+      }
+    }
     // Personagens genéricos: golpe padrão fortificado
     else {
       this.extraType = 'GENERIC_EXTRA';
@@ -2117,6 +2227,45 @@ export class Fighter {
         damage: 435,
         active: true,
         hitsLanded: 0
+      };
+    } else if (this.superType === 'VENOM_WE_ARE_VENOM') {
+      this.superPhase = 'SYMBIOTE_MAW';
+      sounds.playSuperCharge();
+      sounds.playWhoosh();
+      sounds.playPunch(true);
+      const target = this.opponent;
+      this.venomChomp = {
+        timer: 0,
+        target: target,
+        damage: 420,
+        active: true,
+        hitsLanded: 0
+      };
+    } else if (this.superType === 'CARNAGE_MAXIMUM_CARNAGE') {
+      this.superPhase = 'CARNAGE_OUTBURST';
+      sounds.playSuperCharge();
+      sounds.playRapierSlash();
+      sounds.playThunderSlam();
+      this.carnageSpikes = {
+        timer: 0,
+        x: this.position.x,
+        y: this.position.y - 60,
+        damage: 430,
+        active: true,
+        spikesFired: 0
+      };
+    } else if (this.superType === 'HOMELANDER_LASER_EYES') {
+      this.superPhase = 'GOD_COMPLEX_LASER';
+      sounds.playSuperCharge();
+      sounds.playLaser();
+      sounds.playFireCast();
+      this.homelanderEyeBlast = {
+        timer: 0,
+        reach: 1250,
+        width: 44,
+        damage: 425,
+        active: true,
+        tickTimer: 0
       };
     } else {
       this.superType = 'GUSTAVE_SMASH';
@@ -5474,6 +5623,176 @@ export class Fighter {
       }
     }
 
+    // 5.72 Venom: Gavinhas Simbióticas (Q - Feedback)
+    if (this.venomTendril && this.venomTendril.active) {
+      this.venomTendril.timer += dt;
+      if (this.venomTendril.timer >= 0.28) {
+        this.venomTendril.active = false;
+        this.venomTendril = null;
+      }
+    }
+
+    // 5.73 Venom: Nós Somos Venom Mandíbula Voraz (Ultimate)
+    if (this.venomChomp && this.venomChomp.active) {
+      const vc = this.venomChomp;
+      vc.timer += dt;
+      const target = vc.target;
+
+      if (particles && Math.random() < 0.85) {
+        particles.emitSparks(this.position.x, this.position.y - 60, '#09090b', 8, 4);
+        particles.emitSparks(this.position.x, this.position.y - 60, '#ffffff', 4, 3);
+      }
+
+      const chompTimes = [0.25, 0.55, 0.85, 1.2];
+      for (let i = vc.hitsLanded; i < chompTimes.length; i++) {
+        if (vc.timer >= chompTimes[i]) {
+          vc.hitsLanded = i + 1;
+          sounds.playPunch(true);
+          sounds.playKO();
+          const isFinal = i === chompTimes.length - 1;
+          if (target && !target.isDead) {
+            this.position.x = target.position.x - this.facing * 40;
+            if (particles) {
+              particles.emitShockwave(target.position.x, target.position.y - 60, isFinal ? 250 : 130, '#09090b');
+              particles.emitSparks(target.position.x, target.position.y - 60, '#ffffff', isFinal ? 50 : 20, 10);
+              if (isFinal) {
+                particles.emitFloatingText('NÓS SOMOS VENOM!', target.position.x, target.position.y - 95, '#ffffff', true);
+              }
+            }
+            const attackData = {
+              damage: Math.round(vc.damage / 4),
+              knockback: isFinal ? 36 : 8,
+              knockdown: isFinal,
+              isHeavy: isFinal,
+              unblockable: true,
+              attackerPower: this.attackPower
+            };
+            target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 60 }, particles);
+          }
+        }
+      }
+
+      if (vc.timer >= 1.45) {
+        vc.active = false;
+        this.venomChomp = null;
+      }
+    }
+
+    // 5.74 Carnificina: Foices Carmesim (Q - Feedback)
+    if (this.carnageScythe && this.carnageScythe.active) {
+      this.carnageScythe.timer += dt;
+      if (this.carnageScythe.timer >= 0.26) {
+        this.carnageScythe.active = false;
+        this.carnageScythe = null;
+      }
+    }
+
+    // 5.75 Carnificina: Carnificina Total Espinhos Carmesim (Ultimate)
+    if (this.carnageSpikes && this.carnageSpikes.active) {
+      const cs = this.carnageSpikes;
+      cs.timer += dt;
+      cs.x = this.position.x;
+      cs.y = this.position.y - 60;
+
+      if (particles && Math.random() < 0.9) {
+        particles.emitShockwave(cs.x, cs.y, 160, '#dc2626');
+        particles.emitSparks(cs.x, cs.y, '#991b1b', 12, 6);
+      }
+
+      const outburstTimes = [0.3, 0.6, 0.9, 1.2];
+      for (let i = cs.spikesFired; i < outburstTimes.length; i++) {
+        if (cs.timer >= outburstTimes[i]) {
+          cs.spikesFired = i + 1;
+          sounds.playRapierSlash();
+          sounds.playThunderSlam();
+          const isFinal = i === outburstTimes.length - 1;
+          if (particles) {
+            particles.emitShockwave(cs.x, cs.y, isFinal ? 280 : 170, '#dc2626');
+            particles.emitSparks(cs.x, cs.y, '#ef4444', isFinal ? 60 : 25, 12);
+            if (isFinal) {
+              particles.emitFloatingText('CARNIFICINA TOTAL!', cs.x, cs.y - 50, '#dc2626', true);
+            }
+          }
+          if (this.opponent && !this.opponent.isDead) {
+            const dist = Math.abs(this.opponent.position.x - cs.x);
+            if (dist < 260) {
+              const attackData = {
+                damage: Math.round(cs.damage / 4),
+                knockback: isFinal ? 36 : 10,
+                knockdown: isFinal,
+                isHeavy: isFinal,
+                unblockable: true,
+                attackerPower: this.attackPower
+              };
+              this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
+            }
+          }
+        }
+      }
+
+      if (cs.timer >= 1.45) {
+        cs.active = false;
+        this.carnageSpikes = null;
+      }
+    }
+
+    // 5.76 Capitão Pátria (Homelander): Laser Óptico (Q - Feedback)
+    if (this.homelanderLaser && this.homelanderLaser.active) {
+      this.homelanderLaser.timer += dt;
+      if (this.homelanderLaser.timer >= 0.28) {
+        this.homelanderLaser.active = false;
+        this.homelanderLaser = null;
+      }
+    }
+
+    // 5.77 Capitão Pátria (Homelander): Visão Devastadora a Laser (Ultimate)
+    if (this.homelanderEyeBlast && this.homelanderEyeBlast.active) {
+      const hb = this.homelanderEyeBlast;
+      hb.timer += dt;
+      hb.tickTimer += dt;
+      const eyeX = this.position.x + this.facing * 18;
+      const eyeY = this.position.y - 95;
+
+      if (particles && Math.random() < 0.9) {
+        particles.emitSparks(eyeX, eyeY, '#ef4444', 8, 5);
+        particles.emitSparks(eyeX + this.facing * 300, eyeY, '#facc15', 5, 4);
+      }
+
+      if (hb.tickTimer >= 0.22) {
+        hb.tickTimer = 0;
+        sounds.playLaser();
+        sounds.playFireCast();
+        if (this.opponent && !this.opponent.isDead) {
+          const facingOpp = (this.opponent.position.x - eyeX) * this.facing > 0;
+          const dist = Math.abs(this.opponent.position.x - eyeX);
+          if (facingOpp && dist < hb.reach) {
+            const isFinal = hb.timer >= 1.0;
+            if (particles) {
+              particles.emitShockwave(this.opponent.position.x, eyeY, 150, '#ef4444');
+              particles.emitSparks(this.opponent.position.x, eyeY, '#facc15', 20, 8);
+              if (isFinal) {
+                particles.emitFloatingText('EU FAÇO O QUE EU QUISER!', this.opponent.position.x, eyeY - 45, '#ef4444', true);
+              }
+            }
+            const attackData = {
+              damage: Math.round(hb.damage / 5),
+              knockback: isFinal ? 34 : 6,
+              knockdown: isFinal,
+              isHeavy: isFinal,
+              unblockable: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: eyeY }, particles);
+          }
+        }
+      }
+
+      if (hb.timer >= 1.35) {
+        hb.active = false;
+        this.homelanderEyeBlast = null;
+      }
+    }
+
     // 6. Watchdog de Segurança Anti-Travamento (Golpes comuns 0.8s, Super Move 1.6s)
     const attackStates = [
       FIGHTER_STATE.LIGHT_PUNCH,
@@ -7418,6 +7737,163 @@ export class Fighter {
       ctx.strokeStyle = '#facc15';
       ctx.lineWidth = 2;
       ctx.stroke();
+      ctx.restore();
+    }
+
+    // 60. Venom: Gavinhas Negras Simbióticas com Líquido Pegajoso (Q)
+    if (this.venomTendril && this.venomTendril.active) {
+      const vx = this.position.x + this.facing * 35;
+      const vy = this.position.y - 60;
+      ctx.save();
+      ctx.translate(vx, vy);
+      ctx.shadowColor = '#09090b';
+      ctx.shadowBlur = 24;
+
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 6;
+      for (let i = -1; i <= 1; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * 10);
+        ctx.quadraticCurveTo(60 * this.facing, (i * 25) + Math.sin(Date.now() * 0.02) * 12, 140 * this.facing, i * 15);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 61. Venom: Mandíbula Voraz Gigante "Nós Somos Venom" (Ultimate)
+    if (this.venomChomp && this.venomChomp.active) {
+      const vx = this.position.x + this.facing * 45;
+      const vy = this.position.y - 60;
+      ctx.save();
+      ctx.translate(vx, vy);
+      ctx.scale(this.facing, 1);
+      ctx.shadowColor = '#09090b';
+      ctx.shadowBlur = 35;
+
+      // Mandíbula superior
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.arc(0, -25, 42, Math.PI * 0.8, Math.PI * 2);
+      ctx.lineTo(20, -10);
+      ctx.closePath();
+      ctx.fill();
+
+      // Mandíbula inferior
+      ctx.beginPath();
+      ctx.arc(0, 25, 42, 0, Math.PI * 1.2);
+      ctx.lineTo(20, 10);
+      ctx.closePath();
+      ctx.fill();
+
+      // Dentes afiados brancos
+      ctx.fillStyle = '#ffffff';
+      for (let i = 0; i < 6; i++) {
+        ctx.beginPath();
+        ctx.moveTo(5 + i * 8, -25);
+        ctx.lineTo(9 + i * 8, -10);
+        ctx.lineTo(13 + i * 8, -25);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(5 + i * 8, 25);
+        ctx.lineTo(9 + i * 8, 10);
+        ctx.lineTo(13 + i * 8, 25);
+        ctx.fill();
+      }
+
+      // Língua vermelha simbiótica
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(-10, 0);
+      ctx.quadraticCurveTo(20, Math.sin(Date.now() * 0.03) * 15, 48, 0);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // 62. Carnificina: Foices Carmesim Retalhadoras (Q)
+    if (this.carnageScythe && this.carnageScythe.active) {
+      const cx = this.position.x + this.facing * 40;
+      const cy = this.position.y - 60;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(this.facing, 1);
+      ctx.shadowColor = '#dc2626';
+      ctx.shadowBlur = 28;
+
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.moveTo(0, -35);
+      ctx.quadraticCurveTo(55, -45, 75, 5);
+      ctx.lineTo(45, -5);
+      ctx.quadraticCurveTo(35, -25, 0, -20);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 63. Carnificina: Carnificina Total Espinhos Carmesim Radial (Ultimate)
+    if (this.carnageSpikes && this.carnageSpikes.active) {
+      const cx = this.position.x;
+      const cy = this.position.y - 60;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.shadowColor = '#dc2626';
+      ctx.shadowBlur = 32;
+
+      ctx.strokeStyle = '#dc2626';
+      ctx.lineWidth = 3.5;
+      const spikeNum = 12;
+      for (let i = 0; i < spikeNum; i++) {
+        const ang = (i * Math.PI * 2) / spikeNum + (Date.now() * 0.005);
+        const len = 90 + Math.sin(Date.now() * 0.02 + i) * 35;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(ang) * len, Math.sin(ang) * len);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 64. Capitão Pátria (Homelander): Feixe Laser Óptico Escarlate (Q / Ultimate)
+    if ((this.homelanderLaser && this.homelanderLaser.active) || (this.homelanderEyeBlast && this.homelanderEyeBlast.active)) {
+      const eyeX = this.position.x + this.facing * 18;
+      const eyeY = this.position.y - 95;
+      const reach = this.homelanderEyeBlast?.active ? this.homelanderEyeBlast.reach : this.homelanderLaser.reach;
+      const beamW = this.homelanderEyeBlast?.active ? 22 : 12;
+
+      ctx.save();
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = 32;
+
+      const lGrad = ctx.createLinearGradient(eyeX, eyeY - beamW, eyeX, eyeY + beamW);
+      lGrad.addColorStop(0, 'rgba(239, 68, 68, 0.2)');
+      lGrad.addColorStop(0.3, '#ef4444');
+      lGrad.addColorStop(0.5, '#ffffff');
+      lGrad.addColorStop(0.7, '#ef4444');
+      lGrad.addColorStop(1, 'rgba(239, 68, 68, 0.2)');
+
+      ctx.fillStyle = lGrad;
+      ctx.fillRect(this.facing === 1 ? eyeX : eyeX - reach, eyeY - beamW / 2, reach, beamW);
+
+      // Brilho intenso nos olhos
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(eyeX, eyeY, 6, 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
     }
   }

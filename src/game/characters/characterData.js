@@ -1513,6 +1513,90 @@ export const CHARACTERS = [
       weaponType: 'blades_of_chaos'
     },
     description: 'O Deus da Guerra de Esparta. Gira as Lâminas do Caos incandescentes com correntes no Q e ativa a Fúria Espartana desferindo golpes brutais que estilhaçam a rocha na Ultimate!'
+  },
+  {
+    id: 57,
+    name: 'Venom',
+    title: 'O Protetor Letal',
+    image: './assets/expedition33/venom.png',
+    themeColor: '#09090b',
+    secondaryColor: '#f8fafc',
+    glowColor: 'rgba(248, 250, 252, 0.95)',
+    energyColor: '#f8fafc',
+    style: 'Simbionte Alienígena, Garras Negras & Mandíbula Canibal',
+    stats: { health: 1100, speed: 8.5, jumpForce: 15.6, attackPower: 1.22, defense: 1.14 },
+    superType: 'VENOM_WE_ARE_VENOM',
+    visual: {
+      coatType: 'symbiote_suit',
+      headgear: 'symbiote_fangs',
+      maskStyle: 'venom_white_eyes',
+      maskColor: '#ffffff',
+      coatColor: '#09090b',
+      accentColor: '#f8fafc',
+      vestColor: '#09090b',
+      pantColor: '#09090b',
+      bootColor: '#09090b',
+      gloveColor: '#09090b',
+      paintTrailColor: '#f8fafc',
+      weaponType: 'symbiote_tendrils'
+    },
+    description: 'Nós somos Venom! Dispara gavinhas simbióticas perfurantes no Q e avança engolindo e estraçalhando o oponente com sua colossal mandíbula na Ultimate "Nós Somos Venom"!'
+  },
+  {
+    id: 58,
+    name: 'Carnificina',
+    title: 'O Psicopata Simbionte',
+    image: './assets/expedition33/carnificina.png',
+    themeColor: '#dc2626',
+    secondaryColor: '#09090b',
+    glowColor: 'rgba(220, 38, 38, 0.95)',
+    energyColor: '#ef4444',
+    style: 'Lâminas de Sangue Simbióticas, Foices & Caos Máximo',
+    stats: { health: 1040, speed: 9.3, jumpForce: 16.4, attackPower: 1.25, defense: 1.05 },
+    superType: 'CARNAGE_MAXIMUM_CARNAGE',
+    visual: {
+      coatType: 'crimson_symbiote',
+      headgear: 'carnage_crests',
+      maskStyle: 'carnage_black_eyes',
+      maskColor: '#09090b',
+      coatColor: '#dc2626',
+      accentColor: '#09090b',
+      vestColor: '#b91c1c',
+      pantColor: '#dc2626',
+      bootColor: '#991b1b',
+      gloveColor: '#dc2626',
+      paintTrailColor: '#dc2626',
+      weaponType: 'symbiote_scythes'
+    },
+    description: 'Cletus Kasady, pura carnificina vermelha. Transforma os braços em foices e machados cortantes no Q e deflagra uma tempestade explosiva de espinhos carmesim na Ultimate "Carnificina Total"!'
+  },
+  {
+    id: 59,
+    name: 'Capitão Pátria',
+    title: 'O Super-Herói Número Um da Vought',
+    image: './assets/expedition33/homelander.jpg',
+    themeColor: '#1d4ed8',
+    secondaryColor: '#dc2626',
+    glowColor: 'rgba(239, 68, 68, 0.95)',
+    energyColor: '#ef4444',
+    style: 'Visão Térmica de Plasma, Voo Sônico & Complexo Divino',
+    stats: { health: 1090, speed: 8.8, jumpForce: 16.0, attackPower: 1.24, defense: 1.12 },
+    superType: 'HOMELANDER_LASER_EYES',
+    visual: {
+      coatType: 'vought_cape_suit',
+      headgear: 'blonde_slick_quiff',
+      maskStyle: 'glowing_laser_eyes',
+      maskColor: '#ef4444',
+      coatColor: '#1e3a8a',
+      accentColor: '#dc2626',
+      vestColor: '#1d4ed8',
+      pantColor: '#1e3a8a',
+      bootColor: '#991b1b',
+      gloveColor: '#991b1b',
+      paintTrailColor: '#ef4444',
+      weaponType: 'laser_eyes'
+    },
+    description: 'Homelander, o falso salvador absoluto. Dispara rajada mortal de visão a laser no Q e projeta feixes ópticos devastadores que partem a arena ao meio na Ultimate "Eu Posso Fazer o Que Quiser"!'
   }
 ];
 

@@ -1666,6 +1666,45 @@ export class FighterCombat {
           break;
         }
 
+        // --- 44. VENOM: NÓS SOMOS VENOM ---
+        if (fighter.superType === 'VENOM_WE_ARE_VENOM') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.45) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 45. CARNIFICINA: CARNIFICINA TOTAL ---
+        if (fighter.superType === 'CARNAGE_MAXIMUM_CARNAGE') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.45) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 46. CAPITÃO PÁTRIA (HOMELANDER): VISÃO DE CALOR / LASER ÓPTICO ---
+        if (fighter.superType === 'HOMELANDER_LASER_EYES') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.35) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
         // --- 7. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
         if (fighter.stateTime < 0.5) {
           fighter.velocity.x = 0;

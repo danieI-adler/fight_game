@@ -1089,6 +1089,34 @@ export class ExpeditionRenderer {
       ctx.strokeStyle = '#ea580c';
       ctx.lineWidth = 2;
       ctx.stroke();
+    } else if (vis.weaponType === 'symbiote_tendrils') {
+      // Gavinhas negras e garras de Venom
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 3;
+      for (let i = -1; i <= 1; i++) {
+        ctx.beginPath();
+        ctx.moveTo(hx, hy + i * 4);
+        ctx.lineTo(hx + 22 * f, hy + i * 6 - 2);
+        ctx.stroke();
+      }
+    } else if (vis.weaponType === 'symbiote_scythes') {
+      // Braço em foice rubra de Carnificina
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.moveTo(hx, hy - 4);
+      ctx.lineTo(hx + 30 * f, hy - 18);
+      ctx.lineTo(hx + 22 * f, hy + 8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    } else if (vis.weaponType === 'laser_eyes') {
+      // Resplendor rubro nas mãos / energia de Homelander
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(hx + 4 * f, hy, 4, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     ctx.restore();
@@ -1593,6 +1621,67 @@ export class ExpeditionRenderer {
       ctx.fillStyle = '#18181b';
       ctx.beginPath();
       ctx.ellipse(hx + 2 * f, hy + 8, 6.5, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (vis.headgear === 'symbiote_fangs') {
+      // Venom: Cabeça negra lisa simbiótica com olhos brancos gigantes e dentes
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 4, 12, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Olho branco alongado característico de Venom
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(hx - 2 * f, hy - 6);
+      ctx.quadraticCurveTo(hx + 10 * f, hy - 10, hx + 12 * f, hy - 2);
+      ctx.quadraticCurveTo(hx + 4 * f, hy - 1, hx - 2 * f, hy - 6);
+      ctx.fill();
+      // Dentes pontudos inferiores
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(hx + i * 3 * f, hy + 6);
+        ctx.lineTo(hx + (i * 3 + 1.5) * f, hy + 2);
+        ctx.lineTo(hx + (i * 3 + 3) * f, hy + 6);
+        ctx.fill();
+      }
+    } else if (vis.headgear === 'carnage_crests') {
+      // Carnificina: Cabeça carmesim retorcida com veias pretas e olhos recortados
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 4, 11, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Gavinhas na cabeça
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(hx, hy - 10);
+      ctx.lineTo(hx - 6 * f, hy - 18);
+      ctx.moveTo(hx + 4 * f, hy - 10);
+      ctx.lineTo(hx + 8 * f, hy - 16);
+      ctx.stroke();
+      // Olho preto com contorno branco recortado
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.ellipse(hx + 3 * f, hy - 3, 5, 3, 0.2 * f, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    } else if (vis.headgear === 'blonde_slick_quiff') {
+      // Homelander: Penteado loiro para trás com topete impecável e olhos vermelhos brilhantes
+      ctx.fillStyle = '#ca8a04';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 7, 12, 6.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Topete levantado na frente
+      ctx.beginPath();
+      ctx.moveTo(hx - 4 * f, hy - 11);
+      ctx.quadraticCurveTo(hx + 4 * f, hy - 16, hx + 10 * f, hy - 8);
+      ctx.lineTo(hx + 4 * f, hy - 7);
+      ctx.fill();
+      // Olhos rubros brilhantes de laser
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(hx + 4 * f, hy - 1, 2, 0, Math.PI * 2);
       ctx.fill();
     } else {
       // Cabelo clássico
