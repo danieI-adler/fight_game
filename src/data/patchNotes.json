@@ -1,0 +1,44 @@
+[
+  {
+    "section": "Geral & Qualidade de Jogo",
+    "changes": [
+      {"tag": "VISUAL", "title": "Fim dos Raios Genéricos", "desc": "Habilidades não têm mais raios elétricos genéricos. Substituídos por efeitos físicos, cortes, poeira, telecinese e ondas de choque. Eletricidade mantida apenas onde inerente à animação (ex: Chidori do Sasuke, Q do Messi)."},
+      {"tag": "INTERFACE", "title": "Limpeza de Textos Flutuantes", "desc": "Textos flutuantes cômicos e desnecessários removidos. Indicadores de dano e combos mantidos."},
+      {"tag": "ESTABILIDADE", "title": "Prevenção de Congelamentos", "desc": "Watchdogs de segurança e resets de estado adicionados para Iron Man, Kirito, Goku, Han Solo e Homelander, prevenindo travamento do loop de animação."}
+    ]
+  },
+  {
+    "section": "Reworks Mecânicos de Personagens",
+    "changes": [
+      {"tag": "AANG", "title": "Projéteis de Vento Condicionados", "desc": "Ataque à distância com ar comprimido no chute [K] agora ocorre estritamente durante o Estado Avatar (5s após a Ultimate)."},
+      {"tag": "ZORRO", "title": "Clash Defensivo & Tela Preta", "desc": "[Q] não possui mais raios. Anula o golpe mútuo sem dano reflexo. Zorro não bloqueia; ao clonar com sucesso, próximo ataque causa 150% de dano. Ultimate mergulha a tela em escuridão total."},
+      {"tag": "BRUCE BANNER", "title": "Conversão Dobrada de Fúria", "desc": "Recebe o dobro de energia ao sofrer dano enquanto em forma humana, permitindo transformação mais rápida."},
+      {"tag": "JACK SPARROW", "title": "Pérola Negra & Cadência", "desc": "Removidos raios. O Pearla Negra aparece atrás de Jack e dispara canhões a cada 3 s."},
+      {"tag": "DOUTOR ESTRANHO", "title": "Cuidado nos Portais", "desc": "Doutor Estranho agachado não atravessa portais para evitar transições acidentais."},
+      {"tag": "CAPITÃO NASCIMENTO", "title": "Postura de Tiro Balístico", "desc": "[Q] saca arma de fogo e entra em prontidão balística por 6‑8 s."},
+      {"tag": "RAPUNZEL", "title": "Chicote e Puxão Capilar", "desc": "[Q] desfere chicotada de cabelo; Ultimate usa fios dourados para prender e atordoar o alvo."},
+      {"tag": "CAPITÃO AMÉRICA", "title": "Vanguarda com Escudo", "desc": "[Q] ergue escudo vibranium, reduz dano. Ultimate arremessa escudo e lança o inimigo para cima."},
+      {"tag": "NARUTO", "title": "Clone Espelho & Rasen Shuriken", "desc": "[Enter] carrega Rasen Shuriken com clone. [Q] cria clone que espelha movimentação; [E] executa Substituição instantânea."},
+      {"tag": "BOB ESPONJA", "title": "Prisão em Bolha Gigante", "desc": "Removidos raios no [Q]. Ultimate cria bolha gigante que enclausura e inflige dano gradual."},
+      {"tag": "HOMEM-ARANHA", "title": "Casulo e Impacto Aéreo", "desc": "Ultimate reformulada com teias que formam casulo e arremessam o inimigo."},
+      {"tag": "YOSHI", "title": "Língua Elástica & Arremesso", "desc": "Ultimate: Yoshi estende língua, engole o oponente e o cospe para frente."},
+      {"tag": "SONIC", "title": "Super Sonic Completo", "desc": "Ultimate concede salto duplo, maior velocidade de ataque e locomoção, dash estendido."},
+      {"tag": "BANE", "title": "Injeção de Venom & Quebrador de Colunas", "desc": "[Q] injeta Venom nas veias, aumenta porte físico. Ultimate gera postura que desencadeia Backbreaker."},
+      {"tag": "EREN YEAGER", "title": "Gancho DMT & Titã de Ataque", "desc": "[Q] lança cabo DMT; Ultimate transforma em Titã de Ataque colossal."},
+      {"tag": "BRUCE LEE", "title": "Jeet Kune Do Genuíno", "desc": "Removidos raios. [Q] executa One‑Inch Punch com explosão de impacto."},
+      {"tag": "GOKU", "title": "Evolução Super Saiyajin", "desc": "[Q] canaliza Ki progressivamente (SSJ1‑3). Ultimate lança Kamehameha continuo."},
+      {"tag": "YODA", "title": "Ataru & Empurrão da Força", "desc": "[Q] telecina oponente; Ultimate executa saltos rápidos com sabre verde (Forma IV Ataru)."},
+      {"tag": "HAN SOLO", "title": "Suporte Wookie & Millennium Falcon", "desc": "[Q] chama Chewbacca; Ultimate aciona sobrevoo da Millennium Falcon com suporte aéreo."},
+      {"tag": "SUPER MARIO", "title": "Warp Pipe & Super Cogumelo", "desc": "[Q] planta canos de teleporte; Ultimate evoca Super Cogumelo (1 % chance de Super Estrela invencível)."},
+      {"tag": "WOLVERINE", "title": "Fatiamento de Adamantium", "desc": "Removidos raios. [Q] desfere rasgo cruzado com lâminas de adamantium."},
+      {"tag": "KRATOS", "title": "Fúria Espartana Crítica", "desc": "Removidos raios. Ultimate concede taxa crítica e multiplicador devastador."},
+      {"tag": "HOMELANDER", "title": "Supremacia Aérea", "desc": "[Q] ativa modo voo livre; Ultimate projeta feixes térmicos contínuos."}
+    ]
+  },
+  {
+    "section": "Anatomia & Fidelidade Visual",
+    "changes": [
+      {"tag": "MODELAGEM", "title": "Silhuetas Não‑Humanas Fidedignas", "desc": "Ajustadas proporções corporais de Sonic, Pikachu, Yoda, Yoshi e Mario para evitar modelos humanos esticados."}
+    ]
+  }
+]

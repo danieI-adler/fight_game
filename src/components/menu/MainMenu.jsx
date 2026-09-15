@@ -14,7 +14,8 @@ export const MainMenu = ({
   onToggleExpedition,
   isMuted,
   onToggleMute,
-  onOpenBalanceDashboard
+  onOpenBalanceDashboard,
+  onOpenPatchNotes
 }) => {
   const handleSelect = (mode) => {
     sounds.playPunch(false);
@@ -253,6 +254,19 @@ export const MainMenu = ({
             </span>
             <span className="text-[10px] bg-amber-500 text-black px-1.5 py-0.5 rounded font-black">
               100 Lutas / Par
+            </span>
+          </button>
+
+          <button
+            onClick={onOpenPatchNotes}
+            className="w-full py-2 px-4 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-emerald-400 hover:text-emerald-300 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-between shadow mt-1"
+          >
+            <span className="flex items-center gap-2">
+              <span className="text-sm">📜</span>
+              <span>Patch Notes & Reworks</span>
+            </span>
+            <span className="text-[10px] bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 px-1.5 py-0.5 rounded font-bold">
+              v1.1
             </span>
           </button>
         </div>
