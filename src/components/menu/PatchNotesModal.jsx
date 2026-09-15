@@ -59,7 +59,11 @@ export const PatchNotesModal = ({ isOpen, onClose }) => {
                   sounds.playSelect();
                   setActiveTab(idx);
                 }}
-                className={py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition-all cursor-pointer }
+                className={`py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
+                  isActive
+                    ? 'border-amber-400 text-amber-300 bg-amber-400/10'
+                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
+                }`}
               >
                 <Icon size={14} className={isActive ? 'text-amber-400' : 'text-slate-500'} />
                 <span>{section.title}</span>
