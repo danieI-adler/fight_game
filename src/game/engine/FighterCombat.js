@@ -1,6 +1,7 @@
 import { FIGHTER_STATE } from './Fighter';
 import { Box } from './Collision';
 import { sounds } from '../audio/soundManager';
+import { SUPER_MOVE_MAX_DURATION } from './constants';
 
 /**
  * FighterCombat
@@ -195,7 +196,23 @@ export class FighterCombat {
             fighter.superPhase = null;
           }
         }
-        // Maelle, Gustave, Lune, Renoir, Peintresse já tratam seus efeitos em tempo real
+        // Kirito: Starburst Stream (Q) – projétil rápido com som
+        else if (fighter.extraType === 'KIRITO_Q') {
+          // Cria hitbox frontal curta
+          if (fighter.stateTime < 0.2) {
+            fighter.activeHitbox = fighter.createHitbox(30, 70, 120, 50);
+            fighter.activeHitbox.damage = 190; // same as defined in Fighter.js
+            fighter.activeHitbox.knockback = 14;
+            fighter.activeHitbox.isHeavy = true;
+            fighter.activeHitbox.attackerPower = fighter.attackPower;
+          }
+          // Encerrar após breve janela
+          if (fighter.stateTime >= 0.25) {
+            fighter.state = FIGHTER_STATE.IDLE;
+            fighter.extraType = null;
+            fighter.activeHitbox = null;
+          }
+        }
         else if (fighter.extraType === 'GUSTAVE_GUN' || fighter.extraType === 'MAELLE_BLINK_DASH' || fighter.extraType === 'LUNE_HEAL' || fighter.extraType === 'RENOIR_BLACK_HOLE' || fighter.extraType === 'PAINTRESS_REALITY_TEAR') {
           if (fighter.stateTime >= 0.35) {
             fighter.isInvulnerable = false;
@@ -226,6 +243,18 @@ export class FighterCombat {
         break;
 
       case FIGHTER_STATE.SUPER_MOVE:
+        // Watchdog universal de segurança: impede travamento infinito se alguma super demorar mais que 2.5s
+        if (fighter.stateTime >= SUPER_MOVE_MAX_DURATION) {
+          fighter.isInvulnerable = false;
+          fighter.superPhase = null;
+          fighter.superType = null;
+          fighter.activeHitbox = null;
+          fighter.isGrounded = true;
+          fighter.position.y = fighter.groundY;
+          fighter.state = FIGHTER_STATE.IDLE;
+          break;
+        }
+
         // --- 1. MAELLE: VALSA DAS LÂMINAS / ALPHA STRIKE (6 Golpes Rápidos com Teletransporte) ---
         if (fighter.superType === 'MAELLE_WALTZ') {
           fighter.isInvulnerable = true;

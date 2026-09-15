@@ -255,6 +255,9 @@ export class Fighter {
     this.draculaBloodEclipse = null; // { timer, x, y, damage, active, hitsLanded: 0 }
     this.kiritoVorpal = null; // { timer, startX, targetX, damage, active, hasHit }
     this.kiritoStarburst = null; // { timer, target, damage, active, hitsLanded: 0 }
+    this.kiritoStarburstCooldown = 0; // cooldown for Q
+    this.kiritoDualBladeTimer = 0; // timer for ultimate mode
+    this.kiritoDualBladeActive = false; // flag for dual‑blade mode
     this.erenDmtRush = null; // { timer, startX, targetX, damage, active, hasHit }
     this.erenTitanRoar = null; // { timer, x, y, damage, active, hasHit }
     this.bruceLeeOneInch = null; // { timer, reach, damage, active, hasHit }
@@ -367,6 +370,25 @@ export class Fighter {
     this.sparrowDrunkTimer = 0;
     this.sparrowDodgeCharges = 0;
     this.sparrowBlackPearl = null;
+    // Jack Sparrow specific flags
+    this.sparrowBoatActive = false; // true while boat entity is present
+    this.sparrowBoatCooldown = 0; // seconds remaining before next Q shot
+    this.sparrowQCooldown = 3; // Q can fire every 3 seconds
+    // Method to activate boat and handle Q nerf
+    this.activateSparrowBoat = function() {
+        if (this.sparrowBoatCooldown > 0) return; // still cooling down
+        this.sparrowBoatActive = true;
+        this.sparrowBoatCooldown = this.sparrowQCooldown;
+        // Placeholder: spawn a boat entity behind the fighter
+        // In actual game, a boat sprite would be created and attached to the fighter
+    };
+    // Called each update to decrement cooldowns
+    this.updateSparrowTimers = function(delta) {
+        if (this.sparrowBoatCooldown > 0) this.sparrowBoatCooldown -= delta;
+        if (this.sparrowBoatCooldown < 0) this.sparrowBoatCooldown = 0;
+        // Deactivate boat when cooldown ends (simple placeholder behavior)
+        if (this.sparrowBoatCooldown === 0) this.sparrowBoatActive = false;
+    };
     this.mcqueenDriftBurn = null;
     this.mcqueenSpeedBuffTimer = 0;
     this.mcqueenSpeedMultiplier = 1.0;
@@ -663,8 +685,8 @@ export class Fighter {
             hasHit: false
           });
         }
-      } else if (this.isAang) {
-        // Elemento AR de Aang: Rajada cortante de vento / Air Sweep
+      } else if (this.isAang && this.aangAvatarStateActive) {
+        // Elemento AR de Aang: Rajada cortante de vento / Air Sweep (Apenas em Estado Avatar)
         sounds.playWhoosh();
         const ax = this.position.x + this.facing * 35;
         const ay = this.position.y - 65;
@@ -984,7 +1006,27 @@ export class Fighter {
         });
       }
     }
-    // 15. Bruce Banner / Hulk: Hulk Smash no Q (apenas se transformado no Hulk!)
+    // 16. Kirito: Starburst Stream (Q) – projétil rápido com som
+    else if (charName.includes('kirito')) {
+      if (this.kiritoStarburstCooldown > 0) {
+        // cooldown still active, abort
+        this.extraType = null;
+        this.state = FIGHTER_STATE.IDLE;
+        return;
+      }
+      this.extraType = 'KIRITO_Q';
+      // inicia cooldown de 4 segundos
+      this.kiritoStarburstCooldown = 4.0;
+      // cria estrutura do projétil (timer pode ser usado em atualização)
+      this.kiritoStarburst = {
+        timer: 0,
+        damage: 190,
+        active: true,
+        hitsLanded: 0
+      };
+      sounds.playStarburstStream();
+    }
+
     else if (this.isBanner) {
       if (!this.isHulk) {
         // Bruce Banner não tem poderes antes da transformação
@@ -1807,14 +1849,11 @@ export class Fighter {
       this.superPhase = 'CANNON_COMMAND';
       sounds.playSuperCharge();
       sounds.playGunshot();
-      // O navio existe e fica ancorado no canto em que Jack está
-      // Se Jack está na metade esquerda, navio fica no canto esquerdo (x: 110) atirando para a direita (facing: 1)
-      // Se Jack está na metade direita, navio fica no canto direito (x: 1810) atirando para a esquerda (facing: -1)
-      const shipIsLeft = this.position.x < 960;
-      const shipX = shipIsLeft ? 120 : 1800;
-      const shipFacing = shipIsLeft ? 1 : -1;
+      // Item 3: O barco aparece logo atrás do Jack e os tiros são de 3 em 3 segundos
+      const shipX = Math.max(80, Math.min(1840, this.position.x - this.facing * 140));
+      const shipFacing = this.facing;
 
-      // 3 tiros de canhão na horizontal: 1 a cada 5 segundos
+      // 3 tiros de canhão na horizontal: 1 a cada 3 segundos
       this.sparrowBlackPearl = {
         shipX: shipX,
         shipY: this.groundY,
@@ -1822,7 +1861,7 @@ export class Fighter {
         timer: 0,
         shotsFired: 0,
         maxShots: 3,
-        interval: 5.0,
+        interval: 3.0,
         cannonballs: []
       };
     } else if (this.superType === 'MCQUEEN_KACHOW_BLITZ') {
@@ -2370,19 +2409,9 @@ export class Fighter {
           particles.emitSwordSlash(this.position.x - this.facing * 40, this.position.y - 65, this.position.x + this.facing * 50, this.position.y - 65, '#fbbf24', 6);
           particles.emitSparks(hitPoint.x, hitPoint.y, '#fbbf24', 28, 10);
           particles.emitShockwave(hitPoint.x, hitPoint.y, 140, '#f59e0b');
-          particles.emitFloatingText('CLASH NULLIFIED!', this.position.x, this.position.y - 95, '#fbbf24', true);
         }
-        // Anula golpe adversário e se o oponente estiver perto causa contra-golpe rápido
-        if (this.opponent && !this.opponent.isDead) {
-          const counterData = {
-            damage: 85,
-            knockback: 15,
-            knockdown: false,
-            isHeavy: true,
-            attackerPower: this.attackPower
-          };
-          this.opponent.receiveHit(counterData, { x: this.opponent.position.x, y: this.opponent.position.y - 50 }, particles);
-        }
+        // Item 5: Ele apenas cancela o dano de ambos os jogadores, ele não causa dano ao bloquear. Após block, próximo hit causa 150% dmg.
+        this.zorroEmpoweredNextHit = true;
         return false; // ANULA O ATAQUE COMPLETAMENTE!
       }
     }
@@ -2409,10 +2438,17 @@ export class Fighter {
       return false;
     }
 
-    const actualDamage = Math.round(attackData.damage * (attackData.attackerPower || 1.0) / this.defense);
+    let attackerPwr = attackData.attackerPower || 1.0;
+    if (attackData.attacker && attackData.attacker.isZorro && attackData.attacker.zorroEmpoweredNextHit) {
+      attackerPwr *= 1.5; // Item 5: após block/clash, próximo hit causa 150% dmg
+      attackData.attacker.zorroEmpoweredNextHit = false;
+    }
+
+    const actualDamage = Math.round(attackData.damage * attackerPwr / this.defense);
     this.health = Math.max(0, this.health - actualDamage);
-    // Ganha 2,5% de energia ao receber pancada
-    this.energy = Math.min(this.maxEnergy, this.energy + 2.5);
+    // Ganha 2,5% de energia ao receber pancada (Bruce Banner em forma humana ganha o dobro: 5.0%)
+    const energyGain = (this.isBanner && !this.isHulk) ? 5.0 : 2.5;
+    this.energy = Math.min(this.maxEnergy, this.energy + energyGain);
 
     // Se Verso levar um golpe limpo (fora da defesa), o rank dele volta para E (75% do dano)
     this.resetVersoRankOnHitTaken();
@@ -3736,8 +3772,8 @@ export class Fighter {
       sp.rightX = Math.max(800, stageWidth - 280);
       if (sp.cooldown > 0) sp.cooldown -= dt;
 
-      // APENAS DOUTOR ESTRANHO PODE ATRAVESSAR!
-      if (this.isDoctorStrange && sp.cooldown <= 0) {
+      // APENAS DOUTOR ESTRANHO PODE ATRAVESSAR (E NÃO DEVE PASSAR SE ESTIVER AGACHADO)!
+      if (this.isDoctorStrange && sp.cooldown <= 0 && !this.isCrouching && this.state !== FIGHTER_STATE.CROUCH) {
         const leftDist = Math.abs(this.position.x - sp.leftX);
         const rightDist = Math.abs(this.position.x - sp.rightX);
         if (leftDist < 35 && Math.abs(this.position.y - sp.y) < 80) {
@@ -6690,23 +6726,34 @@ export class Fighter {
       ctx.restore();
     }
 
-    // 20. Zorro: Marca do Z brilhante na tela / no alvo
-    if (this.zorroMarkOfZ && this.zorroMarkOfZ.active) {
-      const zm = this.zorroMarkOfZ;
+    // 20. Zorro: Ultimate deixa a tela preta enquanto o Z é gravado
+    if ((this.zorroMarkOfZ && this.zorroMarkOfZ.active) || (this.isZorro && this.state === FIGHTER_STATE.SUPER_MOVE)) {
       ctx.save();
-      ctx.translate(zm.targetX, zm.targetY);
+      // Blackout na arena inteira
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.94)';
+      ctx.fillRect(-500, -500, 3000, 2000);
+
+      const targetX = this.opponent ? this.opponent.position.x : this.position.x + this.facing * 100;
+      const targetY = this.opponent ? this.opponent.position.y - 60 : this.position.y - 60;
+
+      ctx.translate(targetX, targetY);
       ctx.strokeStyle = '#fbbf24';
       ctx.shadowColor = '#f59e0b';
-      ctx.shadowBlur = 25;
-      ctx.lineWidth = 6;
+      ctx.shadowBlur = 35;
+      ctx.lineWidth = 8;
       ctx.beginPath();
       // Linha superior
-      ctx.moveTo(-45, -35);
-      ctx.lineTo(45, -35);
+      ctx.moveTo(-55, -45);
+      ctx.lineTo(55, -45);
       // Linha diagonal
-      ctx.lineTo(-45, 35);
+      ctx.lineTo(-55, 45);
       // Linha inferior
-      ctx.lineTo(45, 35);
+      ctx.lineTo(55, 45);
+      ctx.stroke();
+
+      // Centro em brasa incandescente
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3;
       ctx.stroke();
       ctx.restore();
     }

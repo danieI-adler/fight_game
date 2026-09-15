@@ -14,6 +14,7 @@ import { ControlsGuide } from './components/menu/ControlsGuide';
 import { TrainingOverlay } from './components/training/TrainingOverlay';
 import { GraphicsSelectorModal, GRAPHICS_MODES } from './components/menu/GraphicsSelectorModal';
 import { BalanceDashboardModal } from './components/menu/BalanceDashboardModal';
+import { PatchNotesModal } from './components/menu/PatchNotesModal';
 
 export function App() {
   const [screen, setScreen] = useState('MAIN_MENU'); // 'MAIN_MENU', 'SELECT', 'ONLINE_LOBBY', 'FIGHT'
@@ -35,6 +36,7 @@ export function App() {
   const [showGraphicsModal, setShowGraphicsModal] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [showBalanceDashboard, setShowBalanceDashboard] = useState(false);
+  const [showPatchNotes, setShowPatchNotes] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [initialOnlineRoom, setInitialOnlineRoom] = useState('');
@@ -362,6 +364,7 @@ export function App() {
           isMuted={isMuted}
           onToggleMute={toggleMute}
           onOpenBalanceDashboard={() => setShowBalanceDashboard(true)}
+          onOpenPatchNotes={() => setShowPatchNotes(true)}
         />
       )}
 
@@ -479,6 +482,12 @@ export function App() {
         isOpen={showBalanceDashboard}
         onClose={() => setShowBalanceDashboard(false)}
         isExpedition={isExpedition}
+      />
+
+      {/* Modal de Patch Notes & Reworks */}
+      <PatchNotesModal
+        isOpen={showPatchNotes}
+        onClose={() => setShowPatchNotes(false)}
       />
     </div>
   );
