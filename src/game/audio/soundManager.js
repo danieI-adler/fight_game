@@ -818,6 +818,17 @@ class SoundManager {
 
   // --- NOVOS SONS DE ATAQUES EXTRAS E FINALIZAÇÃO ---
 
+  // --- CUSTOM SOUND: Kirito Starburst Stream (C8763) ---
+  playStarburstStream() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+    const url = 'C:/Users/fogoy/Downloads/sao-c8763-2.mp3';
+    const audio = new Audio(url);
+    audio.volume = 0.8;
+    audio.play();
+  }
+
   playGunshot() {
     if (this.isMuted) return;
     this.init();
