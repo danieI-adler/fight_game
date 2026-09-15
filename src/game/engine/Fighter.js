@@ -105,6 +105,12 @@ export class Fighter {
     this.isIronMan = Boolean(cNameLower.includes('ferro') || cNameLower.includes('iron') || charData.superType === 'IRONMAN_UNIBEAM');
     this.isSpiderMan = Boolean(cNameLower.includes('aranha') || cNameLower.includes('spider') || charData.superType === 'SPIDERMAN_WEB_BARRAGE');
 
+    // Identificação do Lote 5 dos Novos Personagens (Yoshi, Pikachu, Sonic, Bane)
+    this.isYoshi = Boolean(cNameLower.includes('yoshi') || charData.superType === 'YOSHI_EGG_BOMBER');
+    this.isPikachu = Boolean(cNameLower.includes('pikachu') || charData.superType === 'PIKACHU_THUNDER_STRIKE');
+    this.isSonic = Boolean(cNameLower.includes('sonic') || charData.superType === 'SONIC_SUPER_TRANSFORMATION');
+    this.isBane = Boolean(cNameLower.includes('bane') || charData.superType === 'BANE_BACKBREAKER');
+
     // Estado e Animação
     this.state = FIGHTER_STATE.IDLE;
     this.stateTime = 0;
@@ -214,6 +220,17 @@ export class Fighter {
     this.spidermanWeb = null; // { x, y, vx, vy, damage, active, hasHit, pulling: false }
     this.spidermanWebBarrage = null; // { timer, phase, target, active, hitsLanded: 0 }
 
+    // Projéteis e Habilidades Especiais: Yoshi, Pikachu, Sonic, Bane (Lote 5)
+    this.yoshiEgg = null; // { x, y, vx, vy, bounces, damage, active, hasHit }
+    this.yoshiEggBomber = null; // { timer, phase, target, active, eggs: [] }
+    this.pikachuQuickAttack = null; // { timer, startX, targetX, damage, active, hasHit }
+    this.pikachuThunder = null; // { timer, x, y, damage, active, hasHit }
+    this.sonicSpinDash = null; // { timer, startX, targetX, damage, active, hasHit }
+    this.sonicSuperTransform = null; // { timer, active, target, hitsLanded: 0 }
+    this.baneVenomBuffTimer = 0; // Temporizador do superesteróide Venom
+    this.baneVenomSmash = null; // { timer, reach, damage, active, hasHit }
+    this.baneBackbreaker = null; // { timer, target, damage, active, phase: 'GRAB' }
+
     // Articulação Esquelética
     this.pose = {
       head: { x: 0, y: -115 },
@@ -319,6 +336,17 @@ export class Fighter {
     this.ironmanUnibeam = null;
     this.spidermanWeb = null;
     this.spidermanWebBarrage = null;
+
+    // Reset Lote 5
+    this.yoshiEgg = null;
+    this.yoshiEggBomber = null;
+    this.pikachuQuickAttack = null;
+    this.pikachuThunder = null;
+    this.sonicSpinDash = null;
+    this.sonicSuperTransform = null;
+    this.baneVenomBuffTimer = 0;
+    this.baneVenomSmash = null;
+    this.baneBackbreaker = null;
 
     // Reinicia o rank do Verso em uma nova rodada
     if (this.isVerso) {
@@ -1172,6 +1200,88 @@ export class Fighter {
         pulling: false
       };
     }
+    // 29. Yoshi: Arremesso de Ovo Saltitante (Q)
+    else if (this.isYoshi) {
+      this.extraType = 'YOSHI_EGG_THROW';
+      sounds.playWhoosh();
+      sounds.playPunch(false);
+      const sx = this.position.x + this.facing * 36;
+      const sy = this.position.y - 60;
+      this.yoshiEgg = {
+        x: sx,
+        y: sy,
+        vx: this.facing * (level === 2 ? 950 : 800),
+        vy: -220,
+        bounces: 0,
+        damage: level === 2 ? 180 : 125,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 30. Pikachu: Ataque Rápido Ziguezagueante (Q)
+    else if (this.isPikachu) {
+      this.extraType = 'PIKACHU_QUICK_ATTACK';
+      sounds.playElectricZap();
+      sounds.playDash();
+      const target = this.opponent;
+      const targetX = target ? target.position.x : this.position.x + this.facing * 280;
+      this.pikachuQuickAttack = {
+        timer: 0,
+        startX: this.position.x,
+        targetX: targetX,
+        damage: level === 2 ? 200 : 140,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 31. Sonic the Hedgehog: Spin Dash Supersônico (Q)
+    else if (this.isSonic) {
+      this.extraType = 'SONIC_SPIN_DASH';
+      sounds.playWindTornado();
+      sounds.playDash();
+      const target = this.opponent;
+      const targetX = target ? target.position.x + this.facing * 90 : this.position.x + this.facing * 340;
+      this.sonicSpinDash = {
+        timer: 0,
+        startX: this.position.x,
+        targetX: targetX,
+        damage: level === 2 ? 210 : 150,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 32. Bane: Injeção de Venom & Soco Sísmico (Q)
+    else if (this.isBane) {
+      this.extraType = 'BANE_VENOM_PUNCH';
+      sounds.playSuperCharge();
+      sounds.playThunderSlam();
+      this.baneVenomBuffTimer = 5.0; // 5 segundos com +20% de dano
+      const reach = 110;
+      const dmg = level === 2 ? 230 : 165;
+      this.baneVenomSmash = {
+        timer: 0,
+        reach: reach,
+        damage: dmg,
+        active: true,
+        hasHit: false
+      };
+      if (this.opponent && !this.opponent.isDead) {
+        const dist = Math.abs(this.opponent.position.x - this.position.x);
+        const facingOpp = (this.opponent.position.x - this.position.x) * this.facing > 0;
+        if (facingOpp && dist < reach) {
+          this.baneVenomSmash.hasHit = true;
+          const attackData = {
+            damage: dmg,
+            knockback: 24,
+            knockdown: true,
+            isHeavy: true,
+            unblockable: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, null);
+        }
+      }
+    }
     // Personagens genéricos: golpe padrão fortificado
     else {
       this.extraType = 'GENERIC_EXTRA';
@@ -1543,6 +1653,58 @@ export class Fighter {
         damage: 360,
         active: true,
         hitsLanded: 0
+      };
+    } else if (this.superType === 'YOSHI_EGG_BOMBER') {
+      this.superPhase = 'EGG_BOMB';
+      sounds.playSuperCharge();
+      sounds.playPunch(true);
+      const target = this.opponent;
+      this.yoshiEggBomber = {
+        timer: 0,
+        phase: 'BOMB_RAIN',
+        target: target,
+        damage: 370,
+        active: true,
+        eggs: []
+      };
+    } else if (this.superType === 'PIKACHU_THUNDER_STRIKE') {
+      this.superPhase = 'THUNDER_CHARGE';
+      sounds.playSuperCharge();
+      sounds.playThunderSlam();
+      sounds.playElectricZap();
+      const targetX = this.opponent ? this.opponent.position.x : this.position.x + this.facing * 260;
+      this.pikachuThunder = {
+        timer: 0,
+        x: targetX,
+        y: this.groundY - 180,
+        damage: 395,
+        active: true,
+        hasHit: false
+      };
+    } else if (this.superType === 'SONIC_SUPER_TRANSFORMATION') {
+      this.superPhase = 'SUPER_SONIC';
+      sounds.playSuperCharge();
+      sounds.playWindTornado();
+      sounds.playLaser();
+      const target = this.opponent;
+      this.sonicSuperTransform = {
+        timer: 0,
+        active: true,
+        target: target,
+        damage: 385,
+        hitsLanded: 0
+      };
+    } else if (this.superType === 'BANE_BACKBREAKER') {
+      this.superPhase = 'VENOM_OVERDRIVE';
+      sounds.playSuperCharge();
+      sounds.playThunderSlam();
+      const target = this.opponent;
+      this.baneBackbreaker = {
+        timer: 0,
+        phase: 'GRAB',
+        target: target,
+        damage: 420,
+        active: true
       };
     } else {
       this.superType = 'GUSTAVE_SMASH';
@@ -3839,6 +4001,316 @@ export class Fighter {
       }
     }
 
+    // 5.46 Yoshi: Ovo Saltitante (Q)
+    if (this.yoshiEgg && this.yoshiEgg.active) {
+      const ye = this.yoshiEgg;
+      ye.x += ye.vx * dt;
+      ye.y += ye.vy * dt;
+      ye.vy += 750 * dt; // Gravidade
+
+      // Ricochete no chão
+      if (ye.y >= this.groundY - 15) {
+        ye.y = this.groundY - 15;
+        ye.vy = -ye.vy * 0.72;
+        ye.bounces++;
+        sounds.playPunch(false);
+        if (particles) particles.emitDust(ye.x, this.groundY, 6, '#22c55e');
+      }
+
+      if (this.opponent && !this.opponent.isDead && !ye.hasHit) {
+        const dist = Math.hypot(ye.x - this.opponent.position.x, ye.y - (this.opponent.position.y - 50));
+        if (dist < 46) {
+          ye.hasHit = true;
+          ye.active = false;
+          sounds.playPunch(true);
+          if (particles) {
+            particles.emitShockwave(ye.x, ye.y, 90, '#22c55e');
+            particles.emitSparks(ye.x, ye.y, '#ffffff', 20, 8);
+            particles.emitFloatingText('OVO DO YOSHI!', ye.x, ye.y - 25, '#22c55e', true);
+          }
+          const attackData = {
+            damage: ye.damage,
+            knockback: 16,
+            knockdown: false,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: ye.x, y: ye.y }, particles);
+          this.yoshiEgg = null;
+        }
+      }
+
+      if (ye.bounces > 3 || ye.x < -100 || ye.x > stageWidth + 100) {
+        ye.active = false;
+        this.yoshiEgg = null;
+      }
+    }
+
+    // 5.47 Yoshi: Bombardeio de Ovos & Ground Pound (Ultimate)
+    if (this.yoshiEggBomber && this.yoshiEggBomber.active) {
+      const yb = this.yoshiEggBomber;
+      yb.timer += dt;
+      const target = yb.target;
+
+      if (particles && Math.random() < 0.7) {
+        particles.emitSparks(this.position.x, this.position.y - 60, '#22c55e', 4, 3);
+      }
+
+      // 3 Ovos caindo do céu
+      if (yb.timer >= 0.4 && yb.eggs.length === 0 && target) {
+        for (let i = 0; i < 3; i++) {
+          yb.eggs.push({
+            x: target.position.x + (i - 1) * 35,
+            y: this.groundY - 320 - i * 40,
+            vy: 900,
+            hasHit: false
+          });
+        }
+        sounds.playWhoosh();
+      }
+
+      for (const egg of yb.eggs) {
+        egg.y += egg.vy * dt;
+        if (!egg.hasHit && egg.y >= this.groundY - 30) {
+          egg.hasHit = true;
+          sounds.playThunderSlam();
+          if (particles) {
+            particles.emitShockwave(egg.x, this.groundY, 120, '#22c55e');
+            particles.emitSparks(egg.x, this.groundY - 20, '#ef4444', 18, 7);
+          }
+          if (target && !target.isDead) {
+            const attackData = {
+              damage: Math.round(yb.damage / 3),
+              knockback: 22,
+              knockdown: true,
+              isHeavy: true,
+              unblockable: true,
+              attackerPower: this.attackPower
+            };
+            target.receiveHit(attackData, { x: egg.x, y: this.groundY - 40 }, particles);
+          }
+        }
+      }
+
+      if (yb.timer >= 1.4) {
+        yb.active = false;
+        this.yoshiEggBomber = null;
+      }
+    }
+
+    // 5.48 Pikachu: Ataque Rápido Ziguezagueante (Q)
+    if (this.pikachuQuickAttack && this.pikachuQuickAttack.active) {
+      const qa = this.pikachuQuickAttack;
+      qa.timer += dt;
+      const progress = Math.min(1, qa.timer / 0.2);
+      this.position.x = qa.startX + (qa.targetX - qa.startX) * progress;
+
+      if (particles && Math.random() < 0.85) {
+        particles.emitElectricArc(this.position.x - 25, this.position.y - 50, this.position.x + 25, this.position.y - 50, '#facc15');
+        particles.emitSparks(this.position.x, this.position.y - 50, '#eab308', 8, 5);
+      }
+
+      if (this.opponent && !this.opponent.isDead && !qa.hasHit && progress > 0.3) {
+        const dist = Math.abs(this.position.x - this.opponent.position.x);
+        if (dist < 75) {
+          qa.hasHit = true;
+          sounds.playElectricZap();
+          sounds.playPunch(true);
+          if (particles) {
+            particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 50, 140, '#facc15');
+            particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 50, '#38bdf8', 30, 10);
+            particles.emitFloatingText('ATAQUE RÁPIDO!', this.opponent.position.x, this.opponent.position.y - 75, '#eab308', true);
+          }
+          const attackData = {
+            damage: qa.damage,
+            knockback: 18,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 50 }, particles);
+        }
+      }
+
+      if (progress >= 1) {
+        qa.active = false;
+        this.pikachuQuickAttack = null;
+      }
+    }
+
+    // 5.49 Pikachu: Trovão Supremo dos Céus (Ultimate)
+    if (this.pikachuThunder && this.pikachuThunder.active) {
+      const pt = this.pikachuThunder;
+      pt.timer += dt;
+
+      if (particles && Math.random() < 0.9) {
+        particles.emitElectricArc(pt.x + (Math.random() - 0.5) * 40, pt.y - 300, pt.x, this.groundY, '#facc15', 5);
+        particles.emitSparks(pt.x, this.groundY, '#ffffff', 14, 8);
+      }
+
+      if (!pt.hasHit && pt.timer >= 0.45) {
+        pt.hasHit = true;
+        sounds.playThunderSlam();
+        sounds.playKO();
+        if (particles) {
+          particles.emitShockwave(pt.x, this.groundY, 280, '#facc15');
+          particles.emitShockwave(pt.x, this.groundY, 180, '#38bdf8');
+          particles.emitSparks(pt.x, this.groundY - 50, '#ffffff', 50, 18);
+          particles.emitFloatingText('100.000 VOLTS: TROVÃO!', pt.x, pt.y - 30, '#facc15', true);
+        }
+        if (this.opponent && !this.opponent.isDead) {
+          const dist = Math.abs(this.opponent.position.x - pt.x);
+          if (dist < 220) {
+            const attackData = {
+              damage: pt.damage,
+              knockback: 34,
+              knockdown: true,
+              isHeavy: true,
+              unblockable: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 50 }, particles);
+          }
+        }
+      }
+
+      if (pt.timer >= 1.35) {
+        pt.active = false;
+        this.pikachuThunder = null;
+      }
+    }
+
+    // 5.50 Sonic: Spin Dash Supersônico (Q)
+    if (this.sonicSpinDash && this.sonicSpinDash.active) {
+      const sd = this.sonicSpinDash;
+      sd.timer += dt;
+      const progress = Math.min(1, sd.timer / 0.22);
+      this.position.x = sd.startX + (sd.targetX - sd.startX) * progress;
+
+      if (particles && Math.random() < 0.8) {
+        particles.emitDust(this.position.x, this.groundY, 8, '#2563eb');
+        particles.emitSparks(this.position.x, this.position.y - 40, '#60a5fa', 5, 4);
+      }
+
+      if (this.opponent && !this.opponent.isDead && !sd.hasHit && progress > 0.2) {
+        const dist = Math.abs(this.position.x - this.opponent.position.x);
+        if (dist < 80) {
+          sd.hasHit = true;
+          sounds.playPunch(true);
+          sounds.playDash();
+          if (particles) {
+            particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 50, 150, '#2563eb');
+            particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 50, '#facc15', 25, 10);
+            particles.emitFloatingText('SPIN DASH!', this.opponent.position.x, this.opponent.position.y - 75, '#2563eb', true);
+          }
+          const attackData = {
+            damage: sd.damage,
+            knockback: 22,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 50 }, particles);
+        }
+      }
+
+      if (progress >= 1) {
+        sd.active = false;
+        this.sonicSpinDash = null;
+      }
+    }
+
+    // 5.51 Sonic: Super Sonic Blitz (Ultimate)
+    if (this.sonicSuperTransform && this.sonicSuperTransform.active) {
+      const st = this.sonicSuperTransform;
+      st.timer += dt;
+      const target = st.target;
+
+      if (particles && Math.random() < 0.85) {
+        particles.emitElectricArc(this.position.x - 20, this.position.y - 50, this.position.x + 20, this.position.y - 50, '#facc15', 3);
+        particles.emitSparks(this.position.x, this.position.y - 50, '#ffffff', 10, 6);
+      }
+
+      const blitzTimes = [0.3, 0.6, 0.9, 1.2];
+      for (let i = st.hitsLanded; i < blitzTimes.length; i++) {
+        if (st.timer >= blitzTimes[i]) {
+          st.hitsLanded = i + 1;
+          sounds.playLaser();
+          sounds.playPunch(true);
+          const isFinal = i === blitzTimes.length - 1;
+          if (target && !target.isDead) {
+            this.position.x = target.position.x + (i % 2 === 0 ? -60 : 60);
+            this.facing = Math.sign(target.position.x - this.position.x);
+            if (particles) {
+              particles.emitShockwave(target.position.x, target.position.y - 50, isFinal ? 200 : 120, '#facc15');
+              particles.emitSparks(target.position.x, target.position.y - 50, '#2563eb', isFinal ? 35 : 15, 8);
+              if (isFinal) {
+                particles.emitFloatingText('SUPER SONIC!', target.position.x, target.position.y - 85, '#facc15', true);
+              }
+            }
+            const attackData = {
+              damage: Math.round(st.damage / 4),
+              knockback: isFinal ? 34 : 6,
+              knockdown: isFinal,
+              isHeavy: isFinal,
+              unblockable: true,
+              attackerPower: this.attackPower
+            };
+            target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 50 }, particles);
+          }
+        }
+      }
+
+      if (st.timer >= 1.45) {
+        st.active = false;
+        this.sonicSuperTransform = null;
+      }
+    }
+
+    // 5.52 Bane: Quebra-Costas (Ultimate)
+    if (this.baneBackbreaker && this.baneBackbreaker.active) {
+      const bb = this.baneBackbreaker;
+      bb.timer += dt;
+      const target = bb.target;
+
+      if (target && !target.isDead) {
+        if (bb.timer < 0.65) {
+          // Ergue o alvo acima da cabeça de Bane
+          target.velocity.set(0, 0);
+          target.position.x = this.position.x + this.facing * 10;
+          target.position.y = this.position.y - 120;
+          if (particles && Math.random() < 0.5) {
+            particles.emitSparks(target.position.x, target.position.y, '#22c55e', 4, 3);
+          }
+        } else if (bb.phase === 'GRAB') {
+          bb.phase = 'BREAK';
+          sounds.playThunderSlam();
+          sounds.playKO();
+          target.position.y = this.groundY;
+          if (particles) {
+            particles.emitShockwave(this.position.x, this.groundY, 240, '#22c55e');
+            particles.emitShockwave(this.position.x, this.groundY, 140, '#15803d');
+            particles.emitSparks(this.position.x, this.position.y - 40, '#ffffff', 40, 14);
+            particles.emitFloatingText('QUEBRA-COSTAS DE BANE!', this.position.x, this.position.y - 85, '#22c55e', true);
+          }
+          const attackData = {
+            damage: bb.damage,
+            knockback: 28,
+            knockdown: true,
+            isHeavy: true,
+            unblockable: true,
+            attackerPower: this.attackPower
+          };
+          target.receiveHit(attackData, { x: this.position.x, y: this.position.y - 50 }, particles);
+        }
+      }
+
+      if (bb.timer >= 1.35) {
+        bb.active = false;
+        this.baneBackbreaker = null;
+      }
+    }
+
     // 6. Watchdog de Segurança Anti-Travamento (Golpes comuns 0.8s, Super Move 1.6s)
     const attackStates = [
       FIGHTER_STATE.LIGHT_PUNCH,
@@ -5369,6 +5841,90 @@ export class Fighter {
         }
         ctx.restore();
       }
+    }
+
+    // 42. Yoshi: Ovo Saltitante (Q)
+    if (this.yoshiEgg && this.yoshiEgg.active) {
+      const ye = this.yoshiEgg;
+      ctx.save();
+      ctx.translate(ye.x, ye.y);
+      ctx.shadowColor = '#22c55e';
+      ctx.shadowBlur = 14;
+
+      // Casca branca oval
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 14, 18, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Manchas verdes clássicas do ovo do Yoshi
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.arc(-4, -5, 4, 0, Math.PI * 2);
+      ctx.arc(5, 2, 4.5, 0, Math.PI * 2);
+      ctx.arc(-3, 8, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#15803d';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 43. Pikachu: Raio do Trovão (Ultimate)
+    if (this.pikachuThunder && this.pikachuThunder.active) {
+      const pt = this.pikachuThunder;
+      ctx.save();
+      ctx.shadowColor = '#facc15';
+      ctx.shadowBlur = 32;
+
+      // Coluna colossal de raio elétrico descendo dos céus
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 12;
+      ctx.beginPath();
+      ctx.moveTo(pt.x, pt.y - 350);
+      ctx.lineTo(pt.x - 15, pt.y - 180);
+      ctx.lineTo(pt.x + 15, pt.y - 60);
+      ctx.lineTo(pt.x, this.groundY);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 44. Sonic the Hedgehog: Super Sonic Aura Dourada (Ultimate)
+    if (this.sonicSuperTransform && this.sonicSuperTransform.active) {
+      ctx.save();
+      ctx.translate(this.position.x, this.position.y - 55);
+      ctx.shadowColor = '#facc15';
+      ctx.shadowBlur = 35;
+
+      // Chamas de energia Super Saiyajin/Super Sonic
+      const auraGrad = ctx.createRadialGradient(0, 0, 10, 0, 0, 50);
+      auraGrad.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
+      auraGrad.addColorStop(0.5, 'rgba(250, 204, 21, 0.5)');
+      auraGrad.addColorStop(1, 'rgba(234, 179, 8, 0)');
+      ctx.fillStyle = auraGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 50, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 45. Bane: Vapor de Venom Verde Fluorescente (Q / Buff)
+    if (this.baneVenomBuffTimer > 0) {
+      ctx.save();
+      ctx.translate(this.position.x, this.position.y - 60);
+      ctx.shadowColor = '#22c55e';
+      ctx.shadowBlur = 20;
+      ctx.strokeStyle = 'rgba(34, 197, 94, 0.4)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(0, 0, 38 + Math.sin(Date.now() * 0.01) * 4, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
     }
   }
 

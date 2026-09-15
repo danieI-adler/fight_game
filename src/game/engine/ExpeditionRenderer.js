@@ -903,6 +903,51 @@ export class ExpeditionRenderer {
       ctx.beginPath();
       ctx.arc(hx + 4 * f, hy, 1, 0, Math.PI * 2);
       ctx.fill();
+    } else if (vis.weaponType === 'spotted_egg') {
+      // Ovo do Yoshi empunhado
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(hx + 4 * f, hy, 7, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.arc(hx + 2 * f, hy - 2, 2.5, 0, Math.PI * 2);
+      ctx.arc(hx + 6 * f, hy + 3, 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (vis.weaponType === 'lightning_tail') {
+      // Cauda de raio amarela do Pikachu
+      ctx.fillStyle = '#eab308';
+      ctx.beginPath();
+      ctx.moveTo(hx - 8 * f, hy + 8);
+      ctx.lineTo(hx - 14 * f, hy + 2);
+      ctx.lineTo(hx - 18 * f, hy + 6);
+      ctx.lineTo(hx - 26 * f, hy - 4);
+      ctx.lineTo(hx - 22 * f, hy - 8);
+      ctx.closePath();
+      ctx.fill();
+      // Base marrom
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(hx - 10 * f, hy + 6, 4 * f, 4);
+    } else if (vis.weaponType === 'golden_ring') {
+      // Anel Dourado do Sonic
+      ctx.shadowColor = '#facc15';
+      ctx.shadowBlur = 8;
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(hx + 6 * f, hy, 7, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    } else if (vis.weaponType === 'venom_injector') {
+      // Braçadeira com tubos de Venom verde fluorescente do Bane
+      ctx.fillStyle = '#18181b';
+      ctx.fillRect(hx - 4 * f, hy - 5, 12 * f, 10);
+      ctx.strokeStyle = '#22c55e';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(hx - 2 * f, hy - 4);
+      ctx.lineTo(hx + 6 * f, hy + 4);
+      ctx.stroke();
     }
 
     ctx.restore();
@@ -1134,6 +1179,117 @@ export class ExpeditionRenderer {
       ctx.beginPath();
       ctx.ellipse(hx + 3 * f, hy - 3, 3.8, 2.4, 0.2 * f, 0, Math.PI * 2);
       ctx.fill();
+    } else if (vis.headgear === 'yoshi_snout') {
+      // Cabeça arredondada verde do Yoshi com bochechas brancas e crista vermelha
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.arc(hx, hy - 2, 12, 0, Math.PI * 2);
+      ctx.fill();
+      // Bochecha branca
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(hx + 3 * f, hy + 2, 7, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Crista vermelha atrás
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(hx - 8 * f, hy - 4, 3.5, 0, Math.PI * 2);
+      ctx.arc(hx - 10 * f, hy + 2, 3, 0, Math.PI * 2);
+      ctx.fill();
+      // Olho grande preto/branco
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(hx + 3 * f, hy - 5, 4, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.arc(hx + 4.5 * f, hy - 5, 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (vis.headgear === 'pikachu_ears') {
+      // Cabeça amarela com orelhas pontudas de pontas pretas e bochecha vermelha
+      ctx.fillStyle = '#eab308';
+      ctx.beginPath();
+      ctx.arc(hx, hy - 2, 11, 0, Math.PI * 2);
+      ctx.fill();
+      // Orelhas pontudas
+      ctx.fillStyle = '#eab308';
+      ctx.beginPath();
+      ctx.moveTo(hx - 6, hy - 10);
+      ctx.lineTo(hx - 14, hy - 24);
+      ctx.lineTo(hx - 1, hy - 11);
+      ctx.closePath();
+      ctx.fill();
+      // Ponta preta da orelha 1
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.moveTo(hx - 10, hy - 17);
+      ctx.lineTo(hx - 14, hy - 24);
+      ctx.lineTo(hx - 7, hy - 18);
+      ctx.closePath();
+      ctx.fill();
+      // Orelha 2
+      ctx.fillStyle = '#eab308';
+      ctx.beginPath();
+      ctx.moveTo(hx + 2, hy - 11);
+      ctx.lineTo(hx + 10, hy - 24);
+      ctx.lineTo(hx + 7, hy - 10);
+      ctx.closePath();
+      ctx.fill();
+      // Ponta preta da orelha 2
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.moveTo(hx + 6, hy - 18);
+      ctx.lineTo(hx + 10, hy - 24);
+      ctx.lineTo(hx + 9, hy - 17);
+      ctx.closePath();
+      ctx.fill();
+      // Bochecha vermelha elétrica
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.arc(hx + 5 * f, hy + 2, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (vis.headgear === 'hedgehog_quills') {
+      // Espinhos azuis longos para trás do Sonic
+      ctx.fillStyle = '#1d4ed8';
+      for (let i = 0; i < 4; i++) {
+        const ang = -Math.PI * 0.85 + i * 0.45;
+        ctx.beginPath();
+        ctx.moveTo(hx + Math.cos(ang) * 9, hy + Math.sin(ang) * 9);
+        ctx.lineTo(hx - 18 * f, hy - 14 + i * 8);
+        ctx.lineTo(hx + Math.cos(ang + 0.3) * 10, hy + Math.sin(ang + 0.3) * 10);
+        ctx.fill();
+      }
+      ctx.beginPath();
+      ctx.arc(hx, hy - 2, 11, 0, Math.PI * 2);
+      ctx.fill();
+      // Focinho cor de pêssego
+      ctx.fillStyle = '#fdba74';
+      ctx.beginPath();
+      ctx.ellipse(hx + 4 * f, hy + 2, 5, 3.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Narizinho preto
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.arc(hx + 8 * f, hy + 1, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (vis.headgear === 'luchador_mask') {
+      // Máscara de luta preta com aberturas e tubos verdes de Venom do Bane
+      ctx.fillStyle = '#18181b';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 2, 12, 13, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Aberturas oculares brancas ferozes
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(hx + 3 * f, hy - 3, 3, 2, 0.2 * f, 0, Math.PI * 2);
+      ctx.fill();
+      // Tubo verde de Venom na nuca/lado
+      ctx.strokeStyle = '#22c55e';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(hx - 6 * f, hy + 6);
+      ctx.quadraticCurveTo(hx - 14 * f, hy - 2, hx - 4 * f, hy - 10);
+      ctx.stroke();
     } else {
       // Cabelo clássico
       ctx.beginPath();

@@ -1484,6 +1484,58 @@ export class FighterCombat {
           break;
         }
 
+        // --- 30. YOSHI: BOMBARDEIO DE OVOS ---
+        if (fighter.superType === 'YOSHI_EGG_BOMBER') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.4) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 31. PIKACHU: TROVÃO SUPREMO ---
+        if (fighter.superType === 'PIKACHU_THUNDER_STRIKE') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.35) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 32. SONIC: SUPER SONIC TRANSFORMAÇÃO ---
+        if (fighter.superType === 'SONIC_SUPER_TRANSFORMATION') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.45) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 33. BANE: QUEBRA-COSTAS TITÂNICO ---
+        if (fighter.superType === 'BANE_BACKBREAKER') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.35) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
         // --- 7. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
         if (fighter.stateTime < 0.5) {
           fighter.velocity.x = 0;
