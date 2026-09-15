@@ -117,6 +117,14 @@ export class Fighter {
     this.isEren = Boolean(cNameLower.includes('eren') || charData.superType === 'EREN_TITAN_ROAR');
     this.isBruceLee = Boolean(cNameLower.includes('bruce lee') || cNameLower.includes('lee') && !cNameLower.includes('banner') || charData.superType === 'BRUCE_LEE_DRAGON_FURY');
 
+    // Identificação do Lote 7 dos Novos Personagens (Goku, Yoda, Han Solo, Mario, Wolverine, Kratos)
+    this.isGoku = Boolean(cNameLower.includes('goku') || charData.superType === 'GOKU_GENKI_DAMA');
+    this.isYoda = Boolean(cNameLower.includes('yoda') || charData.superType === 'YODA_FORCE_UNLEASHED');
+    this.isHanSolo = Boolean(cNameLower.includes('han solo') || cNameLower.includes('solo') || charData.superType === 'HAN_SOLO_CARPET_BOMB');
+    this.isMario = Boolean(cNameLower.includes('mario') || charData.superType === 'MARIO_FINALE_FIRE');
+    this.isWolverine = Boolean(cNameLower.includes('wolverine') || cNameLower.includes('wolwerine') || cNameLower.includes('logan') || charData.superType === 'WOLVERINE_BERSERKER_BARRAGE');
+    this.isKratos = Boolean(cNameLower.includes('kratos') || charData.superType === 'KRATOS_SPARTAN_RAGE');
+
     // Estado e Animação
     this.state = FIGHTER_STATE.IDLE;
     this.stateTime = 0;
@@ -247,6 +255,20 @@ export class Fighter {
     this.bruceLeeOneInch = null; // { timer, reach, damage, active, hasHit }
     this.bruceLeeDragonFury = null; // { timer, target, damage, active, hitsLanded: 0 }
 
+    // Projéteis e Habilidades Especiais: Goku, Yoda, Han Solo, Mario, Wolverine, Kratos (Lote 7)
+    this.gokuKamehameha = null; // { timer, x, y, reach, damage, active, hasHit }
+    this.gokuGenkiDama = null; // { timer, x, y, damage, active, hasHit, scale }
+    this.yodaForcePush = null; // { timer, x, y, reach, damage, active, hasHit }
+    this.yodaAtaru = null; // { timer, target, damage, active, hitsLanded: 0 }
+    this.hanBlaster = null; // { x, y, vx, damage, active, hasHit }
+    this.hanFalconBomb = null; // { timer, x, y, damage, active, bombsFired: 0, bombs: [] }
+    this.marioFireball = null; // { x, y, vx, vy, bounces, damage, active, hasHit }
+    this.marioFinale = null; // { timer, x, y, damage, active, wavesFired: 0 }
+    this.wolverineXSlash = null; // { timer, reach, damage, active, hasHit }
+    this.wolverineBerserker = null; // { timer, target, damage, active, hitsLanded: 0 }
+    this.kratosBlades = null; // { timer, reach, damage, active, hasHit }
+    this.kratosRage = null; // { timer, x, y, damage, active, hitsLanded: 0 }
+
     // Articulação Esquelética
     this.pose = {
       head: { x: 0, y: -115 },
@@ -373,6 +395,18 @@ export class Fighter {
     this.erenTitanRoar = null;
     this.bruceLeeOneInch = null;
     this.bruceLeeDragonFury = null;
+    this.gokuKamehameha = null;
+    this.gokuGenkiDama = null;
+    this.yodaForcePush = null;
+    this.yodaAtaru = null;
+    this.hanBlaster = null;
+    this.hanFalconBomb = null;
+    this.marioFireball = null;
+    this.marioFinale = null;
+    this.wolverineXSlash = null;
+    this.wolverineBerserker = null;
+    this.kratosBlades = null;
+    this.kratosRage = null;
 
     // Reinicia o rank do Verso em uma nova rodada
     if (this.isVerso) {
@@ -1387,6 +1421,145 @@ export class Fighter {
         }
       }
     }
+    // 37. Son Goku: Feixe Kamehameha (Q)
+    else if (this.isGoku) {
+      this.extraType = 'GOKU_KAMEHAMEHA';
+      sounds.playSuperCharge();
+      sounds.playLaser();
+      this.gokuKamehameha = {
+        timer: 0,
+        x: this.position.x + this.facing * 35,
+        y: this.position.y - 60,
+        reach: 1100,
+        damage: level === 2 ? 235 : 165,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 38. Mestre Yoda: Empurrão Telecinético da Força (Q)
+    else if (this.isYoda) {
+      this.extraType = 'YODA_FORCE_PUSH';
+      sounds.playWindTornado();
+      sounds.playThunderSlam();
+      const reach = 220;
+      const dmg = level === 2 ? 210 : 145;
+      this.yodaForcePush = {
+        timer: 0,
+        x: this.position.x + this.facing * 20,
+        y: this.position.y - 50,
+        reach: reach,
+        damage: dmg,
+        active: true,
+        hasHit: false
+      };
+      if (this.opponent && !this.opponent.isDead) {
+        const dist = Math.abs(this.opponent.position.x - this.position.x);
+        const facingOpp = (this.opponent.position.x - this.position.x) * this.facing > 0;
+        if (facingOpp && dist < reach) {
+          this.yodaForcePush.hasHit = true;
+          const attackData = {
+            damage: dmg,
+            knockback: 28,
+            knockdown: true,
+            isHeavy: true,
+            unblockable: false,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 50 }, null);
+        }
+      }
+    }
+    // 39. Han Solo: Tiro Rápido de Blaster DL-44 (Q)
+    else if (this.isHanSolo) {
+      this.extraType = 'HAN_BLASTER_SHOT';
+      sounds.playLaser();
+      sounds.playGunshot();
+      this.hanBlaster = {
+        x: this.position.x + this.facing * 30,
+        y: this.position.y - 65,
+        vx: this.facing * 1350,
+        damage: level === 2 ? 225 : 155,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 40. Mario: Bola de Fogo Saltitante (Q)
+    else if (this.isMario) {
+      this.extraType = 'MARIO_FIREBALL';
+      sounds.playFireCast();
+      sounds.playPunch(true);
+      this.marioFireball = {
+        x: this.position.x + this.facing * 30,
+        y: this.position.y - 50,
+        vx: this.facing * 680,
+        vy: 200,
+        bounces: 0,
+        damage: level === 2 ? 215 : 150,
+        active: true,
+        hasHit: false
+      };
+    }
+    // 41. Wolverine: Corte X de Garras de Adamantium (Q - Quebra Guarda)
+    else if (this.isWolverine) {
+      this.extraType = 'WOLVERINE_X_SLASH';
+      sounds.playRapierSlash();
+      sounds.playPunch(true);
+      const reach = 100;
+      const dmg = level === 2 ? 240 : 170;
+      this.wolverineXSlash = {
+        timer: 0,
+        reach: reach,
+        damage: dmg,
+        active: true,
+        hasHit: false
+      };
+      if (this.opponent && !this.opponent.isDead) {
+        const dist = Math.abs(this.opponent.position.x - this.position.x);
+        const facingOpp = (this.opponent.position.x - this.position.x) * this.facing > 0;
+        if (facingOpp && dist < reach) {
+          this.wolverineXSlash.hasHit = true;
+          const attackData = {
+            damage: dmg,
+            knockback: 18,
+            knockdown: true,
+            isHeavy: true,
+            unblockable: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, null);
+        }
+      }
+    }
+    // 42. Kratos: Lâminas do Caos Giratórias (Q)
+    else if (this.isKratos) {
+      this.extraType = 'KRATOS_BLADES_OF_CHAOS';
+      sounds.playRapierSlash();
+      sounds.playFireCast();
+      const reach = 175;
+      const dmg = level === 2 ? 230 : 160;
+      this.kratosBlades = {
+        timer: 0,
+        reach: reach,
+        damage: dmg,
+        active: true,
+        hasHit: false
+      };
+      if (this.opponent && !this.opponent.isDead) {
+        const dist = Math.abs(this.opponent.position.x - this.position.x);
+        const facingOpp = (this.opponent.position.x - this.position.x) * this.facing > 0;
+        if (facingOpp && dist < reach) {
+          this.kratosBlades.hasHit = true;
+          const attackData = {
+            damage: dmg,
+            knockback: 20,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, null);
+        }
+      }
+    }
     // Personagens genéricos: golpe padrão fortificado
     else {
       this.extraType = 'GENERIC_EXTRA';
@@ -1864,6 +2037,87 @@ export class Fighter {
         active: true,
         hitsLanded: 0
       };
+    } else if (this.superType === 'GOKU_GENKI_DAMA') {
+      this.superPhase = 'GENKI_DAMA_CHARGE';
+      sounds.playSuperCharge();
+      sounds.playSuper();
+      sounds.playThunderSlam();
+      const targetX = this.opponent ? this.opponent.position.x : this.position.x + this.facing * 240;
+      this.gokuGenkiDama = {
+        timer: 0,
+        x: targetX,
+        y: this.groundY - 320,
+        damage: 430,
+        active: true,
+        hasHit: false,
+        scale: 0.2
+      };
+    } else if (this.superType === 'YODA_FORCE_UNLEASHED') {
+      this.superPhase = 'ATARU_BLITZ';
+      sounds.playSuperCharge();
+      sounds.playLaser();
+      sounds.playDash();
+      const target = this.opponent;
+      this.yodaAtaru = {
+        timer: 0,
+        target: target,
+        damage: 405,
+        active: true,
+        hitsLanded: 0
+      };
+    } else if (this.superType === 'HAN_SOLO_CARPET_BOMB') {
+      this.superPhase = 'FALCON_FLYBY';
+      sounds.playSuperCharge();
+      sounds.playWhoosh();
+      sounds.playGunshot();
+      this.hanFalconBomb = {
+        timer: 0,
+        x: this.position.x - this.facing * 350,
+        y: this.groundY - 240,
+        damage: 410,
+        active: true,
+        bombsFired: 0,
+        bombs: []
+      };
+    } else if (this.superType === 'MARIO_FINALE_FIRE') {
+      this.superPhase = 'MARIO_FINALE';
+      sounds.playSuperCharge();
+      sounds.playFireCast();
+      sounds.playThunderSlam();
+      this.marioFinale = {
+        timer: 0,
+        x: this.position.x + this.facing * 40,
+        y: this.groundY - 60,
+        damage: 415,
+        active: true,
+        wavesFired: 0
+      };
+    } else if (this.superType === 'WOLVERINE_BERSERKER_BARRAGE') {
+      this.superPhase = 'BERSERKER_BARRAGE';
+      sounds.playSuperCharge();
+      sounds.playRapierSlash();
+      sounds.playPunch(true);
+      const target = this.opponent;
+      this.wolverineBerserker = {
+        timer: 0,
+        target: target,
+        damage: 425,
+        active: true,
+        hitsLanded: 0
+      };
+    } else if (this.superType === 'KRATOS_SPARTAN_RAGE') {
+      this.superPhase = 'SPARTAN_RAGE';
+      sounds.playSuperCharge();
+      sounds.playThunderSlam();
+      sounds.playKO();
+      this.kratosRage = {
+        timer: 0,
+        x: this.position.x,
+        y: this.position.y - 65,
+        damage: 435,
+        active: true,
+        hitsLanded: 0
+      };
     } else {
       this.superType = 'GUSTAVE_SMASH';
       this.superPhase = 'CHARGE'; // 'CHARGE' (0-0.5s), 'LEAP' (0.5-0.85s), 'SLAM' (0.85-1.45s)
@@ -2231,6 +2485,18 @@ export class Fighter {
       }
       this.attackPower = this.baseAttackPower * dynamicSpeedMult;
       this.mcqueenCurrentDamageMultiplier = dynamicSpeedMult;
+    }
+
+    // 4.2 WOLVERINE: REGENERAÇÃO PASSIVA MUTANTE DO FATOR DE CURA (+8 HP por segundo)
+    if (this.isWolverine && !this.isDead && this.health < this.maxHealth) {
+      this.wolverineHealTimer = (this.wolverineHealTimer || 0) + dt;
+      if (this.wolverineHealTimer >= 0.5) {
+        this.wolverineHealTimer = 0;
+        this.health = Math.min(this.maxHealth, this.health + 4);
+        if (particles && Math.random() < 0.25) {
+          particles.emitSparks(this.position.x, this.position.y - 45, '#22c55e', 3, 2);
+        }
+      }
     }
 
     // 5. Atualização de Ataques
@@ -4762,6 +5028,452 @@ export class Fighter {
       }
     }
 
+    // 5.60 Son Goku: Kamehameha (Q - Feixe de Ki Concentrado)
+    if (this.gokuKamehameha && this.gokuKamehameha.active) {
+      const gk = this.gokuKamehameha;
+      gk.timer += dt;
+      gk.x = this.position.x + this.facing * 35;
+      gk.y = this.position.y - 60;
+
+      if (particles && Math.random() < 0.8) {
+        particles.emitElectricArc(gk.x, gk.y, gk.x + this.facing * 300, gk.y, '#38bdf8', 4);
+        particles.emitSparks(gk.x, gk.y, '#ffffff', 8, 4);
+      }
+
+      if (!gk.hasHit && gk.timer >= 0.1) {
+        if (this.opponent && !this.opponent.isDead) {
+          const dist = Math.abs(this.opponent.position.x - gk.x);
+          const facingOpp = (this.opponent.position.x - gk.x) * this.facing > 0;
+          if (facingOpp && dist < gk.reach) {
+            gk.hasHit = true;
+            sounds.playPunch(true);
+            sounds.playLaser();
+            if (particles) {
+              particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 160, '#38bdf8');
+              particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 60, '#ffffff', 25, 10);
+              particles.emitFloatingText('KAMEHAMEHA!', this.opponent.position.x, this.opponent.position.y - 85, '#38bdf8', true);
+            }
+            const attackData = {
+              damage: gk.damage,
+              knockback: 24,
+              knockdown: true,
+              isHeavy: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
+          }
+        }
+      }
+
+      if (gk.timer >= 0.45) {
+        gk.active = false;
+        this.gokuKamehameha = null;
+      }
+    }
+
+    // 5.61 Son Goku: Genki Dama Cósmica (Ultimate)
+    if (this.gokuGenkiDama && this.gokuGenkiDama.active) {
+      const gd = this.gokuGenkiDama;
+      gd.timer += dt;
+      if (gd.timer < 0.8) {
+        gd.scale = Math.min(1.0, 0.2 + gd.timer * 1.0);
+      } else {
+        // Desce em direção ao solo
+        const fallProgress = Math.min(1.0, (gd.timer - 0.8) / 0.4);
+        gd.y = (this.groundY - 320) + (320 * fallProgress);
+      }
+
+      if (particles && Math.random() < 0.9) {
+        particles.emitElectricArc(gd.x - 50, gd.y, gd.x + 50, gd.y, '#38bdf8', 5);
+        particles.emitSparks(gd.x, gd.y, '#ffffff', 10, 6);
+      }
+
+      if (!gd.hasHit && gd.timer >= 1.2) {
+        gd.hasHit = true;
+        sounds.playThunderSlam();
+        sounds.playKO();
+        if (particles) {
+          particles.emitShockwave(gd.x, this.groundY, 350, '#38bdf8');
+          particles.emitShockwave(gd.x, this.groundY, 220, '#0284c7');
+          particles.emitSparks(gd.x, this.groundY - 80, '#ffffff', 70, 24);
+          particles.emitFloatingText('GENKI DAMA!', gd.x, gd.y - 40, '#38bdf8', true);
+        }
+        if (this.opponent && !this.opponent.isDead) {
+          const dist = Math.abs(this.opponent.position.x - gd.x);
+          if (dist < 280) {
+            const attackData = {
+              damage: gd.damage,
+              knockback: 40,
+              knockdown: true,
+              isHeavy: true,
+              unblockable: true,
+              attackerPower: this.attackPower
+            };
+            this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 70 }, particles);
+          }
+        }
+      }
+
+      if (gd.timer >= 1.5) {
+        gd.active = false;
+        this.gokuGenkiDama = null;
+      }
+    }
+
+    // 5.62 Mestre Yoda: Empurrão da Força (Q - Duração e Feedback)
+    if (this.yodaForcePush && this.yodaForcePush.active) {
+      const yf = this.yodaForcePush;
+      yf.timer += dt;
+      if (particles && Math.random() < 0.8) {
+        particles.emitShockwave(yf.x + this.facing * 80, yf.y, 90, '#22c55e');
+        particles.emitSparks(yf.x + this.facing * 60, yf.y, '#ffffff', 5, 4);
+      }
+      if (yf.timer >= 0.3) {
+        yf.active = false;
+        this.yodaForcePush = null;
+      }
+    }
+
+    // 5.63 Mestre Yoda: Ataque Acrobático Ataru (Ultimate)
+    if (this.yodaAtaru && this.yodaAtaru.active) {
+      const ya = this.yodaAtaru;
+      ya.timer += dt;
+      const target = ya.target;
+
+      if (particles && Math.random() < 0.85) {
+        particles.emitSparks(this.position.x, this.position.y - 50, '#22c55e', 8, 6);
+      }
+
+      const strikeTimes = [0.2, 0.45, 0.7, 0.95, 1.2];
+      for (let i = ya.hitsLanded; i < strikeTimes.length; i++) {
+        if (ya.timer >= strikeTimes[i]) {
+          ya.hitsLanded = i + 1;
+          sounds.playLaser();
+          sounds.playPunch(true);
+          const isFinal = i === strikeTimes.length - 1;
+          if (target && !target.isDead) {
+            this.position.x = target.position.x + (i % 2 === 0 ? -1 : 1) * 45;
+            this.velocity.y = -6;
+            this.isGrounded = false;
+            if (particles) {
+              particles.emitShockwave(target.position.x, target.position.y - 50, isFinal ? 230 : 120, '#22c55e');
+              particles.emitSparks(target.position.x, target.position.y - 50, '#ffffff', isFinal ? 45 : 18, 10);
+              if (isFinal) {
+                particles.emitFloatingText('FORMA IV: ATARU!', target.position.x, target.position.y - 85, '#22c55e', true);
+              }
+            }
+            const attackData = {
+              damage: Math.round(ya.damage / 5),
+              knockback: isFinal ? 34 : 6,
+              knockdown: isFinal,
+              isHeavy: isFinal,
+              unblockable: true,
+              attackerPower: this.attackPower
+            };
+            target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 50 }, particles);
+          }
+        }
+      }
+
+      if (ya.timer >= 1.4) {
+        ya.active = false;
+        this.yodaAtaru = null;
+      }
+    }
+
+    // 5.64 Han Solo: Tiro de Blaster DL-44 (Q)
+    if (this.hanBlaster && this.hanBlaster.active) {
+      const hb = this.hanBlaster;
+      hb.x += hb.vx * dt;
+
+      if (particles && Math.random() < 0.75) {
+        particles.emitSparks(hb.x, hb.y, '#ef4444', 4, 3);
+      }
+
+      if (this.opponent && !this.opponent.isDead && !hb.hasHit) {
+        const dist = Math.hypot(hb.x - this.opponent.position.x, hb.y - (this.opponent.position.y - 65));
+        if (dist < 45) {
+          hb.hasHit = true;
+          hb.active = false;
+          sounds.playPunch(true);
+          sounds.playGunshot();
+          if (particles) {
+            particles.emitShockwave(hb.x, hb.y, 110, '#ef4444');
+            particles.emitSparks(hb.x, hb.y, '#ffffff', 20, 8);
+            particles.emitFloatingText('HAN ATIROU PRIMEIRO!', hb.x, hb.y - 30, '#ef4444', true);
+          }
+          const attackData = {
+            damage: hb.damage,
+            knockback: 18,
+            knockdown: false,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: hb.x, y: hb.y }, particles);
+          this.hanBlaster = null;
+        }
+      }
+
+      if (hb.x < -100 || hb.x > stageWidth + 100) {
+        hb.active = false;
+        this.hanBlaster = null;
+      }
+    }
+
+    // 5.65 Han Solo: Rasante da Millennium Falcon (Ultimate)
+    if (this.hanFalconBomb && this.hanFalconBomb.active) {
+      const fb = this.hanFalconBomb;
+      fb.timer += dt;
+      fb.x += this.facing * 1100 * dt;
+
+      if (particles && Math.random() < 0.8) {
+        particles.emitDust(fb.x, fb.y, 4, '#94a3b8');
+        particles.emitSparks(fb.x - this.facing * 30, fb.y, '#38bdf8', 3, 3);
+      }
+
+      const bombTimes = [0.3, 0.55, 0.8];
+      for (let i = fb.bombsFired; i < bombTimes.length; i++) {
+        if (fb.timer >= bombTimes[i]) {
+          fb.bombsFired = i + 1;
+          sounds.playThunderSlam();
+          const bx = fb.x;
+          if (particles) {
+            particles.emitShockwave(bx, this.groundY, 180, '#ef4444');
+            particles.emitSparks(bx, this.groundY - 30, '#f97316', 30, 12);
+            particles.emitFloatingText('BOMBARDEIO DA FALCON!', bx, this.groundY - 70, '#ef4444', true);
+          }
+          if (this.opponent && !this.opponent.isDead) {
+            const dist = Math.abs(this.opponent.position.x - bx);
+            if (dist < 180) {
+              const isFinal = i === bombTimes.length - 1;
+              const attackData = {
+                damage: Math.round(fb.damage / 3),
+                knockback: isFinal ? 32 : 12,
+                knockdown: isFinal,
+                isHeavy: isFinal,
+                unblockable: true,
+                attackerPower: this.attackPower
+              };
+              this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 50 }, particles);
+            }
+          }
+        }
+      }
+
+      if (fb.timer >= 1.45) {
+        fb.active = false;
+        this.hanFalconBomb = null;
+      }
+    }
+
+    // 5.66 Mario: Bola de Fogo Saltitante (Q)
+    if (this.marioFireball && this.marioFireball.active) {
+      const mf = this.marioFireball;
+      mf.x += mf.vx * dt;
+      mf.vy += 850 * dt; // gravidade da bola de fogo
+      mf.y += mf.vy * dt;
+
+      if (mf.y >= this.groundY - 15) {
+        mf.y = this.groundY - 15;
+        mf.vy = -340; // quique
+        mf.bounces++;
+        sounds.playFireCast();
+        if (particles) {
+          particles.emitSparks(mf.x, mf.y, '#f97316', 6, 4);
+        }
+      }
+
+      if (particles && Math.random() < 0.6) {
+        particles.emitSparks(mf.x, mf.y, '#facc15', 3, 3);
+      }
+
+      if (this.opponent && !this.opponent.isDead && !mf.hasHit) {
+        const dist = Math.hypot(mf.x - this.opponent.position.x, mf.y - (this.opponent.position.y - 50));
+        if (dist < 45) {
+          mf.hasHit = true;
+          mf.active = false;
+          sounds.playPunch(true);
+          sounds.playFireCast();
+          if (particles) {
+            particles.emitShockwave(mf.x, mf.y, 110, '#f97316');
+            particles.emitSparks(mf.x, mf.y, '#ef4444', 22, 8);
+            particles.emitFloatingText('FIREBALL!', mf.x, mf.y - 30, '#f97316', true);
+          }
+          const attackData = {
+            damage: mf.damage,
+            knockback: 16,
+            knockdown: false,
+            isHeavy: true,
+            attackerPower: this.attackPower
+          };
+          this.opponent.receiveHit(attackData, { x: mf.x, y: mf.y }, particles);
+          this.marioFireball = null;
+        }
+      }
+
+      if (mf.bounces >= 4 || mf.x < -100 || mf.x > stageWidth + 100) {
+        mf.active = false;
+        this.marioFireball = null;
+      }
+    }
+
+    // 5.67 Mario: Mario Finale Onda de Fogo Espiral (Ultimate)
+    if (this.marioFinale && this.marioFinale.active) {
+      const fin = this.marioFinale;
+      fin.timer += dt;
+
+      if (particles && Math.random() < 0.85) {
+        particles.emitSparks(fin.x + this.facing * 100, this.groundY - 60, '#ef4444', 10, 6);
+      }
+
+      const waveTimes = [0.3, 0.7, 1.1];
+      for (let i = fin.wavesFired; i < waveTimes.length; i++) {
+        if (fin.timer >= waveTimes[i]) {
+          fin.wavesFired = i + 1;
+          sounds.playFireCast();
+          sounds.playThunderSlam();
+          if (particles) {
+            particles.emitShockwave(fin.x + this.facing * 150, this.groundY, 240, '#f97316');
+            particles.emitSparks(fin.x + this.facing * 150, this.groundY - 60, '#facc15', 35, 12);
+            particles.emitFloatingText('MARIO FINALE!', fin.x + this.facing * 150, this.groundY - 95, '#ef4444', true);
+          }
+          if (this.opponent && !this.opponent.isDead) {
+            const facingOpp = (this.opponent.position.x - fin.x) * this.facing > 0;
+            const dist = Math.abs(this.opponent.position.x - fin.x);
+            if (facingOpp && dist < 450) {
+              const isFinal = i === waveTimes.length - 1;
+              const attackData = {
+                damage: Math.round(fin.damage / 3),
+                knockback: isFinal ? 34 : 12,
+                knockdown: isFinal,
+                isHeavy: isFinal,
+                unblockable: true,
+                attackerPower: this.attackPower
+              };
+              this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
+            }
+          }
+        }
+      }
+
+      if (fin.timer >= 1.4) {
+        fin.active = false;
+        this.marioFinale = null;
+      }
+    }
+
+    // 5.68 Wolverine: Corte X (Q - Feedback)
+    if (this.wolverineXSlash && this.wolverineXSlash.active) {
+      this.wolverineXSlash.timer += dt;
+      if (this.wolverineXSlash.timer >= 0.25) {
+        this.wolverineXSlash.active = false;
+        this.wolverineXSlash = null;
+      }
+    }
+
+    // 5.69 Wolverine: Berserker Barrage (Ultimate)
+    if (this.wolverineBerserker && this.wolverineBerserker.active) {
+      const wb = this.wolverineBerserker;
+      wb.timer += dt;
+      const target = wb.target;
+
+      if (particles && Math.random() < 0.85) {
+        particles.emitSparks(this.position.x, this.position.y - 50, '#eab308', 6, 5);
+      }
+
+      const clawTimes = [0.2, 0.4, 0.6, 0.85, 1.15];
+      for (let i = wb.hitsLanded; i < clawTimes.length; i++) {
+        if (wb.timer >= clawTimes[i]) {
+          wb.hitsLanded = i + 1;
+          sounds.playRapierSlash();
+          sounds.playPunch(true);
+          const isFinal = i === clawTimes.length - 1;
+          if (target && !target.isDead) {
+            this.position.x = target.position.x - this.facing * 45;
+            if (particles) {
+              particles.emitShockwave(target.position.x, target.position.y - 55, isFinal ? 230 : 120, '#eab308');
+              particles.emitSparks(target.position.x, target.position.y - 55, '#ef4444', isFinal ? 45 : 18, 9);
+              if (isFinal) {
+                particles.emitFloatingText('BERSERKER BARRAGE!', target.position.x, target.position.y - 85, '#eab308', true);
+              }
+            }
+            const attackData = {
+              damage: Math.round(wb.damage / 5),
+              knockback: isFinal ? 36 : 6,
+              knockdown: isFinal,
+              isHeavy: isFinal,
+              unblockable: true,
+              attackerPower: this.attackPower
+            };
+            target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 55 }, particles);
+          }
+        }
+      }
+
+      if (wb.timer >= 1.4) {
+        wb.active = false;
+        this.wolverineBerserker = null;
+      }
+    }
+
+    // 5.70 Kratos: Lâminas do Caos (Q - Feedback)
+    if (this.kratosBlades && this.kratosBlades.active) {
+      this.kratosBlades.timer += dt;
+      if (this.kratosBlades.timer >= 0.3) {
+        this.kratosBlades.active = false;
+        this.kratosBlades = null;
+      }
+    }
+
+    // 5.71 Kratos: Fúria Espartana (Ultimate)
+    if (this.kratosRage && this.kratosRage.active) {
+      const kr = this.kratosRage;
+      kr.timer += dt;
+      kr.x = this.position.x;
+      kr.y = this.position.y - 65;
+
+      if (particles && Math.random() < 0.9) {
+        particles.emitShockwave(kr.x, this.groundY, 180, '#ef4444');
+        particles.emitSparks(kr.x, this.groundY - 40, '#f97316', 15, 8);
+      }
+
+      const smashTimes = [0.3, 0.7, 1.15];
+      for (let i = kr.hitsLanded; i < smashTimes.length; i++) {
+        if (kr.timer >= smashTimes[i]) {
+          kr.hitsLanded = i + 1;
+          sounds.playThunderSlam();
+          sounds.playKO();
+          const isFinal = i === smashTimes.length - 1;
+          if (particles) {
+            particles.emitShockwave(kr.x, this.groundY, isFinal ? 320 : 200, '#dc2626');
+            particles.emitSparks(kr.x, this.groundY - 50, '#ffffff', isFinal ? 55 : 25, 14);
+            if (isFinal) {
+              particles.emitFloatingText('FÚRIA ESPARTANA!', kr.x, kr.y - 50, '#dc2626', true);
+            }
+          }
+          if (this.opponent && !this.opponent.isDead) {
+            const dist = Math.abs(this.opponent.position.x - kr.x);
+            if (dist < 260) {
+              const attackData = {
+                damage: Math.round(kr.damage / 3),
+                knockback: isFinal ? 38 : 14,
+                knockdown: isFinal,
+                isHeavy: isFinal,
+                unblockable: true,
+                attackerPower: this.attackPower
+              };
+              this.opponent.receiveHit(attackData, { x: this.opponent.position.x, y: this.opponent.position.y - 60 }, particles);
+            }
+          }
+        }
+      }
+
+      if (kr.timer >= 1.45) {
+        kr.active = false;
+        this.kratosRage = null;
+      }
+    }
+
     // 6. Watchdog de Segurança Anti-Travamento (Golpes comuns 0.8s, Super Move 1.6s)
     const attackStates = [
       FIGHTER_STATE.LIGHT_PUNCH,
@@ -6494,6 +7206,217 @@ export class Fighter {
       ctx.lineWidth = 4;
       ctx.beginPath();
       ctx.arc(bx, by, 35, -Math.PI / 2, Math.PI / 2, this.facing === -1);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 51. Son Goku: Kamehameha Feixe de Energia Azul Brilhante (Q)
+    if (this.gokuKamehameha && this.gokuKamehameha.active) {
+      const gk = this.gokuKamehameha;
+      ctx.save();
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 32;
+
+      const beamLen = gk.reach;
+      const kGrad = ctx.createLinearGradient(gk.x, gk.y - 30, gk.x, gk.y + 30);
+      kGrad.addColorStop(0, 'rgba(56, 189, 248, 0.2)');
+      kGrad.addColorStop(0.3, '#38bdf8');
+      kGrad.addColorStop(0.5, '#ffffff');
+      kGrad.addColorStop(0.7, '#38bdf8');
+      kGrad.addColorStop(1, 'rgba(56, 189, 248, 0.2)');
+
+      ctx.fillStyle = kGrad;
+      ctx.fillRect(this.facing === 1 ? gk.x : gk.x - beamLen, gk.y - 20, beamLen, 40);
+
+      // Esfera de energia concentrada nas mãos
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(gk.x, gk.y, 24, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 52. Son Goku: Esfera Espiritual Genki Dama (Ultimate)
+    if (this.gokuGenkiDama && this.gokuGenkiDama.active) {
+      const gd = this.gokuGenkiDama;
+      ctx.save();
+      ctx.translate(gd.x, gd.y);
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 40;
+
+      const curRadius = 110 * (gd.scale || 1.0);
+      const orbGrad = ctx.createRadialGradient(0, 0, 10, 0, 0, curRadius);
+      orbGrad.addColorStop(0, '#ffffff');
+      orbGrad.addColorStop(0.4, '#38bdf8');
+      orbGrad.addColorStop(0.8, '#0284c7');
+      orbGrad.addColorStop(1, 'rgba(2, 132, 199, 0)');
+
+      ctx.fillStyle = orbGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, curRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Anel de partículas de ki orbitando
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, curRadius * 1.15, curRadius * 0.45, Date.now() * 0.003, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 53. Mestre Yoda: Onda de Choque Telecinética da Força (Q)
+    if (this.yodaForcePush && this.yodaForcePush.active) {
+      const yf = this.yodaForcePush;
+      ctx.save();
+      ctx.shadowColor = '#22c55e';
+      ctx.shadowBlur = 25;
+      ctx.strokeStyle = '#86efac';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(yf.x + this.facing * 40, yf.y, 45, -Math.PI / 2, Math.PI / 2, this.facing === -1);
+      ctx.stroke();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 54. Han Solo: Raio Vermelho de Blaster DL-44 (Q)
+    if (this.hanBlaster && this.hanBlaster.active) {
+      const hb = this.hanBlaster;
+      ctx.save();
+      ctx.translate(hb.x, hb.y);
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = 18;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 20, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 55. Han Solo: Silhueta da Millennium Falcon no Céu (Ultimate)
+    if (this.hanFalconBomb && this.hanFalconBomb.active) {
+      const fb = this.hanFalconBomb;
+      ctx.save();
+      ctx.translate(fb.x, fb.y);
+      ctx.scale(this.facing, 1);
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 24;
+
+      // Corpo da Millennium Falcon
+      ctx.fillStyle = '#64748b';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 65, 30, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Mandíbulas dianteiras
+      ctx.fillRect(40, -18, 32, 10);
+      ctx.fillRect(40, 8, 32, 10);
+      // Cockpit lateral
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.arc(20, -28, 12, 0, Math.PI * 2);
+      ctx.fill();
+      // Motor de hiperpropulsão azul na traseira
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(-65, -8, 8, 16);
+      ctx.restore();
+    }
+
+    // 56. Mario: Bola de Fogo Saltitante (Q)
+    if (this.marioFireball && this.marioFireball.active) {
+      const mf = this.marioFireball;
+      ctx.save();
+      ctx.translate(mf.x, mf.y);
+      ctx.shadowColor = '#f97316';
+      ctx.shadowBlur = 20;
+
+      const fGrad = ctx.createRadialGradient(0, 0, 3, 0, 0, 14);
+      fGrad.addColorStop(0, '#ffffff');
+      fGrad.addColorStop(0.4, '#facc15');
+      fGrad.addColorStop(0.8, '#f97316');
+      fGrad.addColorStop(1, '#dc2626');
+
+      ctx.fillStyle = fGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 57. Mario: Ondas de Fogo Mario Finale (Ultimate)
+    if (this.marioFinale && this.marioFinale.active) {
+      const fin = this.marioFinale;
+      ctx.save();
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = 30;
+
+      const fx = fin.x + this.facing * 80;
+      const fGrad = ctx.createLinearGradient(fx, fin.y - 60, fx, fin.y + 60);
+      fGrad.addColorStop(0, 'rgba(239, 68, 68, 0.2)');
+      fGrad.addColorStop(0.3, '#f97316');
+      fGrad.addColorStop(0.5, '#ffffff');
+      fGrad.addColorStop(0.7, '#f97316');
+      fGrad.addColorStop(1, 'rgba(239, 68, 68, 0.2)');
+
+      ctx.fillStyle = fGrad;
+      ctx.beginPath();
+      ctx.ellipse(fx, fin.y, 140, 55, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 58. Wolverine: Rastro Metálico de Garras Adamantium (Q)
+    if (this.wolverineXSlash && this.wolverineXSlash.active) {
+      const wx = this.position.x + this.facing * 40;
+      const wy = this.position.y - 60;
+      ctx.save();
+      ctx.translate(wx, wy);
+      ctx.shadowColor = '#f8fafc';
+      ctx.shadowBlur = 25;
+
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 4;
+      // Corte diagonal 1
+      ctx.beginPath();
+      ctx.moveTo(-25 * this.facing, -25);
+      ctx.lineTo(25 * this.facing, 25);
+      ctx.stroke();
+      // Corte diagonal 2 (formando o X)
+      ctx.beginPath();
+      ctx.moveTo(-25 * this.facing, 25);
+      ctx.lineTo(25 * this.facing, -25);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 59. Kratos: Chamas incandescentes das Lâminas do Caos (Q / Ultimate)
+    if (this.kratosBlades && this.kratosBlades.active) {
+      const kx = this.position.x + this.facing * 50;
+      const ky = this.position.y - 60;
+      ctx.save();
+      ctx.translate(kx, ky);
+      ctx.shadowColor = '#dc2626';
+      ctx.shadowBlur = 28;
+
+      ctx.strokeStyle = '#f97316';
+      ctx.lineWidth = 4.5;
+      ctx.beginPath();
+      ctx.arc(0, 0, 60, -Math.PI / 3, Math.PI / 3, this.facing === -1);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 2;
       ctx.stroke();
       ctx.restore();
     }

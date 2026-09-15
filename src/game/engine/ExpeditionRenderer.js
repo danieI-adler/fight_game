@@ -1015,6 +1015,80 @@ export class ExpeditionRenderer {
       ctx.moveTo(hx + 24 * f, hy - 12);
       ctx.lineTo(hx + 34 * f, hy + 2);
       ctx.stroke();
+    } else if (vis.weaponType === 'ki_blast') {
+      // Esfera de Ki de Goku na palma da mão
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(hx + 6 * f, hy, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    } else if (vis.weaponType === 'green_lightsaber') {
+      // Sabre de Luz Verde de Yoda
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(hx + 10 * f, hy - 8);
+      ctx.stroke();
+      // Lâmina de plasma verde esmeralda
+      ctx.strokeStyle = '#22c55e';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(hx + 10 * f, hy - 8);
+      ctx.lineTo(hx + 36 * f, hy - 28);
+      ctx.stroke();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    } else if (vis.weaponType === 'blaster_dl44') {
+      // Pistola Blaster DL-44 de Han Solo
+      ctx.fillStyle = '#18181b';
+      ctx.fillRect(hx - 2 * f, hy - 3, 14 * f, 6);
+      ctx.fillRect(hx + 8 * f, hy - 5, 8 * f, 3); // Mira telescópica montada
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(hx + 12 * f, hy - 1, 4 * f, 2); // Ponta do cano
+    } else if (vis.weaponType === 'fireball_flower') {
+      // Flor de Fogo / Chama na mão de Mario
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.arc(hx + 4 * f, hy - 2, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(hx + 4 * f, hy - 2, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (vis.weaponType === 'adamantium_claws') {
+      // 3 Garras de Adamantium retráteis de Wolverine
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 2;
+      for (let i = -1; i <= 1; i++) {
+        ctx.beginPath();
+        ctx.moveTo(hx + 2 * f, hy + i * 3);
+        ctx.lineTo(hx + 24 * f, hy + i * 4 - 4);
+        ctx.stroke();
+      }
+    } else if (vis.weaponType === 'blades_of_chaos') {
+      // Lâminas do Caos de Kratos com correntes
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(hx - 6 * f, hy + 4);
+      ctx.lineTo(hx, hy);
+      ctx.stroke();
+      // Lâmina curvada com entalhe flamejante
+      ctx.fillStyle = '#78350f';
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(hx + 24 * f, hy - 14);
+      ctx.lineTo(hx + 30 * f, hy - 4);
+      ctx.lineTo(hx + 18 * f, hy + 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#ea580c';
+      ctx.lineWidth = 2;
+      ctx.stroke();
     }
 
     ctx.restore();
@@ -1419,6 +1493,106 @@ export class ExpeditionRenderer {
       ctx.moveTo(hx - 6 * f, hy - 4);
       ctx.lineTo(hx - 6 * f, hy + 3);
       ctx.lineTo(hx - 4 * f, hy);
+      ctx.fill();
+    } else if (vis.headgear === 'goku_hair' || vis.hairStyle === 'saiyan_wild') {
+      // Goku: Cabelo espetado clássico Saiyajin com múltiplas pontas volumosas
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 7, 12, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Espetos largos de Saiyajin para cima e lados
+      const spikes = [
+        { ox: -12, oy: -8, tx: -20 * f, ty: -24 },
+        { ox: -6, oy: -12, tx: -10 * f, ty: -28 },
+        { ox: 0, oy: -14, tx: 2 * f, ty: -30 },
+        { ox: 8, oy: -12, tx: 16 * f, ty: -26 },
+        { ox: 12, oy: -6, tx: 22 * f, ty: -16 }
+      ];
+      for (const sp of spikes) {
+        ctx.beginPath();
+        ctx.moveTo(hx + sp.ox, hy + sp.oy);
+        ctx.lineTo(hx + sp.tx, hy + sp.ty);
+        ctx.lineTo(hx + sp.ox + 6, hy + sp.oy);
+        ctx.fill();
+      }
+    } else if (vis.headgear === 'yoda_ears' || vis.hairStyle === 'wispy_white') {
+      // Yoda: Cabeça arredondada com orelhas pontudas verdes compridas e tufos brancos
+      ctx.fillStyle = '#15803d'; // Pele verde sábia
+      // Orelha esquerda
+      ctx.beginPath();
+      ctx.moveTo(hx - 8, hy - 2);
+      ctx.lineTo(hx - 26, hy - 8);
+      ctx.lineTo(hx - 8, hy + 4);
+      ctx.closePath();
+      ctx.fill();
+      // Orelha direita
+      ctx.beginPath();
+      ctx.moveTo(hx + 8, hy - 2);
+      ctx.lineTo(hx + 26, hy - 8);
+      ctx.lineTo(hx + 8, hy + 4);
+      ctx.closePath();
+      ctx.fill();
+      // Tufos brancos nas laterais
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(hx - 10, hy - 4, 3, 2);
+      ctx.fillRect(hx + 7, hy - 4, 3, 2);
+    } else if (vis.headgear === 'scoundrel_hair' || vis.hairStyle === 'swept_brown') {
+      // Han Solo: Cabelo castanho ondulado para o lado
+      ctx.fillStyle = '#451a03';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 7, 12, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(hx - 8, hy - 8);
+      ctx.quadraticCurveTo(hx + 6 * f, hy - 14, hx + 12 * f, hy - 2);
+      ctx.lineTo(hx + 8 * f, hy + 2);
+      ctx.fill();
+    } else if (vis.headgear === 'mario_cap' || vis.hairStyle === 'cap_brim') {
+      // Mario: Boné vermelho brilhante com aba frontal
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.ellipse(hx, hy - 8, 13, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Aba do boné
+      ctx.fillRect(hx + (f === 1 ? 4 : -16), hy - 5, 12, 3);
+      // Emblema circular branco no centro
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(hx + 2 * f, hy - 9, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      // 'M' vermelho
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(hx + 1 * f, hy - 10, 2, 2);
+    } else if (vis.headgear === 'wolverine_cowl' || vis.hairStyle === 'flared_fins') {
+      // Wolverine: Máscara cowl preta/azul com grandes aletas pontudas clássicas
+      ctx.fillStyle = '#09090b';
+      // Aleta lateral traseira
+      ctx.beginPath();
+      ctx.moveTo(hx - 8 * f, hy - 2);
+      ctx.lineTo(hx - 18 * f, hy - 24);
+      ctx.lineTo(hx - 2 * f, hy - 10);
+      ctx.closePath();
+      ctx.fill();
+      // Aleta lateral dianteira
+      ctx.beginPath();
+      ctx.moveTo(hx + 4 * f, hy - 2);
+      ctx.lineTo(hx + 20 * f, hy - 26);
+      ctx.lineTo(hx + 10 * f, hy - 8);
+      ctx.closePath();
+      ctx.fill();
+    } else if (vis.headgear === 'kratos_bald_beard' || vis.hairStyle === 'full_spartan_beard') {
+      // Kratos: Cabeça raspada pálida, tatuagem vermelha de Esparta no olho e barba cheia escura
+      // Tatuagem vermelha cortando a face
+      ctx.strokeStyle = '#dc2626';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(hx - 2 * f, hy - 12);
+      ctx.lineTo(hx + 4 * f, hy + 6);
+      ctx.stroke();
+      // Barba cheia espartana
+      ctx.fillStyle = '#18181b';
+      ctx.beginPath();
+      ctx.ellipse(hx + 2 * f, hy + 8, 6.5, 5, 0, 0, Math.PI * 2);
       ctx.fill();
     } else {
       // Cabelo clássico

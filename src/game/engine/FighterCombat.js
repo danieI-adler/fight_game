@@ -1588,6 +1588,84 @@ export class FighterCombat {
           break;
         }
 
+        // --- 38. SON GOKU: GENKI DAMA CÓSMICA ---
+        if (fighter.superType === 'GOKU_GENKI_DAMA') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.5) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 39. MESTRE YODA: ATARU LIGHTSABER BLITZ ---
+        if (fighter.superType === 'YODA_FORCE_UNLEASHED') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.4) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 40. HAN SOLO: MILLENNIUM FALCON CARPET BOMB ---
+        if (fighter.superType === 'HAN_SOLO_CARPET_BOMB') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.45) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 41. MARIO: MARIO FINALE ONDAS DE FOGO ---
+        if (fighter.superType === 'MARIO_FINALE_FIRE') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.4) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 42. WOLVERINE: BERSERKER BARRAGE RETALHAMENTO ---
+        if (fighter.superType === 'WOLVERINE_BERSERKER_BARRAGE') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.4) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
+        // --- 43. KRATOS: FÚRIA ESPARTANA ---
+        if (fighter.superType === 'KRATOS_SPARTAN_RAGE') {
+          fighter.isInvulnerable = true;
+          fighter.velocity.x = 0;
+          if (fighter.stateTime >= 1.45) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.state = FIGHTER_STATE.IDLE;
+          }
+          break;
+        }
+
         // --- 7. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
         if (fighter.stateTime < 0.5) {
           fighter.velocity.x = 0;
