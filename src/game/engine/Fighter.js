@@ -1419,21 +1419,9 @@ export class Fighter {
         hasHit: false
       };
     }
-    // 34. Kirito: Vorpal Strike Cruzado (Q)
+    // 34. Kirito: Vorpal Strike Cruzado (Q) - já tratado no bloco de Kirito Starburst Q
     else if (this.isKirito) {
-      this.extraType = 'KIRITO_VORPAL_STRIKE';
-      sounds.playSuperCharge();
-      sounds.playDash();
-      const target = this.opponent;
-      const targetX = target ? target.position.x : this.position.x + this.facing * 280;
-      this.kiritoVorpal = {
-        timer: 0,
-        startX: this.position.x,
-        targetX: targetX,
-        damage: level === 2 ? 220 : 155,
-        active: true,
-        hasHit: false
-      };
+      // Consistência: mantido no fluxo de Kirito Starburst Q
     }
     // 35. Eren Yeager: Dispositivo DMT & Lâminas de Aço (Q)
     else if (this.isEren) {
@@ -2655,6 +2643,10 @@ export class Fighter {
 
     if (this.rangedKickCooldown > 0) {
       this.rangedKickCooldown -= dt;
+    }
+
+    if (this.kiritoStarburstCooldown > 0) {
+      this.kiritoStarburstCooldown -= dt;
     }
 
     // 4.1 RELÂMPAGO MCQUEEN: DANO ESCALA PROPORCIONAL À SUA VELOCIDADE ATUAL!

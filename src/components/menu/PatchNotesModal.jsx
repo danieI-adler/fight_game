@@ -50,11 +50,12 @@ export const PatchNotesModal = ({ isOpen, onClose }) => {
         {/* Tab Navigation */}
         <div className="flex border-b border-slate-800/80 bg-slate-950/60 px-6 gap-2">
           {PATCH_SECTIONS.map((section, idx) => {
-            const Icon = section.icon;
+            const sectionTitle = section.section || section.title || `Seção ${idx + 1}`;
+            const badgeCount = section.changes ? section.changes.length : 0;
             const isActive = activeTab === idx;
             return (
               <button
-                key={section.title}
+                key={sectionTitle}
                 onClick={() => {
                   sounds.playSelect();
                   setActiveTab(idx);
@@ -65,10 +66,10 @@ export const PatchNotesModal = ({ isOpen, onClose }) => {
                     : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
                 }`}
               >
-                <Icon size={14} className={isActive ? 'text-amber-400' : 'text-slate-500'} />
-                <span>{section.title}</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-normal">
-                  {section.badge}
+                <Sparkles size={14} className={isActive ? 'text-amber-400' : 'text-slate-500'} />
+                <span>{sectionTitle}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-normal">
+                  {badgeCount} itens
                 </span>
               </button>
             );
