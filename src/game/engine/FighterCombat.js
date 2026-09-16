@@ -221,7 +221,7 @@ export class FighterCombat {
             fighter.extraType = null;
           }
         } else {
-          // Genérico
+          // Genérico (sem nenhum raiozinho elétrico padrão)
           if (fighter.stateTime > 0.08 && fighter.stateTime < 0.3) {
             fighter.activeHitbox = fighter.createHitbox(25, 80, 100, 55);
             fighter.activeHitbox.damage = 140;
@@ -230,15 +230,16 @@ export class FighterCombat {
             fighter.activeHitbox.isHeavy = true;
             fighter.activeHitbox.attackerPower = fighter.attackPower;
 
-            if (particles && Math.random() < 0.5) {
-              const startX = fighter.position.x + (fighter.facing * 15);
-              const endX = fighter.position.x + (fighter.facing * 110);
-              particles.emitElectricArc(startX, fighter.position.y - 70, endX, fighter.position.y - 70, fighter.charData.themeColor);
+            if (particles && Math.random() < 0.4) {
+              const startX = fighter.position.x + (fighter.facing * 35);
+              particles.emitShockwave(startX, fighter.position.y - 60, 60, fighter.charData?.themeColor || '#ffffff');
+              particles.emitSparks(startX, fighter.position.y - 60, '#ffffff', 8, 4);
             }
           }
-          if (fighter.stateTime >= 0.45) {
+          if (fighter.stateTime >= 0.42) {
             fighter.state = FIGHTER_STATE.IDLE;
             fighter.extraType = null;
+            fighter.activeHitbox = null;
           }
         }
         break;

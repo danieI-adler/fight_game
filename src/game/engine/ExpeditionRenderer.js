@@ -81,6 +81,42 @@ export class ExpeditionRenderer {
       return;
     }
 
+    // PERSONAGENS NÃO-HUMANOIDES / SILHUETAS ESPECÍFICAS (ANATOMIA BESPOKE 100%)
+    const charName = (char.name || '').toLowerCase();
+    const isYoshi = charName.includes('yoshi') || char.id === 'yoshi';
+    const isPikachu = charName.includes('pikachu') || char.id === 'pikachu';
+    const isSonic = charName.includes('sonic') || char.id === 'sonic';
+    const isSpongeBob = charName.includes('esponja') || charName.includes('spongebob') || char.id === 'bobesponja';
+    const isYoda = charName.includes('yoda') || char.id === 'yoda';
+    const isMario = charName.includes('mario') || char.id === 'mario';
+
+    if (isYoshi || isPikachu || isSonic || isSpongeBob || isYoda || isMario) {
+      if (isYoshi) this.drawTrueYoshi(ctx, x, y, f, p, fighter);
+      else if (isPikachu) this.drawTruePikachu(ctx, x, y, f, p, fighter);
+      else if (isSonic) this.drawTrueSonic(ctx, x, y, f, p, fighter);
+      else if (isSpongeBob) this.drawTrueSpongeBob(ctx, x, y, f, p, fighter);
+      else if (isYoda) this.drawTrueYoda(ctx, x, y, f, p, fighter);
+      else if (isMario) this.drawTrueMario(ctx, x, y, f, p, fighter);
+
+      ctx.restore();
+
+      if (showHitboxes) {
+        ctx.save();
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 1.5;
+        for (const box of fighter.getHurtboxes()) {
+          ctx.strokeRect(box.x, box.y, box.width, box.height);
+        }
+        if (fighter.activeHitbox) {
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2.5;
+          ctx.strokeRect(fighter.activeHitbox.x, fighter.activeHitbox.y, fighter.activeHitbox.width, fighter.activeHitbox.height);
+        }
+        ctx.restore();
+      }
+      return;
+    }
+
     // 3. Acessórios Traseiros (Lanceram de Gustave, Cajado com Sino de Monoco, Capa de Renoir, Asas de Esquie)
     this.drawBackAccessories(ctx, x, y, f, p, vis, fighter.stateTime);
 
@@ -2235,5 +2271,657 @@ export class ExpeditionRenderer {
     ctx.restore(); // Fecha Tronco
     ctx.restore(); // Fecha Aura
     ctx.restore(); // Fecha Hulk transform
+  }
+
+  // --- 29. RENDERIZADOR ANATÔMICO 100% DINOSSAURO DE YOSHI ---
+  static drawTrueYoshi(ctx, x, y, f, p, fighter) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(f, 1);
+    const t = fighter.stateTime;
+    const isMoving = Math.abs(fighter.velocity.x) > 0.5;
+    const hop = Math.sin(t * 14) * (isMoving ? 4 : 1.5);
+
+    // 1. Rabo verde de dinossauro para trás
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath();
+    ctx.moveTo(-15, -40 + hop);
+    ctx.quadraticCurveTo(-45, -55 + hop, -50, -35 + hop);
+    ctx.quadraticCurveTo(-35, -25 + hop, -12, -22 + hop);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#15803d';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // 2. Pernas curtinhas de dinossauro e sapatos laranjas grandes
+    const legSwing = Math.sin(t * 12) * (isMoving ? 12 : 0);
+    // Perna esquerda (trás)
+    ctx.fillStyle = '#ea580c';
+    ctx.beginPath();
+    ctx.ellipse(-14 - legSwing, -10, 16, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#9a3412';
+    ctx.stroke();
+
+    // 3. Corpo gordinho arredondado verde
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath();
+    ctx.ellipse(0, -42 + hop, 26, 30, 0.15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // 4. Barriga branca saliente
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(10, -38 + hop, 18, 22, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 5. Casco/Sela vermelha nas costas
+    ctx.fillStyle = '#dc2626';
+    ctx.beginPath();
+    ctx.arc(-22, -50 + hop, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // 6. Perna direita (frente) com sapato laranja
+    ctx.fillStyle = '#ea580c';
+    ctx.beginPath();
+    ctx.ellipse(14 + legSwing, -10, 16, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#9a3412';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // 7. Cabeça de Yoshi com focinho gigante e bochecha
+    const hx = 18;
+    const hy = -82 + hop;
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath();
+    ctx.arc(hx, hy, 22, 0, Math.PI * 2);
+    ctx.fill();
+    // Focinho
+    ctx.beginPath();
+    ctx.ellipse(hx + 18, hy + 6, 18, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Bochecha branca
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(hx + 10, hy + 12, 16, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Cristas vermelhas na nuca
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.arc(hx - 16, hy - 8, 7, 0, Math.PI * 2);
+    ctx.arc(hx - 20, hy + 4, 6, 0, Math.PI * 2);
+    ctx.arc(hx - 20, hy + 16, 5, 0, Math.PI * 2);
+    ctx.fill();
+    // Olhos gigantes de desenho animado
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(hx + 2, hy - 14, 9, 15, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#15803d';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Pupila azul/preta
+    ctx.fillStyle = '#0284c7';
+    ctx.beginPath();
+    ctx.arc(hx + 5, hy - 14, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(hx + 6, hy - 16, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Bracinhos de dinossauro
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath();
+    ctx.ellipse(14, -48 + hop, 9, 6, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // --- 29. RENDERIZADOR ANATÔMICO 100% ROEDOR DE PIKACHU ---
+  static drawTruePikachu(ctx, x, y, f, p, fighter) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(f, 1);
+    const t = fighter.stateTime;
+    const isMoving = Math.abs(fighter.velocity.x) > 0.5;
+    const bounce = Math.sin(t * 16) * (isMoving ? 3 : 1);
+
+    // 1. Cauda de raio em zigue-zague nas costas
+    ctx.save();
+    ctx.strokeStyle = '#ca8a04';
+    ctx.fillStyle = '#eab308';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-18, -35 + bounce);
+    ctx.lineTo(-35, -45 + bounce);
+    ctx.lineTo(-28, -55 + bounce);
+    ctx.lineTo(-50, -75 + bounce);
+    ctx.lineTo(-30, -72 + bounce);
+    ctx.lineTo(-45, -95 + bounce);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    // Base marrom da cauda
+    ctx.fillStyle = '#78350f';
+    ctx.beginPath();
+    ctx.moveTo(-18, -35 + bounce);
+    ctx.lineTo(-30, -42 + bounce);
+    ctx.lineTo(-26, -48 + bounce);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // 2. Patas traseiras curtinhas
+    ctx.fillStyle = '#eab308';
+    ctx.beginPath();
+    ctx.ellipse(-12, -8, 12, 8, 0, 0, Math.PI * 2);
+    ctx.ellipse(12, -8, 12, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 3. Corpo oval gordinho amarelo sem pescoço humano
+    ctx.fillStyle = '#eab308';
+    ctx.beginPath();
+    ctx.ellipse(0, -36 + bounce, 24, 28, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#ca8a04';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Listras marrons nas costas
+    ctx.fillStyle = '#78350f';
+    ctx.beginPath();
+    ctx.ellipse(-14, -44 + bounce, 8, 3, -0.2, 0, Math.PI * 2);
+    ctx.ellipse(-14, -32 + bounce, 9, 3.5, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4. Cabeça redonda com bochechas elétricas
+    const hy = -62 + bounce;
+    ctx.fillStyle = '#eab308';
+    ctx.beginPath();
+    ctx.arc(0, hy, 22, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Orelhas pontudas compridas com pontas pretas
+    // Orelha esquerda
+    ctx.fillStyle = '#eab308';
+    ctx.beginPath();
+    ctx.moveTo(-12, hy - 16);
+    ctx.lineTo(-28, hy - 52);
+    ctx.lineTo(-4, hy - 20);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#09090b';
+    ctx.beginPath();
+    ctx.moveTo(-22, hy - 40);
+    ctx.lineTo(-28, hy - 52);
+    ctx.lineTo(-14, hy - 38);
+    ctx.closePath();
+    ctx.fill();
+
+    // Orelha direita
+    ctx.fillStyle = '#eab308';
+    ctx.beginPath();
+    ctx.moveTo(6, hy - 18);
+    ctx.lineTo(26, hy - 52);
+    ctx.lineTo(16, hy - 15);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#09090b';
+    ctx.beginPath();
+    ctx.moveTo(18, hy - 38);
+    ctx.lineTo(26, hy - 52);
+    ctx.lineTo(22, hy - 40);
+    ctx.closePath();
+    ctx.fill();
+
+    // Bochecha vermelha elétrica redonda
+    ctx.fillStyle = '#dc2626';
+    ctx.beginPath();
+    ctx.arc(14, hy + 4, 7, 0, Math.PI * 2);
+    ctx.arc(-14, hy + 4, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Olhos pretos brilhantes com brilho branco
+    ctx.fillStyle = '#09090b';
+    ctx.beginPath();
+    ctx.arc(8, hy - 4, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(9.5, hy - 6, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Patinhas dianteiras curtinhas fofas
+    ctx.fillStyle = '#eab308';
+    ctx.beginPath();
+    ctx.ellipse(8, -30 + bounce, 7, 5, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // --- 29. RENDERIZADOR ANATÔMICO 100% CARTOON DE SONIC ---
+  static drawTrueSonic(ctx, x, y, f, p, fighter) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(f, 1);
+    const t = fighter.stateTime;
+    const isMoving = Math.abs(fighter.velocity.x) > 0.5;
+    const legSpin = isMoving ? t * 24 : 0;
+
+    // 1. Pernas de cartoon e Tênis vermelhos velozes com faixa branca e fivela dourada
+    // Sapato esquerdo (trás)
+    ctx.fillStyle = '#dc2626';
+    ctx.beginPath();
+    ctx.ellipse(-14, -10, 18, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-16, -18, 6, 16);
+    ctx.fillStyle = '#facc15';
+    ctx.fillRect(-18, -14, 8, 4);
+
+    // 2. Tronco esférico azul com barriga redonda cor de pêssego
+    ctx.fillStyle = '#1d4ed8';
+    ctx.beginPath();
+    ctx.arc(0, -42, 18, 0, Math.PI * 2);
+    ctx.fill();
+    // Barriga pêssego
+    ctx.fillStyle = '#fdba74';
+    ctx.beginPath();
+    ctx.arc(4, -42, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Espinhos pontudos nas costas
+    ctx.fillStyle = '#1d4ed8';
+    ctx.beginPath();
+    ctx.moveTo(-14, -46);
+    ctx.lineTo(-32, -40);
+    ctx.lineTo(-14, -34);
+    ctx.closePath();
+    ctx.fill();
+
+    // 3. Sapato direito (frente)
+    ctx.fillStyle = '#dc2626';
+    ctx.beginPath();
+    ctx.ellipse(14, -10, 18, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(12, -18, 6, 16);
+    ctx.fillStyle = '#facc15';
+    ctx.fillRect(10, -14, 8, 4);
+
+    // 4. Cabeça com 3 espinhos gigantes para trás
+    const hy = -75;
+    ctx.fillStyle = '#1d4ed8';
+    // 3 espinhos da cabeça
+    ctx.beginPath();
+    ctx.moveTo(0, hy - 14);
+    ctx.lineTo(-38, hy - 30);
+    ctx.lineTo(-8, hy - 2);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(-6, hy - 6);
+    ctx.lineTo(-44, hy - 8);
+    ctx.lineTo(-8, hy + 8);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(-4, hy + 6);
+    ctx.lineTo(-36, hy + 18);
+    ctx.lineTo(2, hy + 14);
+    ctx.closePath();
+    ctx.fill();
+
+    // Cabeça esférica
+    ctx.beginPath();
+    ctx.arc(0, hy, 20, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Orelhas pontudas azuis com interior pêssego
+    ctx.beginPath();
+    ctx.moveTo(-4, hy - 18);
+    ctx.lineTo(-12, hy - 32);
+    ctx.lineTo(2, hy - 20);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#fdba74';
+    ctx.beginPath();
+    ctx.moveTo(-3, hy - 19);
+    ctx.lineTo(-10, hy - 28);
+    ctx.lineTo(0, hy - 20);
+    ctx.closePath();
+    ctx.fill();
+
+    // Focinho saliente cor de pêssego e nariz preto
+    ctx.fillStyle = '#fdba74';
+    ctx.beginPath();
+    ctx.ellipse(14, hy + 4, 12, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#09090b';
+    ctx.beginPath();
+    ctx.arc(24, hy + 2, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Olhos conectados brancos com pupilas verdes
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(8, hy - 4, 8, 12, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#09090b';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath();
+    ctx.ellipse(11, hy - 4, 4, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Luvas brancas volumosas de cartoon
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(14, -40, 8, 0, Math.PI * 2);
+    ctx.arc(-14, -40, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // --- 29. RENDERIZADOR ANATÔMICO 100% ESPONJA QUADRADA DE BOB ESPONJA ---
+  static drawTrueSpongeBob(ctx, x, y, f, p, fighter) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(f, 1);
+
+    // 1. Pernas fininhas de palito e sapatos pretos brilhantes
+    ctx.fillStyle = '#fde047';
+    ctx.fillRect(-12, -22, 4, 16);
+    ctx.fillRect(8, -22, 4, 16);
+    // Meias brancas com listras vermelha e azul
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-13, -16, 6, 10);
+    ctx.fillRect(7, -16, 6, 10);
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(-13, -13, 6, 1.5);
+    ctx.fillRect(7, -13, 6, 1.5);
+    ctx.fillStyle = '#3b82f6';
+    ctx.fillRect(-13, -10, 6, 1.5);
+    ctx.fillRect(7, -10, 6, 1.5);
+    // Sapatos pretos
+    ctx.fillStyle = '#09090b';
+    ctx.beginPath();
+    ctx.ellipse(-10, -5, 8, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(10, -5, 8, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. Calça quadrada marrom com cinto preto
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(-22, -34, 44, 14);
+    ctx.fillStyle = '#09090b';
+    ctx.fillRect(-20, -32, 6, 2);
+    ctx.fillRect(-6, -32, 6, 2);
+    ctx.fillRect(8, -32, 6, 2);
+
+    // 3. Camisa branca e gravata vermelha
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-22, -44, 44, 10);
+    // Gravata vermelha triangular
+    ctx.fillStyle = '#dc2626';
+    ctx.beginPath();
+    ctx.moveTo(0, -44);
+    ctx.lineTo(-4, -36);
+    ctx.lineTo(0, -32);
+    ctx.lineTo(4, -36);
+    ctx.closePath();
+    ctx.fill();
+
+    // 4. Corpo amarelo quadrado esponjoso com poros verdes
+    ctx.fillStyle = '#facc15';
+    ctx.beginPath();
+    ctx.roundRect(-24, -96, 48, 52, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#ca8a04';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Poros verdes oliva
+    ctx.fillStyle = '#84cc16';
+    ctx.beginPath();
+    ctx.arc(-16, -84, 3.5, 0, Math.PI * 2);
+    ctx.arc(16, -88, 4, 0, Math.PI * 2);
+    ctx.arc(-18, -60, 4.5, 0, Math.PI * 2);
+    ctx.arc(14, -56, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 5. Olhos esbugalhados gigantes azuis
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(-8, -74, 11, 0, Math.PI * 2);
+    ctx.arc(10, -74, 11, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#09090b';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Íris azul
+    ctx.fillStyle = '#0284c7';
+    ctx.beginPath();
+    ctx.arc(-6, -74, 5, 0, Math.PI * 2);
+    ctx.arc(12, -74, 5, 0, Math.PI * 2);
+    ctx.fill();
+    // Pupila preta
+    ctx.fillStyle = '#09090b';
+    ctx.beginPath();
+    ctx.arc(-6, -74, 2.5, 0, Math.PI * 2);
+    ctx.arc(12, -74, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 6. Nariz saliente comprido
+    ctx.fillStyle = '#facc15';
+    ctx.strokeStyle = '#ca8a04';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(4, -68, 5, 8, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // 7. Sorriso largo com dentes de coelho separados
+    ctx.strokeStyle = '#09090b';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(2, -62, 14, 0.2, Math.PI * 0.8);
+    ctx.stroke();
+    // Dois dentes brancos separados
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-2, -61, 4, 5);
+    ctx.fillRect(4, -61, 4, 5);
+    ctx.strokeRect(-2, -61, 4, 5);
+    ctx.strokeRect(4, -61, 4, 5);
+
+    // Braços fininhos
+    ctx.fillStyle = '#facc15';
+    ctx.beginPath();
+    ctx.ellipse(-24, -48, 4, 12, 0.2, 0, Math.PI * 2);
+    ctx.ellipse(24, -48, 4, 12, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // --- 29. RENDERIZADOR ANATÔMICO 100% MESTRE YODA (ESTATURA ANÃ COM TÚNICA JEDI) ---
+  static drawTrueYoda(ctx, x, y, f, p, fighter) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(f * 0.72, 0.72); // Estatura diminuta proporcional ao Mestre Jedi
+
+    // 1. Manto Jedi marrom largo até o chão
+    ctx.fillStyle = '#57534e';
+    ctx.beginPath();
+    ctx.moveTo(-20, -50);
+    ctx.lineTo(-28, -6);
+    ctx.lineTo(28, -6);
+    ctx.lineTo(20, -50);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#44403c';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Túnica interna bege
+    ctx.fillStyle = '#d6d3d1';
+    ctx.beginPath();
+    ctx.moveTo(-10, -50);
+    ctx.lineTo(-6, -10);
+    ctx.lineTo(6, -10);
+    ctx.lineTo(10, -50);
+    ctx.closePath();
+    ctx.fill();
+
+    // 2. Cabeça verde sábia com rugas
+    const hy = -74;
+    ctx.fillStyle = '#15803d';
+    ctx.beginPath();
+    ctx.ellipse(0, hy, 20, 16, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Orelhas compridas laterais de Yoda
+    // Orelha esquerda
+    ctx.beginPath();
+    ctx.moveTo(-16, hy);
+    ctx.lineTo(-48, hy - 8);
+    ctx.lineTo(-16, hy + 8);
+    ctx.closePath();
+    ctx.fill();
+    // Orelha direita
+    ctx.beginPath();
+    ctx.moveTo(16, hy);
+    ctx.lineTo(48, hy - 8);
+    ctx.lineTo(16, hy + 8);
+    ctx.closePath();
+    ctx.fill();
+
+    // Tufos de cabelo branco sábio
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-18, hy - 4, 5, 3);
+    ctx.fillRect(13, hy - 4, 5, 3);
+
+    // Olhos sábios com rugas
+    ctx.fillStyle = '#78350f';
+    ctx.beginPath();
+    ctx.arc(8, hy - 2, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath();
+    ctx.arc(9, hy - 2, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 3. Mini sabre de luz verde esmeralda na mão
+    ctx.save();
+    ctx.shadowColor = '#22c55e';
+    ctx.shadowBlur = 18;
+    ctx.strokeStyle = '#86efac';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(16, -35);
+    ctx.lineTo(48, -48);
+    ctx.stroke();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  // --- 29. RENDERIZADOR ANATÔMICO 100% MARIO (ENCANADOR CHIBI COM MACACÃO) ---
+  static drawTrueMario(ctx, x, y, f, p, fighter) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(f * 0.85, 0.85); // Proporção mais compacta e atarracada clássica
+
+    // 1. Sapatos marrons redondos
+    ctx.fillStyle = '#78350f';
+    ctx.beginPath();
+    ctx.ellipse(-14, -8, 16, 9, 0, 0, Math.PI * 2);
+    ctx.ellipse(14, -8, 16, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. Macacão jeans azul com barriga redonda
+    ctx.fillStyle = '#1d4ed8';
+    ctx.beginPath();
+    ctx.ellipse(0, -36, 24, 26, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Fivelas douradas amarelas redondas
+    ctx.fillStyle = '#facc15';
+    ctx.beginPath();
+    ctx.arc(-10, -44, 4, 0, Math.PI * 2);
+    ctx.arc(10, -44, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Camisa vermelha por baixo
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(-18, -48, 36, 8);
+
+    // Luvas brancas redondas
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(-22, -36, 8, 0, Math.PI * 2);
+    ctx.arc(22, -36, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 3. Cabeça, Narigão e Bigode
+    const hy = -74;
+    ctx.fillStyle = '#fed7aa';
+    ctx.beginPath();
+    ctx.arc(0, hy, 20, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Bigode preto volumoso
+    ctx.fillStyle = '#09090b';
+    ctx.beginPath();
+    ctx.ellipse(8, hy + 6, 14, 6, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Nariz grande redondo saliente
+    ctx.fillStyle = '#fed7aa';
+    ctx.beginPath();
+    ctx.arc(14, hy + 2, 8.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#ea580c';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Olho azul de cartoon
+    ctx.fillStyle = '#0284c7';
+    ctx.beginPath();
+    ctx.arc(6, hy - 4, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(7.5, hy - 5, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4. Boné vermelho icônico com aba frontal e emblema 'M'
+    ctx.fillStyle = '#dc2626';
+    ctx.beginPath();
+    ctx.ellipse(0, hy - 14, 24, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Aba frontal
+    ctx.fillRect(4, hy - 10, 22, 5);
+    // Emblema circular branco com letra M
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(4, hy - 16, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#dc2626';
+    ctx.font = 'bold 8px sans-serif';
+    ctx.fillText('M', 1.5, hy - 13);
+
+    ctx.restore();
   }
 }

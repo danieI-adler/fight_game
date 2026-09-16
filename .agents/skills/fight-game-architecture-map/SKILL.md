@@ -39,6 +39,9 @@ Este guia é a bússola oficial para qualquer desenvolvedor ou agente de IA que 
 ## 📂 Guia Detalhado por Módulo
 
 ### 1. Sistema de Personagens (`src/game/characters/`)
+* **`roster/`**: Arquivo modular dedicado para a lógica de cada personagem (ex: `gustave.js`, `maelle.js`, `lune.js`, `sciel.js`, `renoir.js`, `verso.js`, `monoco.js`, `batman.js`, `naruto.js`, etc.).
+  - Contém `init`, `onSpecial`, `onSuper`, `update` (projéteis/timers) e `draw` (efeitos no Canvas) do lutador.
+* **`registry.js`**: Centralizador e vinculador automático do personagem ao seu módulo comportamental (`BaseCharacter`).
 * **`expedition33Characters.js`**: Elenco de *Clair Obscur: Expedition 33* (Gustave, Maelle, Lune, Sciel, Renoir, Verso, Monoco, etc.).
   - Adicione propriedades como `voiceAbility: 'nome_do_som'` ou `superType: 'NOME_DO_SUPER'` aqui.
 * **`characterData.js`**: Elenco clássico dos 20 personagens Belle Époque com atributos base.

@@ -7,6 +7,7 @@ import { ExpeditionRenderer } from './ExpeditionRenderer';
 import { ExpeditionHDRenderer } from './ExpeditionHDRenderer';
 import { FighterAnimator } from './FighterAnimator';
 import { FighterCombat } from './FighterCombat';
+import { getCharacterBehavior } from '../characters/registry';
 
 export const FIGHTER_STATE = {
   IDLE: 'IDLE',
@@ -305,6 +306,10 @@ export class Fighter {
     };
 
     this.opponent = null;
+    this.behavior = getCharacterBehavior(this);
+    if (this.behavior) {
+      this.behavior.init(this);
+    }
   }
 
   setOpponent(opponent) {
@@ -459,6 +464,10 @@ export class Fighter {
     // Monoco sempre mantém energia cheia para sua skill
     if (this.isMonoco) {
       this.energy = this.maxEnergy;
+    }
+
+    if (this.behavior) {
+      this.behavior.reset(this, startX, keepEnergy);
     }
   }
 
@@ -737,6 +746,9 @@ export class Fighter {
     this.extraAttackLevel = level;
 
     const charName = (this.charData?.name || '').toLowerCase();
+    if (this.behavior && this.behavior.onSpecial(this, level)) {
+      return;
+    }
 
     // 1. Gustave: tiro de pistola de longo alcance
     if (charName.includes('gustave')) {
@@ -1741,6 +1753,10 @@ export class Fighter {
     this.superType = this.charData?.superType || null;
     this.isInvulnerable = this.superType !== 'MONOCO_PARRY_MIMIC';
 
+    if (this.behavior && this.behavior.onSuper(this)) {
+      return;
+    }
+
     if (this.superType === 'MONOCO_PARRY_MIMIC') {
       this.superPhase = 'PARRY_STANCE';
       sounds.playStaffBell();
@@ -2444,6 +2460,10 @@ export class Fighter {
     // Se Verso levar um golpe limpo (fora da defesa), o rank dele volta para E (75% do dano)
     this.resetVersoRankOnHitTaken();
 
+    if (this.behavior) {
+      this.behavior.onHitTaken(this, attackData);
+    }
+
     if (attackData.isHeavy) {
       sounds.playPunch(true);
       if (particles) {
@@ -2681,6 +2701,10 @@ export class Fighter {
 
     // 5. Atualização de Ataques
     this.updateAttackStates(dt, particles, stageWidth);
+
+    if (this.behavior) {
+      this.behavior.update(this, dt, stageWidth, particles);
+    }
 
     // 5.1 Atualização de Efeitos de Status Elementais
     if (this.slowTimer > 0) {
@@ -5922,6 +5946,10 @@ export class Fighter {
 
     // Renderiza projéteis e áreas de Ataques Extras
     this.drawExtraAttacks(ctx);
+
+    if (this.behavior) {
+      this.behavior.draw(this, ctx);
+    }
   }
 
   drawExtraAttacks(ctx) {
