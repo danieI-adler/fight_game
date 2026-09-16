@@ -550,7 +550,22 @@ export class Fighter {
   }
 
   jump(dirX = 0) {
-    if (!this.canAct() || !this.isGrounded || this.jumpCooldown > 0) return;
+    if (!this.canAct() || this.jumpCooldown > 0) return;
+    if (!this.isGrounded) {
+      // 17 - Sonic: Double Jump enquanto em Super Sonic!
+      if (this.canDoubleJump && !this.hasDoubleJumped) {
+        this.hasDoubleJumped = true;
+        this.jumpCooldown = 0.15;
+        this.velocity.y = -(this.jumpForce * 0.95);
+        this.velocity.x = dirX * (this.getEffectiveSpeed() * 0.9);
+        this.state = FIGHTER_STATE.JUMP;
+        sounds.playWhoosh();
+        sounds.playDash();
+        return;
+      }
+      return;
+    }
+    this.hasDoubleJumped = false;
     this.isGrounded = false;
     this.jumpCooldown = 0.22; // Cooldown de pulo
     this.lastAction = 'JUMP';
@@ -595,7 +610,21 @@ export class Fighter {
   block(isBlocking) {
     if (this.isZorro) {
       this.isBlocking = false;
-      return; // Zorro não pode se defender!
+      return; // 5 - Zorro não pode se defender!
+    }
+    // 12 - Naruto: Apertar E com clone ativo faz ele trocar de lugar instantaneamente!
+    if (isBlocking && this.narutoClone && this.narutoClone.active) {
+      const tempX = this.position.x;
+      const tempY = this.position.y;
+      this.position.x = this.narutoClone.x;
+      this.position.y = this.narutoClone.y;
+      this.narutoClone.x = tempX;
+      this.narutoClone.y = tempY;
+      sounds.playWhoosh();
+      sounds.playDash();
+      this.narutoClone.active = false;
+      this.narutoClone = null;
+      return;
     }
     if (!this.canAct() && this.state !== FIGHTER_STATE.BLOCK) return;
     this.isBlocking = isBlocking;
@@ -611,7 +640,9 @@ export class Fighter {
   dash(dir) {
     if (!this.canAct() || !this.isGrounded) return;
     this.state = dir === this.facing ? FIGHTER_STATE.DASH_FORWARD : FIGHTER_STATE.DASH_BACK;
-    this.velocity.x = dir * (this.getEffectiveSpeed() * 3.8);
+    // 17 - Super Sonic possui dash estendido!
+    const dashMult = (this.superSonicTimer > 0) ? 6.2 : 3.8;
+    this.velocity.x = dir * (this.getEffectiveSpeed() * dashMult);
     this.stateTime = 0;
     sounds.playDash();
   }
@@ -2451,7 +2482,13 @@ export class Fighter {
       attackData.attacker.zorroEmpoweredNextHit = false;
     }
 
-    const actualDamage = Math.round(attackData.damage * attackerPwr / this.defense);
+    let actualDamage = Math.round(attackData.damage * attackerPwr / this.defense);
+    if (this.captainShieldDefenseTimer > 0) {
+      actualDamage = Math.round(actualDamage * 0.5); // Item 11: Defesa com escudo reduz 50% do dano!
+    }
+    if (this.kratosRageTimer > 0) {
+      actualDamage = Math.round(actualDamage * 0.6); // Item 27: Fúria Espartana reduz dano sofrido
+    }
     this.health = Math.max(0, this.health - actualDamage);
     // Ganha 2,5% de energia ao receber pancada (Bruce Banner em forma humana ganha o dobro: 5.0%)
     const energyGain = (this.isBanner && !this.isHulk) ? 5.0 : 2.5;
@@ -2467,9 +2504,8 @@ export class Fighter {
     if (attackData.isHeavy) {
       sounds.playPunch(true);
       if (particles) {
-        particles.emitSparks(hitPoint.x, hitPoint.y, this.charData.themeColor || '#ffaa00', 20, 8);
-        particles.emitShockwave(hitPoint.x, hitPoint.y, 65, this.charData.energyColor || '#ffffff');
-        particles.emitElectricArc(hitPoint.x - 20, hitPoint.y - 20, hitPoint.x + 20, hitPoint.y + 20, this.charData.themeColor);
+        particles.emitSparks(hitPoint.x, hitPoint.y, this.charData?.themeColor || '#ffaa00', 20, 8);
+        particles.emitShockwave(hitPoint.x, hitPoint.y, 65, this.charData?.energyColor || '#ffffff');
       }
     } else {
       sounds.playPunch(false);
@@ -3215,7 +3251,6 @@ export class Fighter {
             particles.emitShockwave(box.x, box.y - 30, 140, '#10b981');
             particles.emitSparks(box.x, box.y - 40, '#22c55e', 35, 10);
             particles.emitSparks(box.x, box.y - 40, '#a855f7', 25, 8);
-            particles.emitFloatingText('HA! HA! HA!', this.opponent.position.x, this.opponent.position.y - 85, '#10b981', true);
           }
         }
       }
@@ -3494,7 +3529,6 @@ export class Fighter {
             } else if (arr.type === 'BOXING_GLOVE_ARROW') {
               sounds.playThunderSlam();
               if (particles) {
-                particles.emitFloatingText('POW!', arr.x, arr.y - 30, '#22c55e', true);
                 particles.emitShockwave(arr.x, arr.y, 110, '#22c55e');
               }
             }
@@ -3597,7 +3631,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(snp.fissureX, this.groundY, 260, '#ffffff');
             particles.emitSparks(snp.fissureX, this.groundY - 60, '#ffffff', 50, 16);
-            particles.emitFloatingText('YOU SHALL NOT PASS!', this.position.x, this.position.y - 120, '#ffffff', true);
           }
           const attackData = {
             damage: 385,
@@ -3628,7 +3661,6 @@ export class Fighter {
             particles.emitShockwave(hs.x, this.groundY, hs.radius, '#84cc16');
             particles.emitSparks(hs.x, this.groundY - 40, '#4d7c0f', 35, 12);
             particles.emitDust(hs.x, this.groundY, 25, '#365314');
-            particles.emitFloatingText('HULK SMASH!', this.position.x, this.position.y - 100, '#84cc16', true);
           }
           const attackData = {
             damage: hs.damage,
@@ -3658,7 +3690,6 @@ export class Fighter {
           sounds.playRapierSlash();
           if (particles) {
             particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 50, '#fbbf24', 16, 6);
-            particles.emitFloatingText('DISARM!', this.opponent.position.x, this.opponent.position.y - 80, '#f59e0b', true);
           }
           const attackData = {
             damage: zw.damage,
@@ -3870,7 +3901,6 @@ export class Fighter {
           particles.emitShockwave(wc.x, this.groundY, wc.radius, '#0284c7');
           particles.emitSparks(wc.x, this.groundY - 30, '#38bdf8', 40, 14);
           particles.emitSparks(wc.x, this.groundY - 30, '#ffffff', 30, 10);
-          particles.emitFloatingText('THIS IS NOT METH!', wc.x, this.groundY - 90, '#38bdf8', true);
         }
         if (this.opponent && !this.opponent.isDead) {
           const dist = Math.abs(wc.x - this.opponent.position.x);
@@ -3956,7 +3986,6 @@ export class Fighter {
         if (particles) {
           particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 40, 110, '#38bdf8');
           particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 40, '#facc15', 20, 8);
-          particles.emitFloatingText('ANKARA MESSI!', this.opponent.position.x, this.opponent.position.y - 85, '#38bdf8', true);
         }
         const attackData = {
           damage: mr.damage,
@@ -4016,7 +4045,6 @@ export class Fighter {
             if (particles) {
               particles.emitShockwave(ball.x, ball.y, 240, '#facc15');
               particles.emitSparks(ball.x, ball.y, '#facc15', 50, 16);
-              particles.emitFloatingText('GOLAÇO NO ÂNGULO!', ball.x, ball.y - 65, '#facc15', true);
             }
             const attackData = {
               damage: 420,
@@ -4110,7 +4138,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 50, 220, '#facc15');
             particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 50, '#fef08a', 40, 14);
-            particles.emitFloatingText('CABELOS DOURADOS!', this.opponent.position.x, this.opponent.position.y - 90, '#facc15', true);
           }
           const attackData = {
             damage: storm.damage,
@@ -4201,7 +4228,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 150, '#0ea5e9');
             particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 60, '#38bdf8', 35, 12);
-            particles.emitFloatingText('RASENGAN!', this.opponent.position.x, this.opponent.position.y - 85, '#0ea5e9', true);
           }
           const attackData = {
             damage: nr.damage,
@@ -4243,7 +4269,6 @@ export class Fighter {
             particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 260, '#0284c7');
             particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 160, '#38bdf8');
             particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 60, '#ffffff', 55, 18);
-            particles.emitFloatingText('FUUTON: RASEN SHURIKEN!', this.opponent.position.x, this.opponent.position.y - 95, '#0284c7', true);
           }
           const attackData = {
             damage: 410,
@@ -4285,7 +4310,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 160, '#818cf8');
             particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 60, '#c084fc', 35, 12);
-            particles.emitFloatingText('CHIDORI!', this.opponent.position.x, this.opponent.position.y - 85, '#818cf8', true);
           }
           const attackData = {
             damage: sc.damage,
@@ -4323,7 +4347,6 @@ export class Fighter {
           particles.emitShockwave(sk.x, this.groundY, 320, '#818cf8');
           particles.emitShockwave(sk.x, this.groundY, 200, '#38bdf8');
           particles.emitSparks(sk.x, this.groundY - 60, '#ffffff', 60, 20);
-          particles.emitFloatingText('KIRIN DOS CÉUS!', sk.x, sk.y - 40, '#818cf8', true);
         }
         if (this.opponent && !this.opponent.isDead) {
           const dist = Math.abs(this.opponent.position.x - sk.x);
@@ -4369,7 +4392,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(sp.x, sp.y, 80, '#facc15');
             particles.emitSparks(sp.x, sp.y, '#ef4444', 18, 6);
-            particles.emitFloatingText('HAMBÚRGUER DE SIRI!', sp.x, sp.y - 30, '#eab308', true);
           }
           const attackData = {
             damage: sp.damage,
@@ -4458,7 +4480,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(ir.x, ir.y, 110, '#38bdf8');
             particles.emitSparks(ir.x, ir.y, '#facc15', 25, 9);
-            particles.emitFloatingText('REPULSOR STARK!', ir.x, ir.y - 30, '#38bdf8', true);
           }
           const attackData = {
             damage: ir.damage,
@@ -4541,7 +4562,6 @@ export class Fighter {
             sounds.playPunch(false);
             if (particles) {
               particles.emitShockwave(sw.x, sw.y, 85, '#ffffff');
-              particles.emitFloatingText('TEIA PUXADORA!', sw.x, sw.y - 25, '#ef4444', true);
             }
           }
         }
@@ -4607,7 +4627,6 @@ export class Fighter {
               particles.emitShockwave(target.position.x, target.position.y - 50, isLast ? 180 : 100, '#ef4444');
               particles.emitSparks(target.position.x, target.position.y - 50, '#38bdf8', isLast ? 35 : 15, 8);
               if (isLast) {
-                particles.emitFloatingText('COMBO ARACNÍDEO!', target.position.x, target.position.y - 85, '#ef4444', true);
               }
             }
             const attackData = {
@@ -4654,7 +4673,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(ye.x, ye.y, 90, '#22c55e');
             particles.emitSparks(ye.x, ye.y, '#ffffff', 20, 8);
-            particles.emitFloatingText('OVO DO YOSHI!', ye.x, ye.y - 25, '#22c55e', true);
           }
           const attackData = {
             damage: ye.damage,
@@ -4747,7 +4765,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 50, 140, '#facc15');
             particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 50, '#38bdf8', 30, 10);
-            particles.emitFloatingText('ATAQUE RÁPIDO!', this.opponent.position.x, this.opponent.position.y - 75, '#eab308', true);
           }
           const attackData = {
             damage: qa.damage,
@@ -4784,7 +4801,6 @@ export class Fighter {
           particles.emitShockwave(pt.x, this.groundY, 280, '#facc15');
           particles.emitShockwave(pt.x, this.groundY, 180, '#38bdf8');
           particles.emitSparks(pt.x, this.groundY - 50, '#ffffff', 50, 18);
-          particles.emitFloatingText('100.000 VOLTS: TROVÃO!', pt.x, pt.y - 30, '#facc15', true);
         }
         if (this.opponent && !this.opponent.isDead) {
           const dist = Math.abs(this.opponent.position.x - pt.x);
@@ -4829,7 +4845,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 50, 150, '#2563eb');
             particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 50, '#facc15', 25, 10);
-            particles.emitFloatingText('SPIN DASH!', this.opponent.position.x, this.opponent.position.y - 75, '#2563eb', true);
           }
           const attackData = {
             damage: sd.damage,
@@ -4873,7 +4888,6 @@ export class Fighter {
               particles.emitShockwave(target.position.x, target.position.y - 50, isFinal ? 200 : 120, '#facc15');
               particles.emitSparks(target.position.x, target.position.y - 50, '#2563eb', isFinal ? 35 : 15, 8);
               if (isFinal) {
-                particles.emitFloatingText('SUPER SONIC!', target.position.x, target.position.y - 85, '#facc15', true);
               }
             }
             const attackData = {
@@ -4919,7 +4933,6 @@ export class Fighter {
             particles.emitShockwave(this.position.x, this.groundY, 240, '#22c55e');
             particles.emitShockwave(this.position.x, this.groundY, 140, '#15803d');
             particles.emitSparks(this.position.x, this.position.y - 40, '#ffffff', 40, 14);
-            particles.emitFloatingText('QUEBRA-COSTAS DE BANE!', this.position.x, this.position.y - 85, '#22c55e', true);
           }
           const attackData = {
             damage: bb.damage,
@@ -4958,7 +4971,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(db.x, db.y, 110, '#991b1b');
             particles.emitSparks(db.x, db.y, '#ef4444', 25, 8);
-            particles.emitFloatingText('MORCEGOS CARNÍVOROS!', db.x, db.y - 30, '#991b1b', true);
           }
           // Drácula cura 25 de vida ao sugar sangue
           this.health = Math.min(this.maxHealth, this.health + 25);
@@ -5040,7 +5052,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 160, '#38bdf8');
             particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 60, '#ffffff', 30, 12);
-            particles.emitFloatingText('VORPAL STRIKE!', this.opponent.position.x, this.opponent.position.y - 85, '#38bdf8', true);
           }
           const attackData = {
             damage: kv.damage,
@@ -5083,7 +5094,6 @@ export class Fighter {
               particles.emitShockwave(target.position.x, target.position.y - 60, isFinal ? 220 : 110, isFinal ? '#0284c7' : '#38bdf8');
               particles.emitSparks(target.position.x, target.position.y - 60, '#ffffff', isFinal ? 40 : 15, 8);
               if (isFinal) {
-                particles.emitFloatingText('STARBURST STREAM!', target.position.x, target.position.y - 95, '#0284c7', true);
               }
             }
             const attackData = {
@@ -5126,7 +5136,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 140, '#15803d');
             particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 60, '#ef4444', 25, 9);
-            particles.emitFloatingText('CORTE DUPLO DMT!', this.opponent.position.x, this.opponent.position.y - 85, '#15803d', true);
           }
           const attackData = {
             damage: ed.damage,
@@ -5163,7 +5172,6 @@ export class Fighter {
           particles.emitShockwave(et.x, this.groundY, 320, '#facc15');
           particles.emitShockwave(et.x, this.groundY, 200, '#ef4444');
           particles.emitSparks(et.x, this.groundY - 80, '#ffffff', 65, 22);
-          particles.emitFloatingText('TRANSFORMAÇÃO TITÃ!', et.x, et.y - 40, '#ef4444', true);
         }
         if (this.opponent && !this.opponent.isDead) {
           const dist = Math.abs(this.opponent.position.x - et.x);
@@ -5210,7 +5218,6 @@ export class Fighter {
               particles.emitShockwave(target.position.x, target.position.y - 60, isFinal ? 220 : 115, '#eab308');
               particles.emitSparks(target.position.x, target.position.y - 60, '#ef4444', isFinal ? 40 : 16, 9);
               if (isFinal) {
-                particles.emitFloatingText('O GRITO DO DRAGÃO!', target.position.x, target.position.y - 90, '#eab308', true);
               }
             }
             const attackData = {
@@ -5255,7 +5262,6 @@ export class Fighter {
             if (particles) {
               particles.emitShockwave(this.opponent.position.x, this.opponent.position.y - 60, 160, '#38bdf8');
               particles.emitSparks(this.opponent.position.x, this.opponent.position.y - 60, '#ffffff', 25, 10);
-              particles.emitFloatingText('KAMEHAMEHA!', this.opponent.position.x, this.opponent.position.y - 85, '#38bdf8', true);
             }
             const attackData = {
               damage: gk.damage,
@@ -5300,7 +5306,6 @@ export class Fighter {
           particles.emitShockwave(gd.x, this.groundY, 350, '#38bdf8');
           particles.emitShockwave(gd.x, this.groundY, 220, '#0284c7');
           particles.emitSparks(gd.x, this.groundY - 80, '#ffffff', 70, 24);
-          particles.emitFloatingText('GENKI DAMA!', gd.x, gd.y - 40, '#38bdf8', true);
         }
         if (this.opponent && !this.opponent.isDead) {
           const dist = Math.abs(this.opponent.position.x - gd.x);
@@ -5363,7 +5368,6 @@ export class Fighter {
               particles.emitShockwave(target.position.x, target.position.y - 50, isFinal ? 230 : 120, '#22c55e');
               particles.emitSparks(target.position.x, target.position.y - 50, '#ffffff', isFinal ? 45 : 18, 10);
               if (isFinal) {
-                particles.emitFloatingText('FORMA IV: ATARU!', target.position.x, target.position.y - 85, '#22c55e', true);
               }
             }
             const attackData = {
@@ -5404,7 +5408,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(hb.x, hb.y, 110, '#ef4444');
             particles.emitSparks(hb.x, hb.y, '#ffffff', 20, 8);
-            particles.emitFloatingText('HAN ATIROU PRIMEIRO!', hb.x, hb.y - 30, '#ef4444', true);
           }
           const attackData = {
             damage: hb.damage,
@@ -5444,7 +5447,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(bx, this.groundY, 180, '#ef4444');
             particles.emitSparks(bx, this.groundY - 30, '#f97316', 30, 12);
-            particles.emitFloatingText('BOMBARDEIO DA FALCON!', bx, this.groundY - 70, '#ef4444', true);
           }
           if (this.opponent && !this.opponent.isDead) {
             const dist = Math.abs(this.opponent.position.x - bx);
@@ -5501,7 +5503,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(mf.x, mf.y, 110, '#f97316');
             particles.emitSparks(mf.x, mf.y, '#ef4444', 22, 8);
-            particles.emitFloatingText('FIREBALL!', mf.x, mf.y - 30, '#f97316', true);
           }
           const attackData = {
             damage: mf.damage,
@@ -5539,7 +5540,6 @@ export class Fighter {
           if (particles) {
             particles.emitShockwave(fin.x + this.facing * 150, this.groundY, 240, '#f97316');
             particles.emitSparks(fin.x + this.facing * 150, this.groundY - 60, '#facc15', 35, 12);
-            particles.emitFloatingText('MARIO FINALE!', fin.x + this.facing * 150, this.groundY - 95, '#ef4444', true);
           }
           if (this.opponent && !this.opponent.isDead) {
             const facingOpp = (this.opponent.position.x - fin.x) * this.facing > 0;
@@ -5598,7 +5598,6 @@ export class Fighter {
               particles.emitShockwave(target.position.x, target.position.y - 55, isFinal ? 230 : 120, '#eab308');
               particles.emitSparks(target.position.x, target.position.y - 55, '#ef4444', isFinal ? 45 : 18, 9);
               if (isFinal) {
-                particles.emitFloatingText('BERSERKER BARRAGE!', target.position.x, target.position.y - 85, '#eab308', true);
               }
             }
             const attackData = {
@@ -5652,7 +5651,6 @@ export class Fighter {
             particles.emitShockwave(kr.x, this.groundY, isFinal ? 320 : 200, '#dc2626');
             particles.emitSparks(kr.x, this.groundY - 50, '#ffffff', isFinal ? 55 : 25, 14);
             if (isFinal) {
-              particles.emitFloatingText('FÚRIA ESPARTANA!', kr.x, kr.y - 50, '#dc2626', true);
             }
           }
           if (this.opponent && !this.opponent.isDead) {
@@ -5711,7 +5709,6 @@ export class Fighter {
               particles.emitShockwave(target.position.x, target.position.y - 60, isFinal ? 250 : 130, '#09090b');
               particles.emitSparks(target.position.x, target.position.y - 60, '#ffffff', isFinal ? 50 : 20, 10);
               if (isFinal) {
-                particles.emitFloatingText('NÓS SOMOS VENOM!', target.position.x, target.position.y - 95, '#ffffff', true);
               }
             }
             const attackData = {
@@ -5765,7 +5762,6 @@ export class Fighter {
             particles.emitShockwave(cs.x, cs.y, isFinal ? 280 : 170, '#dc2626');
             particles.emitSparks(cs.x, cs.y, '#ef4444', isFinal ? 60 : 25, 12);
             if (isFinal) {
-              particles.emitFloatingText('CARNIFICINA TOTAL!', cs.x, cs.y - 50, '#dc2626', true);
             }
           }
           if (this.opponent && !this.opponent.isDead) {
@@ -5826,7 +5822,6 @@ export class Fighter {
               particles.emitShockwave(this.opponent.position.x, eyeY, 150, '#ef4444');
               particles.emitSparks(this.opponent.position.x, eyeY, '#facc15', 20, 8);
               if (isFinal) {
-                particles.emitFloatingText('EU FAÇO O QUE EU QUISER!', this.opponent.position.x, eyeY - 45, '#ef4444', true);
               }
             }
             const attackData = {
@@ -5893,6 +5888,20 @@ export class Fighter {
 
   updateAttackStates(dt, particles, stageWidth = 2000) {
     FighterCombat.updateAttackStates(this, dt, particles, stageWidth);
+
+    // Watchdogs Universais de Segurança (Garante que Kirito, Homem de Ferro, Goku, Han Solo e Homelander nunca travem!)
+    if (this.state === FIGHTER_STATE.SPECIAL_1 && this.stateTime >= 0.42) {
+      this.state = FIGHTER_STATE.IDLE;
+      this.activeHitbox = null;
+      this.extraType = null;
+      this.isInvulnerable = false;
+    }
+    if (this.state === FIGHTER_STATE.SUPER_MOVE && this.stateTime >= 1.55) {
+      this.state = FIGHTER_STATE.IDLE;
+      this.activeHitbox = null;
+      this.superPhase = null;
+      this.isInvulnerable = false;
+    }
   }
 
   updateSkeletalPose() {

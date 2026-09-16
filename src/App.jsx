@@ -346,6 +346,8 @@ export function App() {
             } catch (e) {}
           }}
           isExpedition={isExpedition}
+          onOpenBalanceDashboard={() => setShowBalanceDashboard(true)}
+          onOpenPatchNotes={() => setShowPatchNotes(true)}
           onToggleExpedition={() => {
             setIsExpedition((prev) => {
               const next = !prev;

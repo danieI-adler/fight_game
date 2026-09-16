@@ -214,11 +214,42 @@ export class FighterCombat {
             fighter.activeHitbox = null;
           }
         }
-        else if (fighter.extraType === 'GUSTAVE_GUN' || fighter.extraType === 'MAELLE_BLINK_DASH' || fighter.extraType === 'LUNE_HEAL' || fighter.extraType === 'RENOIR_BLACK_HOLE' || fighter.extraType === 'PAINTRESS_REALITY_TEAR') {
-          if (fighter.stateTime >= 0.35) {
+        else if (
+          fighter.extraType === 'GUSTAVE_GUN' ||
+          fighter.extraType === 'MAELLE_BLINK_DASH' ||
+          fighter.extraType === 'LUNE_HEAL' ||
+          fighter.extraType === 'RENOIR_BLACK_HOLE' ||
+          fighter.extraType === 'PAINTRESS_REALITY_TEAR' ||
+          fighter.extraType === 'CAPTAIN_SHIELD_GUARD' ||
+          fighter.extraType === 'GOKU_SSJ_TRANSFORM' ||
+          fighter.extraType === 'BANE_VENOM_INJECTION' ||
+          fighter.extraType === 'MARIO_WARP_PIPE' ||
+          fighter.extraType === 'HOMELANDER_FLIGHT' ||
+          fighter.extraType === 'NASCIMENTO_DRAW_GUN' ||
+          fighter.extraType === 'ZORRO_PARRY_STANCE' ||
+          fighter.extraType === 'AANG_WATER_WHIP' ||
+          fighter.extraType === 'AANG_FIRE_FLURRY' ||
+          fighter.extraType === 'RAPUNZEL_HAIR_SLAP' ||
+          fighter.extraType === 'NARUTO_KAGE_BUNSHIN' ||
+          fighter.extraType === 'SPONGEBOB_PATTY_THROW' ||
+          fighter.extraType === 'IRONMAN_REPULSOR_BEAM' ||
+          fighter.extraType === 'SPIDERMAN_WEB_PULL' ||
+          fighter.extraType === 'YOSHI_EGG_THROW' ||
+          fighter.extraType === 'PIKACHU_QUICK_ATTACK' ||
+          fighter.extraType === 'SONIC_SPIN_DASH' ||
+          fighter.extraType === 'DRACULA_BAT_SWARM' ||
+          fighter.extraType === 'EREN_DMT_DASH' ||
+          fighter.extraType === 'BRUCE_LEE_ONE_INCH' ||
+          fighter.extraType === 'YODA_FORCE_PUSH' ||
+          fighter.extraType === 'HAN_SOLO_CHEWIE' ||
+          fighter.extraType === 'WOLVERINE_X_SLASH' ||
+          fighter.extraType === 'KRATOS_CHAOS_BLADES'
+        ) {
+          if (fighter.stateTime >= 0.22) {
             fighter.isInvulnerable = false;
             fighter.state = FIGHTER_STATE.IDLE;
             fighter.extraType = null;
+            fighter.activeHitbox = null;
           }
         } else {
           // Genérico (sem nenhum raiozinho elétrico padrão)
@@ -1813,6 +1844,19 @@ export class FighterCombat {
             fighter.activeHitbox.isHeavy = true;
             fighter.activeHitbox.unblockable = false;
             fighter.activeHitbox.attackerPower = fighter.attackPower;
+          }
+        }
+
+        if (
+          fighter.superType === 'SONIC_SUPER_TRANSFORMATION' ||
+          fighter.superType === 'MARIO_FINALE_FIRE' ||
+          fighter.superType === 'HULK_TRANSFORM' ||
+          fighter.superType === 'AANG_AVATAR_STATE'
+        ) {
+          if (fighter.stateTime >= 0.25) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.state = FIGHTER_STATE.IDLE;
           }
         }
 

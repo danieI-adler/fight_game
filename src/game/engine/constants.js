@@ -1,1 +1,1 @@
-export const SUPER_MOVE_MAX_DURATION = 2.5;
+export const SUPER_MOVE_MAX_DURATION = 1.6;
