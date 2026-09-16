@@ -5041,9 +5041,9 @@ export class Fighter {
       const progress = Math.min(1, kv.timer / 0.18);
       this.position.x = kv.startX + (kv.targetX - kv.startX) * progress;
 
-      if (particles && Math.random() < 0.8) {
-        particles.emitElectricArc(this.position.x - 20, this.position.y - 60, this.position.x + 20, this.position.y - 60, '#38bdf8');
-        particles.emitSparks(this.position.x, this.position.y - 60, '#0284c7', 8, 6);
+      if (particles && Math.random() < 0.6) {
+        particles.emitSparks(this.position.x, this.position.y - 60, '#38bdf8', 6, 5);
+        particles.emitSparks(this.position.x, this.position.y - 60, '#ffffff', 4, 3);
       }
 
       if (this.opponent && !this.opponent.isDead && !kv.hasHit && progress > 0.3) {
@@ -5070,6 +5070,10 @@ export class Fighter {
       if (progress >= 1) {
         kv.active = false;
         this.kiritoVorpal = null;
+        this.extraType = null;
+        if (this.state === FIGHTER_STATE.SPECIAL_1) {
+          this.state = FIGHTER_STATE.IDLE;
+        }
       }
     }
 
@@ -5096,8 +5100,6 @@ export class Fighter {
             if (particles) {
               particles.emitShockwave(target.position.x, target.position.y - 60, isFinal ? 220 : 110, isFinal ? '#0284c7' : '#38bdf8');
               particles.emitSparks(target.position.x, target.position.y - 60, '#ffffff', isFinal ? 40 : 15, 8);
-              if (isFinal) {
-              }
             }
             const attackData = {
               damage: Math.round(ks.damage / 5),
@@ -5112,9 +5114,15 @@ export class Fighter {
         }
       }
 
-      if (ks.timer >= 1.45) {
+      if (ks.timer >= 1.35) {
         ks.active = false;
         this.kiritoStarburst = null;
+        this.superPhase = null;
+        this.superType = null;
+        this.isInvulnerable = false;
+        if (this.state === FIGHTER_STATE.SUPER_MOVE) {
+          this.state = FIGHTER_STATE.IDLE;
+        }
       }
     }
 
@@ -5343,6 +5351,10 @@ export class Fighter {
       if (yf.timer >= 0.3) {
         yf.active = false;
         this.yodaForcePush = null;
+        this.extraType = null;
+        if (this.state === FIGHTER_STATE.SPECIAL_1) {
+          this.state = FIGHTER_STATE.IDLE;
+        }
       }
     }
 
@@ -5370,8 +5382,6 @@ export class Fighter {
             if (particles) {
               particles.emitShockwave(target.position.x, target.position.y - 50, isFinal ? 230 : 120, '#22c55e');
               particles.emitSparks(target.position.x, target.position.y - 50, '#ffffff', isFinal ? 45 : 18, 10);
-              if (isFinal) {
-              }
             }
             const attackData = {
               damage: Math.round(ya.damage / 5),
@@ -5386,9 +5396,15 @@ export class Fighter {
         }
       }
 
-      if (ya.timer >= 1.4) {
+      if (ya.timer >= 1.35) {
         ya.active = false;
         this.yodaAtaru = null;
+        this.superPhase = null;
+        this.superType = null;
+        this.isInvulnerable = false;
+        if (this.state === FIGHTER_STATE.SUPER_MOVE) {
+          this.state = FIGHTER_STATE.IDLE;
+        }
       }
     }
 
@@ -7553,7 +7569,8 @@ export class Fighter {
     }
 
     // 48. Kirito: Rastro Celeste de Elucidator & Dark Repulser (Q / Ultimate)
-    if (this.kiritoVorpal && this.kiritoVorpal.active) {
+    if ((this.kiritoVorpal && this.kiritoVorpal.active) || (this.kiritoStarburst && this.kiritoStarburst.active)) {
+      const isSuper = Boolean(this.kiritoStarburst && this.kiritoStarburst.active);
       const kx = this.position.x + this.facing * 35;
       const ky = this.position.y - 60;
       ctx.save();
@@ -7561,16 +7578,33 @@ export class Fighter {
       ctx.shadowColor = '#38bdf8';
       ctx.shadowBlur = 24;
 
+      // Elucidator (Lâmina Negra / Azul Celeste)
       ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 3.5;
       ctx.beginPath();
-      ctx.moveTo(-20 * this.facing, 15);
-      ctx.lineTo(35 * this.facing, -15);
+      ctx.moveTo(-25 * this.facing, 20);
+      ctx.lineTo(45 * this.facing, -20);
       ctx.stroke();
 
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1.5;
       ctx.stroke();
+
+      // Dark Repulser (Lâmina Verde-Água / Turquesa no Starburst Stream)
+      if (isSuper) {
+        ctx.shadowColor = '#34d399';
+        ctx.strokeStyle = '#34d399';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(-25 * this.facing, -20);
+        ctx.lineTo(45 * this.facing, 20);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#f0fdf4';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
       ctx.restore();
     }
 

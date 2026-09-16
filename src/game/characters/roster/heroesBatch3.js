@@ -59,9 +59,7 @@ export class KiritoBehavior extends BaseCharacter {
     fighter.kiritoStarburstCooldown = 0;
   }
   onSpecial(fighter, level) {
-    if (fighter.kiritoStarburstCooldown > 0) return true;
     fighter.extraType = 'KIRITO_VORPAL';
-    fighter.kiritoStarburstCooldown = 3.5;
     sounds.playLaser();
     sounds.playDash();
     const target = fighter.opponent;
@@ -82,18 +80,39 @@ export class KiritoBehavior extends BaseCharacter {
     sounds.playKiritoStarburst();
     sounds.playSuperCharge();
     sounds.playDash();
-    fighter.kiritoStarburst = {
+    const starburstData = {
       timer: 0,
       target: fighter.opponent,
       damage: 430,
       active: true,
       hitsLanded: 0
     };
+    fighter.kiritoStarburst = starburstData;
     return true;
   }
   update(fighter, dt, stageWidth, particles) {
-    if (fighter.kiritoStarburstCooldown > 0) {
-      fighter.kiritoStarburstCooldown -= dt;
+    // 19 - Kirito: recovery automático do Vorpal Strike
+    if (fighter.kiritoVorpal && fighter.kiritoVorpal.active) {
+      if (fighter.kiritoVorpal.timer >= 0.22) {
+        fighter.kiritoVorpal.active = false;
+        fighter.kiritoVorpal = null;
+        fighter.extraType = null;
+        if (fighter.state === FIGHTER_STATE.SPECIAL_1) {
+          fighter.state = FIGHTER_STATE.IDLE;
+        }
+      }
+    }
+    // 19 - Kirito: recovery automático da Ultimate Starburst Stream
+    if (fighter.kiritoStarburst && fighter.kiritoStarburst.active) {
+      if (fighter.kiritoStarburst.timer >= 1.35) {
+        fighter.kiritoStarburst.active = false;
+        fighter.kiritoStarburst = null;
+        fighter.superPhase = null;
+        fighter.isInvulnerable = false;
+        if (fighter.state === FIGHTER_STATE.SUPER_MOVE) {
+          fighter.state = FIGHTER_STATE.IDLE;
+        }
+      }
     }
   }
 }
@@ -223,14 +242,31 @@ export class YodaBehavior extends BaseCharacter {
     fighter.superPhase = 'ATARU_STORM';
     sounds.playSuperCharge();
     sounds.playRapierSlash();
-    fighter.yodaAtaruFlurry = {
+    const ataruObj = {
       timer: 0,
       target: fighter.opponent,
       damage: 420,
       active: true,
       hitsLanded: 0
     };
+    fighter.yodaAtaru = ataruObj;
+    fighter.yodaAtaruFlurry = ataruObj;
     return true;
+  }
+  update(fighter, dt, stageWidth, particles) {
+    // Recovery automático da Ultimate Ataru de Yoda
+    if (fighter.yodaAtaru && fighter.yodaAtaru.active) {
+      if (fighter.yodaAtaru.timer >= 1.35) {
+        fighter.yodaAtaru.active = false;
+        fighter.yodaAtaru = null;
+        fighter.yodaAtaruFlurry = null;
+        fighter.superPhase = null;
+        fighter.isInvulnerable = false;
+        if (fighter.state === FIGHTER_STATE.SUPER_MOVE) {
+          fighter.state = FIGHTER_STATE.IDLE;
+        }
+      }
+    }
   }
 }
 
