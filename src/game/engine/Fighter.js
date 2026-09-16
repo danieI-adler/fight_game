@@ -756,6 +756,8 @@ export class Fighter {
       sounds.playGustaveAbility();
     } else if (this.charData.voiceAbility === 'mcqueen_katchau' || this.isMcQueen) {
       sounds.playMcQueenKatchau();
+    } else if (this.charData.voiceAbility === 'kirito_starburst' || this.isKirito) {
+      sounds.playKiritoStarburst();
     }
   }
 
@@ -2188,6 +2190,7 @@ export class Fighter {
       this.health = Math.min(this.maxHealth, this.health + Math.round(this.maxHealth * 0.15));
     } else if (this.superType === 'KIRITO_STARBURST_STREAM') {
       this.superPhase = 'STARBURST_STREAM';
+      sounds.playKiritoStarburst();
       sounds.playSuperCharge();
       sounds.playDash();
       const target = this.opponent;

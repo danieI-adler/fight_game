@@ -1274,6 +1274,7 @@ export const CHARACTERS = [
     style: 'Empunhadura Dupla, Elucidator & Starburst Stream',
     stats: { health: 970, speed: 8.9, jumpForce: 15.4, attackPower: 1.18, defense: 0.95 },
     superType: 'KIRITO_STARBURST_STREAM',
+    voiceAbility: 'kirito_starburst',
     visual: {
       coatType: 'black_wyrm_coat',
       headgear: 'kirito_hair',

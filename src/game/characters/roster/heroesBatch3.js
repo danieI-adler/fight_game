@@ -79,6 +79,7 @@ export class KiritoBehavior extends BaseCharacter {
   onSuper(fighter) {
     fighter.superType = 'KIRITO_STARBURST_STREAM';
     fighter.superPhase = 'STARBURST_STREAM';
+    sounds.playKiritoStarburst();
     sounds.playSuperCharge();
     sounds.playDash();
     fighter.kiritoStarburst = {

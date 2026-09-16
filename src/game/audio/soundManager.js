@@ -568,6 +568,27 @@ class SoundManager {
     }
   }
 
+  playKiritoStarburst() {
+    if (this.isMuted) return;
+    this.init();
+
+    try {
+      const audio = new Audio('./assets/audio/kirito_starburst.mp3');
+      audio.volume = 1.0;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn('Tentando caminho alternativo de voz Starburst Stream:', err);
+          const fallback = new Audio('./assets/expedition33/kirito_starburst.mp3');
+          fallback.volume = 1.0;
+          fallback.play().catch((e) => console.warn('Erro ao tocar Starburst Stream do Kirito:', e));
+        });
+      }
+    } catch (e) {
+      console.warn('Erro ao reproduzir Starburst Stream:', e);
+    }
+  }
+
   // --- ELEMENTOS DE LUNE (GELO, FOGO, TERRA, AR) ---
 
   playIceSpell() {
