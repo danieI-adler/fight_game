@@ -101,10 +101,59 @@ export class FighterRenderer {
       return;
     }
 
-    // SE FOR PERSONAGEM COM ANATOMIA NÃO-HUMANA OU PERSONAGENS EXPANDIDOS (id > 20 ou visual customizado):
+    // SE FOR PERSONAGEM COM ANATOMIA NÃO-HUMANA OU PERSONAGENS EXPANDIDOS:
     // Personagens 1 a 20 são os arquétipos originais Belle Époque. Personagens 21+ (Batman, Vader, McQueen, Yoshi, Sonic, Mario, Kirito, etc.)
-    // possuem trajes, silhuetas, armaduras e traços únicos implementados no ExpeditionRenderer.
+    // e personagens não-humanoides possuem renderizadores e traços bespoke no ExpeditionRenderer.
+    const charName = (char.name || '').toLowerCase();
     const isSpecialOrCustomCharacter = (char.id && Number(char.id) > 20) ||
+      charName.includes('yoda') ||
+      charName.includes('sonic') ||
+      charName.includes('mario') ||
+      charName.includes('yoshi') ||
+      charName.includes('pikachu') ||
+      charName.includes('esponja') ||
+      charName.includes('spongebob') ||
+      charName.includes('mcqueen') ||
+      charName.includes('kirito') ||
+      charName.includes('batman') ||
+      charName.includes('vader') ||
+      charName.includes('palpatine') ||
+      charName.includes('joker') ||
+      charName.includes('coringa') ||
+      charName.includes('sparrow') ||
+      charName.includes('gandalf') ||
+      charName.includes('arrow') ||
+      charName.includes('arqueiro') ||
+      charName.includes('banner') ||
+      charName.includes('hulk') ||
+      charName.includes('zorro') ||
+      charName.includes('aang') ||
+      charName.includes('strange') ||
+      charName.includes('walter') ||
+      charName.includes('white') ||
+      charName.includes('messi') ||
+      charName.includes('nascimento') ||
+      charName.includes('rapunzel') ||
+      charName.includes('capit') ||
+      charName.includes('naruto') ||
+      charName.includes('sasuke') ||
+      charName.includes('iron') ||
+      charName.includes('ferro') ||
+      charName.includes('spider') ||
+      charName.includes('aranha') ||
+      charName.includes('bane') ||
+      charName.includes('dracula') ||
+      charName.includes('eren') ||
+      charName.includes('bruce') ||
+      charName.includes('goku') ||
+      charName.includes('han solo') ||
+      charName.includes('wolverine') ||
+      charName.includes('kratos') ||
+      charName.includes('venom') ||
+      charName.includes('carnage') ||
+      charName.includes('carnificina') ||
+      charName.includes('homelander') ||
+      charName.includes('pátria') ||
       vis.headgear === 'yoshi_snout' ||
       vis.headgear === 'pikachu_ears' ||
       vis.headgear === 'hedgehog_quills' ||

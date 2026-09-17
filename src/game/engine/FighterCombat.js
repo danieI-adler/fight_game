@@ -196,9 +196,8 @@ export class FighterCombat {
             fighter.superPhase = null;
           }
         }
-        // Kirito: Vorpal Strike Cruzado (Q) – corte supersônico com lâminas duplas
-        else if (fighter.extraType === 'KIRITO_VORPAL' || fighter.extraType === 'KIRITO_Q') {
-          // Hitbox ativa durante o corte rápido
+        // Kirito: Vorpal Strike / Starburst Stream Q – avanço rápido e corte
+        else if (fighter.extraType === 'KIRITO_VORPAL' || fighter.extraType === 'KIRITO_Q' || fighter.extraType === 'KIRITO_STARBURST_Q') {
           if (fighter.stateTime < 0.2) {
             fighter.activeHitbox = fighter.createHitbox(30, 70, 120, 50);
             fighter.activeHitbox.damage = 190;
@@ -207,67 +206,16 @@ export class FighterCombat {
             fighter.activeHitbox.isHeavy = true;
             fighter.activeHitbox.attackerPower = fighter.attackPower;
           }
-          // Encerrar e restaurar IDLE
           if (fighter.stateTime >= 0.22) {
             fighter.state = FIGHTER_STATE.IDLE;
             fighter.extraType = null;
             fighter.activeHitbox = null;
           }
         }
-        else if (
-          fighter.extraType === 'GUSTAVE_GUN' ||
-          fighter.extraType === 'MAELLE_BLINK_DASH' ||
-          fighter.extraType === 'LUNE_HEAL' ||
-          fighter.extraType === 'RENOIR_BLACK_HOLE' ||
-          fighter.extraType === 'PAINTRESS_REALITY_TEAR' ||
-          fighter.extraType === 'CAPTAIN_SHIELD_GUARD' ||
-          fighter.extraType === 'GOKU_SSJ_TRANSFORM' ||
-          fighter.extraType === 'BANE_VENOM_INJECTION' ||
-          fighter.extraType === 'MARIO_WARP_PIPE' ||
-          fighter.extraType === 'HOMELANDER_FLIGHT' ||
-          fighter.extraType === 'NASCIMENTO_DRAW_GUN' ||
-          fighter.extraType === 'ZORRO_PARRY_STANCE' ||
-          fighter.extraType === 'AANG_WATER_WHIP' ||
-          fighter.extraType === 'AANG_FIRE_FLURRY' ||
-          fighter.extraType === 'RAPUNZEL_HAIR_SLAP' ||
-          fighter.extraType === 'NARUTO_KAGE_BUNSHIN' ||
-          fighter.extraType === 'SPONGEBOB_PATTY_THROW' ||
-          fighter.extraType === 'IRONMAN_REPULSOR_BEAM' ||
-          fighter.extraType === 'SPIDERMAN_WEB_PULL' ||
-          fighter.extraType === 'YOSHI_EGG_THROW' ||
-          fighter.extraType === 'PIKACHU_QUICK_ATTACK' ||
-          fighter.extraType === 'SONIC_SPIN_DASH' ||
-          fighter.extraType === 'DRACULA_BAT_SWARM' ||
-          fighter.extraType === 'EREN_DMT_DASH' ||
-          fighter.extraType === 'BRUCE_LEE_ONE_INCH' ||
-          fighter.extraType === 'YODA_FORCE_PUSH' ||
-          fighter.extraType === 'HAN_SOLO_CHEWIE' ||
-          fighter.extraType === 'WOLVERINE_X_SLASH' ||
-          fighter.extraType === 'KRATOS_CHAOS_BLADES'
-        ) {
+        else {
+          // Finalização universal limpa de todas as habilidades especiais (SEM NENHUM RAIO ELÉTRICO PADRÃO)
           if (fighter.stateTime >= 0.22) {
             fighter.isInvulnerable = false;
-            fighter.state = FIGHTER_STATE.IDLE;
-            fighter.extraType = null;
-            fighter.activeHitbox = null;
-          }
-        } else {
-          // Genérico (sem nenhum raiozinho elétrico padrão)
-          if (fighter.stateTime > 0.08 && fighter.stateTime < 0.3) {
-            fighter.activeHitbox = fighter.createHitbox(25, 80, 100, 55);
-            fighter.activeHitbox.damage = 140;
-            fighter.activeHitbox.knockback = 16;
-            fighter.activeHitbox.knockdown = true;
-            fighter.activeHitbox.isHeavy = true;
-            fighter.activeHitbox.attackerPower = fighter.attackPower;
-
-            if (particles && Math.random() < 0.4) {
-              const startX = fighter.position.x + (fighter.facing * 35);
-              particles.emitShockwave(startX, fighter.position.y - 60, 60, fighter.charData?.themeColor || '#ffffff');
-              particles.emitSparks(startX, fighter.position.y - 60, '#ffffff', 8, 4);
-            }
-          }
-          if (fighter.stateTime >= 0.42) {
             fighter.state = FIGHTER_STATE.IDLE;
             fighter.extraType = null;
             fighter.activeHitbox = null;
@@ -989,7 +937,6 @@ export class FighterCombat {
 
               if (particles) {
                 particles.emitShockwave(fighter.position.x + fighter.facing * 55, fighter.position.y - 75, 70, '#10b981');
-                particles.emitFloatingText('BANG!', fighter.position.x + fighter.facing * 60, fighter.position.y - 95, '#ef4444', true);
               }
 
               // Atordoa o oponente
@@ -1046,7 +993,6 @@ export class FighterCombat {
                 particles.emitShockwave(target.position.x, target.position.y - 40, 190, '#10b981');
                 particles.emitSparks(target.position.x, target.position.y - 50, '#22c55e', 35, 10);
                 particles.emitSparks(target.position.x, target.position.y - 50, '#fbbf24', 25, 8);
-                particles.emitFloatingText('CATCH THIS!', target.position.x, target.position.y - 95, '#f59e0b', true);
               }
             }
           }
@@ -1104,7 +1050,6 @@ export class FighterCombat {
                 particles.emitSparks(target.position.x, target.position.y - 60, '#ef4444', 40, 14);
                 particles.emitSparks(target.position.x, target.position.y - 60, '#10b981', 35, 12);
                 particles.emitDust(target.position.x, fighter.groundY, 25, '#3b0764');
-                particles.emitFloatingText('THAT\'S THE PUNCHLINE! HA! HA!', target.position.x, target.position.y - 95, '#10b981', true);
               }
             }
           }
@@ -1163,7 +1108,6 @@ export class FighterCombat {
               if (particles) {
                 particles.emitShockwave(fighter.opponent.position.x, fighter.groundY, 200, '#ef4444');
                 particles.emitSparks(fighter.opponent.position.x, fighter.groundY - 30, '#facc15', 50, 16);
-                particles.emitFloatingText('KA-CHOW!', fighter.position.x, fighter.position.y - 90, '#facc15', true);
               }
             }
           }
@@ -1254,7 +1198,6 @@ export class FighterCombat {
               particles.emitSwordSlash(targetX - 50, targetY + 35, targetX + 50, targetY + 35, '#fbbf24', 6);
               particles.emitShockwave(targetX, targetY, 180, '#f59e0b');
               particles.emitSparks(targetX, targetY, '#fbbf24', 40, 14);
-              particles.emitFloatingText('MARCA DO Z!', targetX, targetY - 60, '#fbbf24', true);
             }
             if (target && !target.isDead) {
               const attackData = {
@@ -1300,7 +1243,6 @@ export class FighterCombat {
               particles.emitShockwave(targetX, fighter.groundY - 40, 160, '#ef4444');
               particles.emitSparks(targetX, fighter.groundY - 40, '#fef08a', 45, 14);
               particles.emitDust(targetX, fighter.groundY, 20, '#ca8a04');
-              particles.emitFloatingText('ESTADO AVATAR!', fighter.position.x, fighter.position.y - 110, '#38bdf8', true);
             }
             if (target && !target.isDead) {
               const attackData = {
@@ -1342,7 +1284,6 @@ export class FighterCombat {
             if (particles) {
               particles.emitShockwave(targetX, fighter.groundY - 50, 220, '#f59e0b');
               particles.emitSparks(targetX, fighter.groundY - 50, '#ffffff', 40, 14);
-              particles.emitFloatingText('DIMENSÃO ESPELHADA!', targetX, fighter.groundY - 100, '#f59e0b', true);
             }
             if (target && !target.isDead) {
               const attackData = {
@@ -1456,7 +1397,6 @@ export class FighterCombat {
                 const sx = fighter.position.x + fighter.facing * 45;
                 particles.emitShockwave(sx, fighter.groundY, 220, '#3b82f6');
                 particles.emitSparks(sx, fighter.position.y - 50, '#ef4444', 35, 12);
-                particles.emitFloatingText('I CAN DO THIS ALL DAY!', sx, fighter.position.y - 90, '#3b82f6', true);
               }
               const attackData = {
                 damage: 390,
@@ -1611,11 +1551,11 @@ export class FighterCombat {
           break;
         }
 
-        // --- 35. KIRITO: STARBURST STREAM ---
-        if (fighter.superType === 'KIRITO_STARBURST_STREAM') {
+        // --- 35. KIRITO: MODO EMPUNHADURA DUPLA / STARBURST STREAM ---
+        if (fighter.superType === 'KIRITO_DUAL_WIELD' || fighter.superType === 'KIRITO_STARBURST_STREAM') {
           fighter.isInvulnerable = true;
           fighter.velocity.x = 0;
-          if (fighter.stateTime >= 1.45) {
+          if (fighter.stateTime >= (fighter.superType === 'KIRITO_DUAL_WIELD' ? 0.25 : 1.45)) {
             fighter.isInvulnerable = false;
             fighter.superPhase = null;
             fighter.superType = null;
@@ -1651,11 +1591,11 @@ export class FighterCombat {
           break;
         }
 
-        // --- 38. SON GOKU: GENKI DAMA CÓSMICA ---
-        if (fighter.superType === 'GOKU_GENKI_DAMA') {
+        // --- 38. SON GOKU: GENKI DAMA CÓSMICA / KAMEHAMEHA ---
+        if (fighter.superType === 'GOKU_GENKI_DAMA' || fighter.superType === 'GOKU_KAMEHAMEHA') {
           fighter.isInvulnerable = true;
           fighter.velocity.x = 0;
-          if (fighter.stateTime >= 1.5) {
+          if (fighter.stateTime >= 1.35) {
             fighter.isInvulnerable = false;
             fighter.superPhase = null;
             fighter.superType = null;
@@ -1667,11 +1607,12 @@ export class FighterCombat {
         // --- 39. MESTRE YODA: ATARU LIGHTSABER BLITZ ---
         if (fighter.superType === 'YODA_FORCE_UNLEASHED') {
           fighter.isInvulnerable = true;
-          fighter.velocity.x = 0;
-          if (fighter.stateTime >= 1.4) {
+          if (fighter.stateTime >= 1.2 || !fighter.yodaAtaru) {
             fighter.isInvulnerable = false;
             fighter.superPhase = null;
             fighter.superType = null;
+            fighter.yodaAtaru = null;
+            fighter.yodaAtaruFlurry = null;
             fighter.state = FIGHTER_STATE.IDLE;
           }
           break;
@@ -1768,82 +1709,96 @@ export class FighterCombat {
           break;
         }
 
-        // --- 7. GUSTAVE / SUPER MOVE PADRÃO (3 FASES) ---
-        if (fighter.stateTime < 0.5) {
-          fighter.velocity.x = 0;
-          fighter.isInvulnerable = true;
-          if (particles && Math.random() < 0.65) {
-            const gx = fighter.position.x - fighter.facing * 30;
-            const gy = fighter.position.y - 45;
-            particles.emitElectricArc(gx + (Math.random() - 0.5) * 60, gy + (Math.random() - 0.5) * 60, gx, gy, '#ef4444', 2);
-            particles.emitSparks(gx, gy, '#ef4444', 4, 6);
-          }
-        } else if (fighter.stateTime >= 0.5 && fighter.stateTime < 0.85) {
-          if (fighter.superPhase === 'CHARGE') {
-            fighter.superPhase = 'LEAP';
-            const targetX = fighter.opponent ? fighter.opponent.position.x : fighter.position.x + fighter.facing * 320;
-            fighter._superTargetX = targetX;
-            fighter._superStartX = fighter.position.x;
-            const dist = targetX - fighter.position.x;
-            fighter.facing = dist >= 0 ? 1 : -1;
-            fighter.velocity.y = -15;
-            fighter.velocity.x = 0; // Sem velocidade horizontal — interpolação controlada
-            fighter.isGrounded = false;
-            sounds.playSuper();
-            if (particles) particles.emitDust(fighter.position.x, fighter.groundY, 14, '#ef4444');
-          }
-
-          // Interpolar posição horizontal em direção ao alvo durante o LEAP
-          if (fighter._superTargetX != null && fighter._superStartX != null) {
-            const leapProgress = Math.min(1, (fighter.stateTime - 0.5) / 0.35);
-            const landX = fighter._superTargetX - fighter.facing * 40;
-            fighter.position.x = fighter._superStartX + (landX - fighter._superStartX) * leapProgress;
-          }
-
-          // Manter no ar durante o LEAP (sobrescrever gravidade)
-          if (!fighter.isGrounded) {
-            fighter.position.y = Math.min(fighter.position.y, fighter.groundY - 80);
-          }
-
-          if (particles && Math.random() < 0.7) {
-            const hx = fighter.position.x + fighter.facing * 35;
-            const hy = fighter.position.y - 120;
-            particles.emitElectricArc(fighter.position.x, fighter.position.y - 60, hx, hy, '#ff0033', 2);
-            particles.emitSparks(hx, hy, '#ef4444', 5, 8);
-          }
-        } else if (fighter.stateTime >= 0.85 && fighter.stateTime < 1.45) {
-          if (fighter.superPhase === 'LEAP') {
-            fighter.superPhase = 'IMPACT';
-
-            // Teleportar para perto do oponente para garantir o impacto
-            const landX = fighter._superTargetX || fighter.position.x;
-            fighter.position.x = landX - fighter.facing * 40;
-            fighter.position.y = fighter.groundY;
-            fighter.velocity.y = 0;
+        // --- GUSTAVE / SUPER MOVE PADRÃO (Executa APENAS se for Gustave ou se superPhase === 'CHARGE') ---
+        const isGustaveSuper = fighter.superType === 'GUSTAVE_DESPERATE_SHOT' || fighter.superType === 'GUSTAVE_SUPER' || (!fighter.superType && fighter.superPhase === 'CHARGE');
+        if (isGustaveSuper) {
+          if (fighter.stateTime < 0.5) {
             fighter.velocity.x = 0;
-            fighter.isGrounded = true;
+            fighter.isInvulnerable = true;
+            if (particles && Math.random() < 0.65) {
+              const gx = fighter.position.x - fighter.facing * 30;
+              const gy = fighter.position.y - 45;
+              particles.emitShockwave(gx, gy, 45, '#ef4444');
+              particles.emitSparks(gx, gy, '#ef4444', 4, 6);
+            }
+          } else if (fighter.stateTime >= 0.5 && fighter.stateTime < 0.85) {
+            if (fighter.superPhase === 'CHARGE') {
+              fighter.superPhase = 'LEAP';
+              const targetX = fighter.opponent ? fighter.opponent.position.x : fighter.position.x + fighter.facing * 320;
+              fighter._superTargetX = targetX;
+              fighter._superStartX = fighter.position.x;
+              const dist = targetX - fighter.position.x;
+              fighter.facing = dist >= 0 ? 1 : -1;
+              fighter.velocity.y = -15;
+              fighter.velocity.x = 0;
+              fighter.isGrounded = false;
+              sounds.playSuper();
+              if (particles) particles.emitDust(fighter.position.x, fighter.groundY, 14, '#ef4444');
+            }
 
-            sounds.playPunch(true);
-            sounds.playThunderSlam();
+            // Interpolar posição horizontal em direção ao alvo durante o LEAP
+            if (fighter._superTargetX != null && fighter._superStartX != null) {
+              const leapProgress = Math.min(1, (fighter.stateTime - 0.5) / 0.35);
+              const landX = fighter._superTargetX - fighter.facing * 40;
+              fighter.position.x = fighter._superStartX + (landX - fighter._superStartX) * leapProgress;
+            }
 
-            if (particles) {
-              const impactX = fighter.position.x + fighter.facing * 40;
-              particles.emitShockwave(impactX, fighter.groundY, 260, '#ef4444');
-              particles.emitShockwave(impactX, fighter.groundY, 150, '#fbbf24');
-              particles.emitSparks(impactX, fighter.groundY - 20, '#ef4444', 45, 16);
-              particles.emitDust(impactX, fighter.groundY, 25, '#fbbf24');
+            // Manter no ar durante o LEAP (sobrescrever gravidade)
+            if (!fighter.isGrounded) {
+              fighter.position.y = Math.min(fighter.position.y, fighter.groundY - 80);
+            }
+
+            if (particles && Math.random() < 0.7) {
+              const hx = fighter.position.x + fighter.facing * 35;
+              const hy = fighter.position.y - 120;
+              particles.emitShockwave(fighter.position.x, fighter.position.y - 60, 50, '#ef4444');
+              particles.emitSparks(hx, hy, '#ef4444', 5, 8);
+            }
+          } else if (fighter.stateTime >= 0.85 && fighter.stateTime < 1.45) {
+            if (fighter.superPhase === 'LEAP') {
+              fighter.superPhase = 'IMPACT';
+
+              // Teleportar para perto do oponente para garantir o impacto
+              const landX = fighter._superTargetX || fighter.position.x;
+              fighter.position.x = landX - fighter.facing * 40;
+              fighter.position.y = fighter.groundY;
+              fighter.velocity.y = 0;
+              fighter.velocity.x = 0;
+              fighter.isGrounded = true;
+
+              sounds.playPunch(true);
+              sounds.playThunderSlam();
+
+              if (particles) {
+                const impactX = fighter.position.x + fighter.facing * 40;
+                particles.emitShockwave(impactX, fighter.groundY, 260, '#ef4444');
+                particles.emitShockwave(impactX, fighter.groundY, 150, '#fbbf24');
+                particles.emitSparks(impactX, fighter.groundY - 20, '#ef4444', 45, 16);
+                particles.emitDust(impactX, fighter.groundY, 25, '#fbbf24');
+              }
+            }
+
+            if (fighter.stateTime >= 0.85 && fighter.stateTime < 1.15) {
+              const impactBoxX = fighter.facing === 1 ? -60 : -260;
+              fighter.activeHitbox = fighter.createHitbox(impactBoxX, 100, 320, 110);
+              fighter.activeHitbox.damage = 350;
+              fighter.activeHitbox.knockback = 26;
+              fighter.activeHitbox.knockdown = true;
+              fighter.activeHitbox.isHeavy = true;
+              fighter.activeHitbox.unblockable = false;
+              fighter.activeHitbox.attackerPower = fighter.attackPower;
             }
           }
-
-          if (fighter.stateTime >= 0.85 && fighter.stateTime < 1.15) {
-            const impactBoxX = fighter.facing === 1 ? -60 : -260;
-            fighter.activeHitbox = fighter.createHitbox(impactBoxX, 100, 320, 110);
-            fighter.activeHitbox.damage = 350;
-            fighter.activeHitbox.knockback = 26;
-            fighter.activeHitbox.knockdown = true;
-            fighter.activeHitbox.isHeavy = true;
-            fighter.activeHitbox.unblockable = false;
-            fighter.activeHitbox.attackerPower = fighter.attackPower;
+        } else {
+          // Safety Watchdog para qualquer outra Super: garante que nunca fique preso em SUPER_MOVE
+          if (fighter.stateTime >= 0.25) {
+            fighter.isInvulnerable = false;
+            fighter.superPhase = null;
+            fighter.superType = null;
+            fighter.activeHitbox = null;
+            fighter.isGrounded = true;
+            fighter.position.y = fighter.groundY;
+            fighter.state = FIGHTER_STATE.IDLE;
           }
         }
 
@@ -1851,7 +1806,8 @@ export class FighterCombat {
           fighter.superType === 'SONIC_SUPER_TRANSFORMATION' ||
           fighter.superType === 'MARIO_FINALE_FIRE' ||
           fighter.superType === 'HULK_TRANSFORM' ||
-          fighter.superType === 'AANG_AVATAR_STATE'
+          fighter.superType === 'AANG_AVATAR_STATE' ||
+          fighter.superType === 'KIRITO_DUAL_WIELD'
         ) {
           if (fighter.stateTime >= 0.25) {
             fighter.isInvulnerable = false;

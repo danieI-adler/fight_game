@@ -187,6 +187,29 @@ class SoundManager {
     osc.stop(t + 0.22);
   }
 
+  playLaser() {
+    if (this.isMuted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(1400, t);
+    osc.frequency.exponentialRampToValueAtTime(120, t + 0.15);
+
+    gain.gain.setValueAtTime(0.5, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(t);
+    osc.stop(t + 0.16);
+  }
+
   playSuperCharge() {
     if (this.isMuted) return;
     this.init();
@@ -573,15 +596,18 @@ class SoundManager {
     this.init();
 
     try {
-      const audio = new Audio('./assets/audio/kirito_starburst.mp3');
+      const audio = new Audio('./assets/audio/sao-c8763-2.mp3');
       audio.volume = 1.0;
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch((err) => {
-          console.warn('Tentando caminho alternativo de voz Starburst Stream:', err);
-          const fallback = new Audio('./assets/expedition33/kirito_starburst.mp3');
+          const fallback = new Audio('./assets/audio/kirito_starburst.mp3');
           fallback.volume = 1.0;
-          fallback.play().catch((e) => console.warn('Erro ao tocar Starburst Stream do Kirito:', e));
+          fallback.play().catch(() => {
+            const localFallback = new Audio('C:/Users/fogoy/Downloads/sao-c8763-2.mp3');
+            localFallback.volume = 1.0;
+            localFallback.play().catch((e) => console.warn('Erro ao tocar Starburst Stream do Kirito:', e));
+          });
         });
       }
     } catch (e) {
@@ -977,5 +1003,28 @@ class SoundManager {
   }
 }
 
-export const sounds = new SoundManager();
+// Fallback seguro usando Proxy: se qualquer golpe ou personagem tentar invocar um método
+// de som que não exista ou com typo, ele não quebra a engine nem trava o jogo.
+const baseSounds = new SoundManager();
+export const sounds = new Proxy(baseSounds, {
+  get(target, prop, receiver) {
+    if (prop in target) {
+      const val = Reflect.get(target, prop, receiver);
+      if (typeof val === 'function') {
+        return val.bind(target);
+      }
+      return val;
+    }
+    // Fallback gracioso para métodos sonoros não mapeados
+    if (typeof prop === 'string' && (prop.startsWith('play') || prop.startsWith('stop'))) {
+      return (...args) => {
+        // Fallback para sfx genérico se disponível
+        if (target.playWhoosh && !target.isMuted) {
+          try { target.playWhoosh(); } catch (_) {}
+        }
+      };
+    }
+    return Reflect.get(target, prop, receiver);
+  }
+});
 

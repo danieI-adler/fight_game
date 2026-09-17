@@ -19,38 +19,41 @@ export class GokuBehavior extends BaseCharacter {
     fighter.gokuGenkiDama = null;
   }
 
-  // 22 - GOKU: Q aumenta o Super Saiyajin (SSJ1 -> SSJ2 -> SSJ3, com 66% sobe 2 níveis!). Cada nível aumenta speed e dano!
+  // 25 - GOKU: Q Kamehameha (feixe concentrado de Ki)
   onSpecial(fighter, level) {
-    fighter.extraType = 'GOKU_SSJ_TRANSFORM';
-    sounds.playSuperCharge();
-    sounds.playSuper();
-    const levelsToAdd = level === 2 ? 2 : 1;
-    fighter.gokuSsjLevel = Math.min(3, (fighter.gokuSsjLevel || 0) + levelsToAdd);
-    // Buff cumulativo de velocidade e dano por nível de SSJ
-    fighter.speed = (fighter.baseSpeed || 9.4) * (1.0 + fighter.gokuSsjLevel * 0.15);
-    fighter.attackPower = (fighter.baseAttackPower || 1.24) * (1.0 + fighter.gokuSsjLevel * 0.2);
-    return true;
-  }
-
-  // 22 - GOKU: Ultimate -> Kamehameha!
-  onSuper(fighter) {
-    fighter.superType = 'GOKU_KAMEHAMEHA';
-    fighter.superPhase = 'KAMEHAMEHA_CHARGE';
-    sounds.playSuperCharge();
+    fighter.extraType = 'GOKU_KAMEHAMEHA';
     sounds.playLaser();
+    sounds.playSuperCharge();
     fighter.gokuKamehameha = {
       reach: 1400,
-      damage: 440 + (fighter.gokuSsjLevel || 0) * 40,
+      damage: level === 2 ? 220 : 145,
       timer: 0,
       active: true,
       hasHit: false
     };
     return true;
   }
+
+  // 25 - GOKU: Ultimate -> Colossal Genki Dama!
+  onSuper(fighter) {
+    fighter.superType = 'GOKU_GENKI_DAMA';
+    fighter.superPhase = 'GENKI_DAMA_CHARGE';
+    sounds.playSuperCharge();
+    sounds.playSuper();
+    fighter.gokuGenkiDama = {
+      timer: 0,
+      x: fighter.position.x + fighter.facing * 40,
+      y: fighter.position.y - 120,
+      damage: 460,
+      active: true,
+      hasHit: false,
+      scale: 0.2
+    };
+    return true;
+  }
   update(fighter, dt, stageWidth, particles) {
-    if ((fighter.gokuSsjLevel || 0) > 0 && particles && Math.random() < 0.35) {
-      const sparkColor = fighter.gokuSsjLevel >= 2 ? '#38bdf8' : '#facc15';
-      particles.emitSparks(fighter.position.x, fighter.position.y - 60, sparkColor, 3, 2);
+    if (fighter.energy >= 80 && particles && Math.random() < 0.3) {
+      particles.emitSparks(fighter.position.x, fighter.position.y - 60, '#facc15', 3, 2);
     }
   }
 }

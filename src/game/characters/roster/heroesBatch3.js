@@ -44,75 +44,115 @@ export class DraculaBehavior extends BaseCharacter {
   }
 }
 
-// 19 - KIRITO: Não trava no Q nem na Ult. Q Vorpal Strike supersônico; Ult Starburst Stream 16 acertos
+// 19 - KIRITO: Não trava no Q nem na Ult. Q Starburst Stream com áudio; Ult Dual Wield (duas espadas, combo J e K)
 export class KiritoBehavior extends BaseCharacter {
   constructor() { super('kirito', 'Kirito'); }
   init(fighter) {
     fighter.isKirito = true;
-    fighter.kiritoVorpal = null;
-    fighter.kiritoStarburst = null;
+    fighter.kiritoStarburstQ = null;
+    fighter.kiritoDualBladeActive = false;
+    fighter.kiritoDualBladeTimer = 0;
     fighter.kiritoStarburstCooldown = 0;
   }
   reset(fighter) {
-    fighter.kiritoVorpal = null;
-    fighter.kiritoStarburst = null;
+    fighter.kiritoStarburstQ = null;
+    fighter.kiritoDualBladeActive = false;
+    fighter.kiritoDualBladeTimer = 0;
     fighter.kiritoStarburstCooldown = 0;
   }
+  // Q: Starburst Stream com áudio oficial e avanço supersônico fatiando o inimigo
   onSpecial(fighter, level) {
-    fighter.extraType = 'KIRITO_VORPAL';
+    fighter.extraType = 'KIRITO_STARBURST_Q';
+    sounds.playKiritoStarburst();
     sounds.playLaser();
     sounds.playDash();
-    const target = fighter.opponent;
-    const targetX = target ? target.position.x - fighter.facing * 40 : fighter.position.x + fighter.facing * 220;
-    fighter.kiritoVorpal = {
+    fighter.velocity.x = fighter.facing * 1250;
+    fighter.isInvulnerable = true;
+    fighter.kiritoStarburstQ = {
       timer: 0,
-      startX: fighter.position.x,
-      targetX: targetX,
-      damage: level === 2 ? 210 : 140,
+      damage: level === 2 ? 220 : 150,
       active: true,
       hasHit: false
     };
     return true;
   }
+  // R (Super): Empunhadura Dupla (Dual Wield) - Kirito saca a Dark Repulser e comba J e K alternando as espadas!
   onSuper(fighter) {
-    fighter.superType = 'KIRITO_STARBURST_STREAM';
-    fighter.superPhase = 'STARBURST_STREAM';
-    sounds.playKiritoStarburst();
+    fighter.superType = 'KIRITO_DUAL_WIELD';
+    fighter.superPhase = 'DUAL_WIELD_STANCE';
     sounds.playSuperCharge();
-    sounds.playDash();
-    const starburstData = {
-      timer: 0,
-      target: fighter.opponent,
-      damage: 430,
-      active: true,
-      hitsLanded: 0
-    };
-    fighter.kiritoStarburst = starburstData;
+    sounds.playRapierSlash();
+    fighter.kiritoDualBladeActive = true;
+    fighter.kiritoDualBladeTimer = 15.0; // 15 segundos em modo Dual Wield!
+    fighter.attackPower = (fighter.baseAttackPower || 1.18) * 1.35;
+    fighter.speed = (fighter.baseSpeed || 8.9) * 1.25;
+    fighter.isInvulnerable = true;
     return true;
   }
   update(fighter, dt, stageWidth, particles) {
-    // 19 - Kirito: recovery automático do Vorpal Strike
-    if (fighter.kiritoVorpal && fighter.kiritoVorpal.active) {
-      if (fighter.kiritoVorpal.timer >= 0.22) {
-        fighter.kiritoVorpal.active = false;
-        fighter.kiritoVorpal = null;
+    // 19 - Kirito: Q Starburst Stream avanço e recuperação rápida
+    if (fighter.kiritoStarburstQ && fighter.kiritoStarburstQ.active) {
+      const kq = fighter.kiritoStarburstQ;
+      kq.timer += dt;
+
+      if (particles && Math.random() < 0.6) {
+        particles.emitSparks(fighter.position.x, fighter.position.y - 60, '#38bdf8', 6, 5);
+        particles.emitSparks(fighter.position.x, fighter.position.y - 60, '#ffffff', 4, 3);
+      }
+
+      if (fighter.opponent && !fighter.opponent.isDead && !kq.hasHit && kq.timer > 0.05) {
+        const dist = Math.abs(fighter.position.x - fighter.opponent.position.x);
+        if (dist < 90) {
+          kq.hasHit = true;
+          sounds.playPunch(true);
+          sounds.playLaser();
+          if (particles) {
+            particles.emitShockwave(fighter.opponent.position.x, fighter.opponent.position.y - 60, 160, '#38bdf8');
+            particles.emitSparks(fighter.opponent.position.x, fighter.opponent.position.y - 60, '#ffffff', 30, 12);
+          }
+          const attackData = {
+            damage: kq.damage,
+            knockback: 18,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: fighter.attackPower
+          };
+          fighter.opponent.receiveHit(attackData, { x: fighter.opponent.position.x, y: fighter.opponent.position.y - 60 }, particles);
+        }
+      }
+
+      if (kq.timer >= 0.22) {
+        kq.active = false;
+        fighter.kiritoStarburstQ = null;
         fighter.extraType = null;
+        fighter.isInvulnerable = false;
+        fighter.velocity.x *= 0.2;
         if (fighter.state === FIGHTER_STATE.SPECIAL_1) {
           fighter.state = FIGHTER_STATE.IDLE;
         }
       }
     }
-    // 19 - Kirito: recovery automático da Ultimate Starburst Stream
-    if (fighter.kiritoStarburst && fighter.kiritoStarburst.active) {
-      if (fighter.kiritoStarburst.timer >= 1.35) {
-        fighter.kiritoStarburst.active = false;
-        fighter.kiritoStarburst = null;
-        fighter.superPhase = null;
-        fighter.isInvulnerable = false;
-        if (fighter.state === FIGHTER_STATE.SUPER_MOVE) {
-          fighter.state = FIGHTER_STATE.IDLE;
-        }
+
+    // 19 - Kirito: Duração do modo Dual Wield (R)
+    if (fighter.kiritoDualBladeTimer > 0) {
+      fighter.kiritoDualBladeTimer -= dt;
+      if (particles && Math.random() < 0.25) {
+        particles.emitSparks(fighter.position.x - fighter.facing * 15, fighter.position.y - 60, '#38bdf8', 2, 2);
+        particles.emitSparks(fighter.position.x + fighter.facing * 15, fighter.position.y - 60, '#34d399', 2, 2);
       }
+      if (fighter.kiritoDualBladeTimer <= 0) {
+        fighter.kiritoDualBladeActive = false;
+        fighter.attackPower = fighter.baseAttackPower || 1.18;
+        fighter.speed = fighter.baseSpeed || 8.9;
+      }
+    }
+
+    // Recuperação da animação da Ultimate (ativação da postura)
+    if (fighter.superType === 'KIRITO_DUAL_WIELD' && fighter.stateTime >= 0.25) {
+      fighter.state = FIGHTER_STATE.IDLE;
+      fighter.superType = null;
+      fighter.superPhase = null;
+      fighter.isInvulnerable = false;
     }
   }
 }
@@ -254,14 +294,54 @@ export class YodaBehavior extends BaseCharacter {
     return true;
   }
   update(fighter, dt, stageWidth, particles) {
-    // Recovery automático da Ultimate Ataru de Yoda
+    // Recovery e animação acrobática da Ultimate Ataru de Yoda
     if (fighter.yodaAtaru && fighter.yodaAtaru.active) {
-      if (fighter.yodaAtaru.timer >= 1.35) {
-        fighter.yodaAtaru.active = false;
+      const ya = fighter.yodaAtaru;
+      ya.timer += dt;
+      const target = ya.target;
+
+      if (particles && Math.random() < 0.8) {
+        particles.emitSparks(fighter.position.x, fighter.position.y - 50, '#22c55e', 6, 4);
+      }
+
+      const strikeTimes = [0.15, 0.35, 0.55, 0.75, 0.95];
+      for (let i = ya.hitsLanded; i < strikeTimes.length; i++) {
+        if (ya.timer >= strikeTimes[i]) {
+          ya.hitsLanded = i + 1;
+          sounds.playLaser();
+          sounds.playRapierSlash();
+          const isFinal = i === strikeTimes.length - 1;
+          if (target && !target.isDead) {
+            fighter.position.x = target.position.x + (i % 2 === 0 ? -1 : 1) * 45;
+            fighter.position.y = fighter.groundY - 35;
+            fighter.velocity.y = -5;
+            fighter.isGrounded = false;
+            if (particles) {
+              particles.emitShockwave(target.position.x, target.position.y - 50, isFinal ? 200 : 110, '#22c55e');
+              particles.emitSparks(target.position.x, target.position.y - 50, '#22c55e', isFinal ? 30 : 14, 8);
+            }
+            const attackData = {
+              damage: Math.round(ya.damage / 5),
+              knockback: isFinal ? 28 : 5,
+              knockdown: isFinal,
+              isHeavy: isFinal,
+              unblockable: true,
+              attackerPower: fighter.attackPower
+            };
+            target.receiveHit(attackData, { x: target.position.x, y: target.position.y - 50 }, particles);
+          }
+        }
+      }
+
+      if (ya.timer >= 1.15) {
+        ya.active = false;
         fighter.yodaAtaru = null;
         fighter.yodaAtaruFlurry = null;
         fighter.superPhase = null;
+        fighter.superType = null;
         fighter.isInvulnerable = false;
+        fighter.isGrounded = true;
+        fighter.position.y = fighter.groundY;
         if (fighter.state === FIGHTER_STATE.SUPER_MOVE) {
           fighter.state = FIGHTER_STATE.IDLE;
         }
@@ -312,6 +392,54 @@ export class HanSoloBehavior extends BaseCharacter {
       active: true
     };
     return true;
+  }
+  update(fighter, dt, stageWidth, particles) {
+    if (fighter.chewieBowcaster && fighter.chewieBowcaster.active) {
+      const cb = fighter.chewieBowcaster;
+      cb.x += cb.vx * dt;
+      if (particles && Math.random() < 0.6) {
+        particles.emitSparks(cb.x, cb.y, '#22c55e', 3, 2);
+      }
+      if (fighter.opponent && !fighter.opponent.isDead && !cb.hasHit) {
+        const dist = Math.abs(cb.x - fighter.opponent.position.x);
+        if (dist < 40 && Math.abs(cb.y - (fighter.opponent.position.y - 50)) < 60) {
+          cb.hasHit = true;
+          cb.active = false;
+          sounds.playLaser();
+          sounds.playPunch(true);
+          if (particles) {
+            particles.emitShockwave(cb.x, cb.y, 90, '#22c55e');
+            particles.emitSparks(cb.x, cb.y, '#ef4444', 16, 6);
+          }
+          const attackData = {
+            damage: cb.damage,
+            knockback: 15,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: fighter.attackPower
+          };
+          fighter.opponent.receiveHit(attackData, { x: cb.x, y: cb.y }, particles);
+        }
+      }
+      if (cb.x < 0 || cb.x > stageWidth) {
+        cb.active = false;
+        fighter.chewieBowcaster = null;
+      }
+    }
+  }
+  draw(ctx, fighter) {
+    if (fighter.chewieBowcaster && fighter.chewieBowcaster.active) {
+      const cb = fighter.chewieBowcaster;
+      ctx.save();
+      // Desenha projétil de energia esmeralda da besta de Chewbacca
+      ctx.shadowColor = '#22c55e';
+      ctx.shadowBlur = 18;
+      ctx.fillStyle = '#86efac';
+      ctx.beginPath();
+      ctx.ellipse(cb.x, cb.y, 16, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
   }
 }
 
@@ -378,6 +506,23 @@ export class MarioBehavior extends BaseCharacter {
       if (fighter.marioSuperSizeTimer <= 0) {
         fighter.attackPower = fighter.baseAttackPower || 1.1;
       }
+    }
+  }
+  draw(ctx, fighter) {
+    if (fighter.marioPipes && fighter.marioPipes.length > 0) {
+      ctx.save();
+      for (const pipe of fighter.marioPipes) {
+        // Desenha cano verde clássico de Super Mario
+        ctx.fillStyle = '#16a34a';
+        ctx.fillRect(pipe.x - 22, pipe.y - 42, 44, 42);
+        ctx.fillStyle = '#22c55e';
+        ctx.fillRect(pipe.x - 26, pipe.y - 54, 52, 14);
+        ctx.strokeStyle = '#14532d';
+        ctx.lineWidth = 2.5;
+        ctx.strokeRect(pipe.x - 26, pipe.y - 54, 52, 14);
+        ctx.strokeRect(pipe.x - 22, pipe.y - 42, 44, 42);
+      }
+      ctx.restore();
     }
   }
 }

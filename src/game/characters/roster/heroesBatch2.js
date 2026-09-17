@@ -220,6 +220,143 @@ export class YoshiBehavior extends BaseCharacter {
     };
     return true;
   }
+  update(fighter, dt, stageWidth, particles) {
+    if (fighter.yoshiEgg && fighter.yoshiEgg.active) {
+      const ye = fighter.yoshiEgg;
+      ye.x += ye.vx * dt;
+      ye.vy += 800 * dt;
+      ye.y += ye.vy * dt;
+      if (ye.y >= fighter.groundY) {
+        ye.y = fighter.groundY;
+        ye.vy = -ye.vy * 0.6;
+        ye.bounces = (ye.bounces || 0) + 1;
+        if (ye.bounces >= 3) {
+          ye.active = false;
+          fighter.yoshiEgg = null;
+        }
+      }
+      if (fighter.opponent && !fighter.opponent.isDead && !ye.hasHit) {
+        const dist = Math.abs(ye.x - fighter.opponent.position.x);
+        if (dist < 45 && Math.abs(ye.y - (fighter.opponent.position.y - 50)) < 60) {
+          ye.hasHit = true;
+          ye.active = false;
+          fighter.yoshiEgg = null;
+          sounds.playPunch(true);
+          if (particles) {
+            particles.emitShockwave(ye.x, ye.y, 90, '#22c55e');
+            particles.emitSparks(ye.x, ye.y, '#ffffff', 18, 6);
+          }
+          fighter.opponent.receiveHit({
+            damage: ye.damage,
+            knockback: 14,
+            knockdown: true,
+            isHeavy: true,
+            attackerPower: fighter.attackPower
+          }, { x: ye.x, y: ye.y }, particles);
+        }
+      }
+    }
+
+    if (fighter.yoshiTongueSwallow && fighter.yoshiTongueSwallow.active) {
+      const yts = fighter.yoshiTongueSwallow;
+      yts.timer += dt;
+      const target = yts.target;
+
+      if (yts.phase === 'TONGUE_OUT') {
+        if (target && !target.isDead) {
+          const dist = Math.abs(fighter.position.x - target.position.x);
+          if (dist < 320 && yts.timer > 0.08) {
+            yts.phase = 'SWALLOWED';
+            sounds.playPunch(true);
+            target.position.x = fighter.position.x + fighter.facing * 20;
+            target.position.y = fighter.position.y;
+            target.hitstunTime = 0.8;
+            if (particles) {
+              particles.emitShockwave(target.position.x, target.position.y - 45, 100, '#ec4899');
+            }
+          }
+        }
+        if (yts.timer >= 0.35 && yts.phase === 'TONGUE_OUT') {
+          yts.phase = 'SPIT_OUT';
+        }
+      } else if (yts.phase === 'SWALLOWED') {
+        if (target && !target.isDead) {
+          target.position.x = fighter.position.x;
+          target.velocity.x = 0;
+          target.velocity.y = 0;
+        }
+        if (yts.timer >= 0.75) {
+          yts.phase = 'SPIT_OUT';
+          sounds.playWhoosh();
+          sounds.playThunderSlam();
+          if (target && !target.isDead) {
+            target.position.x = fighter.position.x + fighter.facing * 55;
+            target.velocity.x = fighter.facing * 24;
+            target.velocity.y = -8;
+            target.isGrounded = false;
+            if (particles) {
+              particles.emitShockwave(target.position.x, target.position.y - 50, 180, '#22c55e');
+              particles.emitSparks(target.position.x, target.position.y - 50, '#fbbf24', 25, 8);
+            }
+            target.receiveHit({
+              damage: yts.damage,
+              knockback: 26,
+              knockdown: true,
+              isHeavy: true,
+              unblockable: true,
+              attackerPower: fighter.attackPower
+            }, { x: target.position.x, y: target.position.y - 50 }, particles);
+          }
+        }
+      } else if (yts.phase === 'SPIT_OUT' && yts.timer >= 1.05) {
+        yts.active = false;
+        fighter.yoshiTongueSwallow = null;
+        fighter.superPhase = null;
+        fighter.superType = null;
+        fighter.isInvulnerable = false;
+        if (fighter.state === FIGHTER_STATE.SUPER_MOVE) {
+          fighter.state = FIGHTER_STATE.IDLE;
+        }
+      }
+    }
+  }
+  draw(ctx, fighter) {
+    if (fighter.yoshiEgg && fighter.yoshiEgg.active) {
+      const ye = fighter.yoshiEgg;
+      ctx.save();
+      ctx.translate(ye.x, ye.y);
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 14, 18, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.arc(-4, -4, 4, 0, Math.PI * 2);
+      ctx.arc(4, 5, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    if (fighter.yoshiTongueSwallow && fighter.yoshiTongueSwallow.active) {
+      const yts = fighter.yoshiTongueSwallow;
+      if (yts.phase === 'TONGUE_OUT') {
+        const tx = fighter.position.x + fighter.facing * Math.min(300, yts.timer * 900);
+        const ty = fighter.position.y - 55;
+        ctx.save();
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 14;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(fighter.position.x + fighter.facing * 25, fighter.position.y - 55);
+        ctx.lineTo(tx, ty);
+        ctx.stroke();
+        ctx.fillStyle = '#fda4af';
+        ctx.beginPath();
+        ctx.arc(tx, ty, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+  }
 }
 
 // PIKACHU

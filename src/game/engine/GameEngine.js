@@ -106,6 +106,7 @@ export class GameEngine {
         if (this.inputHandler.p1Binds.heavyKick.includes(e.code)) this.justPressedP1.heavyKick = true;
         if (this.inputHandler.p1Binds.special1.includes(e.code)) this.justPressedP1.special1 = true;
         if (this.inputHandler.p1Binds.superMove.includes(e.code)) this.justPressedP1.superMove = true;
+        if (this.inputHandler.p1Binds.block?.includes(e.code)) this.justPressedP1.block = true;
       }
 
       // Detecção de Duplo Toque para Dash (P1 - A / D)
@@ -139,6 +140,7 @@ export class GameEngine {
           if (this.inputHandler.p2Binds.heavyKick.includes(e.code)) this.justPressedP2.heavyKick = true;
           if (this.inputHandler.p2Binds.special1.includes(e.code)) this.justPressedP2.special1 = true;
           if (this.inputHandler.p2Binds.superMove.includes(e.code)) this.justPressedP2.superMove = true;
+          if (this.inputHandler.p2Binds.block?.includes(e.code)) this.justPressedP2.block = true;
         }
 
         if (this.inputHandler.doubleTapDashEnabled) {
@@ -1057,6 +1059,17 @@ export class GameEngine {
       } else {
         this.stage.draw(ctx, this.camera);
       }
+
+      // 5 - ZORRO: Ultimate deixa a tela inteira preta durante a execução do Z
+      const isZorroUltActive = (this.p1?.zorroBlackoutTimer > 0) || (this.p2?.zorroBlackoutTimer > 0) ||
+        (this.p1?.superType === 'ZORRO_MARK_OF_Z') || (this.p2?.superType === 'ZORRO_MARK_OF_Z');
+      if (isZorroUltActive) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.96)';
+        ctx.fillRect(-2500, -2500, 8000, 6000);
+        ctx.restore();
+      }
+
       this.p1.draw(ctx, this.showHitboxes, this.graphicsMode, this.isExpedition);
       this.p2.draw(ctx, this.showHitboxes, this.graphicsMode, this.isExpedition);
       this.drawCinematicBeam(ctx);

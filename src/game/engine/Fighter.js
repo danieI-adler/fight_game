@@ -655,6 +655,24 @@ export class Fighter {
     this.hasHitCurrentAttack = false;
     this.stateTime = 0;
 
+    // 19 - Kirito: Em modo Empunhadura Dupla, o soco desfere golpe de espada Elucidator
+    if (this.isKirito && (this.kiritoDualBladeActive || this.kiritoDualBladeTimer > 0)) {
+      sounds.playRapierSlash();
+    } else if (this.isNascimento && this.nascimentoGunTimer > 0) {
+      // 9 - Capitão Nascimento: Desfere tiros com a arma sacada
+      sounds.playGunshot();
+      const bX = this.position.x + this.facing * 35;
+      const bY = this.position.y - 65;
+      this.gustaveBullet = {
+        x: bX,
+        y: bY,
+        vx: this.facing * 1400,
+        damage: 80,
+        active: true,
+        hasHit: false
+      };
+    }
+
     if (!this.isGrounded) {
       this.state = FIGHTER_STATE.JUMP_PUNCH;
       sounds.playWhoosh();
@@ -675,6 +693,11 @@ export class Fighter {
     this.lastAction = 'ATTACK';
     this.hasHitCurrentAttack = false;
     this.stateTime = 0;
+
+    // 19 - Kirito: Em modo Empunhadura Dupla, o chute desfere golpe cruzado com a Dark Repulser
+    if (this.isKirito && (this.kiritoDualBladeActive || this.kiritoDualBladeTimer > 0)) {
+      sounds.playRapierSlash();
+    }
 
     if (!this.isGrounded) {
       this.state = FIGHTER_STATE.JUMP_KICK;
@@ -725,8 +748,8 @@ export class Fighter {
             hasHit: false
           });
         }
-      } else if (this.isAang && this.aangAvatarStateActive) {
-        // Elemento AR de Aang: Rajada cortante de vento / Air Sweep (Apenas em Estado Avatar)
+      } else if (this.isAang && (this.aangAvatarStateActive || this.avatarStateTimer > 0)) {
+        // 2 - Elemento AR de Aang: Rajada cortante de vento / Air Sweep (Apenas em Estado Avatar - 5s após ultimate)
         sounds.playWhoosh();
         const ax = this.position.x + this.facing * 35;
         const ay = this.position.y - 65;
@@ -2392,7 +2415,6 @@ export class Fighter {
       sounds.playWhoosh();
       this.velocity.x = -this.facing * 6; // cambaleia para longe do golpe
       if (particles) {
-        particles.emitFloatingText(`DODGED! (${this.sparrowDodgeCharges} left)`, this.position.x, this.position.y - 85, '#fbbf24', true);
         particles.emitSparks(this.position.x, this.position.y - 50, '#f59e0b', 12, 6);
       }
       if (this.sparrowDodgeCharges <= 0) {
@@ -6178,16 +6200,10 @@ export class Fighter {
 
     // 7.5 Buff de Crítico Radiante de Sciel
     if (this.scielCritCharges > 0) {
-      const hx = this.position.x;
-      const hy = this.position.y - 128;
       const pulse = Math.sin(Date.now() * 0.012) * 3;
       ctx.save();
       ctx.shadowColor = '#fbbf24';
       ctx.shadowBlur = 14;
-      ctx.fillStyle = '#fbbf24';
-      ctx.font = 'bold 12px "Cinzel", serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(`✨ CRIT FOCUS: ${this.scielCritCharges}x`, hx, hy + pulse);
 
       // Fitas de luz dourada circundando Sciel
       ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)';
@@ -6274,21 +6290,6 @@ export class Fighter {
       ctx.arc(ax - this.facing * 12, ay - 4, 5, 0, Math.PI * 2);
       ctx.arc(ax - this.facing * 22, ay + 3, 3, 0, Math.PI * 2);
       ctx.fill();
-      ctx.restore();
-    }
-
-    // 9. Garrafa de Rum de Jack Sparrow (indicador visual de embriaguez/esquiva)
-    if (this.sparrowDrunkTimer > 0) {
-      const hx = this.position.x;
-      const hy = this.position.y - 125;
-      const pulse = Math.sin(Date.now() * 0.01) * 3;
-      ctx.save();
-      ctx.shadowColor = '#fbbf24';
-      ctx.shadowBlur = 10;
-      ctx.fillStyle = '#f59e0b';
-      ctx.font = 'bold 12px "Cinzel", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('🍾 RUM DODGE!', hx, hy + pulse);
       ctx.restore();
     }
 

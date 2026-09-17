@@ -131,6 +131,9 @@ export class InputHandler {
     const down = this.isPressed(binds.down) || (gp && gp.down);
     const block = this.isPressed(binds.block) || (gp && gp.block);
 
+    // Rastreia se o botão de Super está sendo segurado (para Naruto carregar o Rasen Shuriken com clone)
+    fighter.isHoldingSuper = Boolean(this.isPressed(binds.superMove) || (gp && gp.superMove));
+
     // Processar ataques prioritariamente (se o jogador atacar enquanto 'down' estiver pressionado, aciona golpe agachado)
     let attackInitiated = false;
     if (justPressed.superMove) {
