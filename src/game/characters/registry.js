@@ -1,3 +1,4 @@
+import { BaseCharacter } from './base/BaseCharacter.js';
 // Expedition 33
 import { gustaveBehavior } from './roster/gustave.js';
 import { maelleBehavior } from './roster/maelle.js';
@@ -222,6 +223,8 @@ const rosterRegistry = {
   homelander: homelanderBehavior,
 };
 
+const defaultBehavior = new BaseCharacter('default', 'Default');
+
 function normalizeText(text) {
   return String(text || '')
     .toLowerCase()
@@ -243,5 +246,5 @@ export function getCharacterBehavior(fighter) {
     }
   }
 
-  return null;
+  return defaultBehavior;
 }

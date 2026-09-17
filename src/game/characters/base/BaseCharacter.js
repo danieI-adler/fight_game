@@ -1,4 +1,4 @@
-﻿export class BaseCharacter {
+export class BaseCharacter {
   constructor(id, name) {
     this.id = id;
     this.name = name;
@@ -12,12 +12,15 @@
 
   // Retorna true se executou especial próprio
   onSpecial(fighter, level) {
-    return false;
+    fighter.extraType = 'GENERIC_EXTRA';
+    return true;
   }
 
   // Retorna true se executou super próprio
   onSuper(fighter) {
-    return false;
+    fighter.superType = 'GUSTAVE_SMASH';
+    fighter.superPhase = 'CHARGE';
+    return true;
   }
 
   // Atualização por frame de projéteis, timers e colisões específicas
