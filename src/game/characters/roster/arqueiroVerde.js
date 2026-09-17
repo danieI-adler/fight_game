@@ -1,4 +1,4 @@
-﻿import { BaseCharacter } from '../base/BaseCharacter.js';
+import { BaseCharacter } from '../base/BaseCharacter.js';
 import { sounds } from '../../audio/soundManager.js';
 
 export class GreenArrowBehavior extends BaseCharacter {
@@ -21,6 +21,7 @@ export class GreenArrowBehavior extends BaseCharacter {
     return true;
   }
   onSuper(fighter) {
+    fighter.superType = 'ARROW_STORM';
     fighter.superPhase = 'ARROW_STORM';
     sounds.playSuperCharge();
     sounds.playWhoosh();

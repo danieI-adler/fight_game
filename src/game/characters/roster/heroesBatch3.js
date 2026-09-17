@@ -617,79 +617,173 @@ export class KratosBehavior extends BaseCharacter {
 
 export class VenomBehavior extends BaseCharacter {
   constructor() { super('venom', 'Venom'); }
-  init(fighter) { fighter.isVenom = true; }
+  init(fighter) {
+    fighter.isVenom = true;
+    fighter.venomTendril = null;
+    fighter.venomChomp = null;
+  }
+  reset(fighter) {
+    fighter.venomTendril = null;
+    fighter.venomChomp = null;
+  }
   onSpecial(fighter, level) {
     fighter.extraType = 'VENOM_TENDRILS';
-    sounds.playPunch(true);
     sounds.playWhoosh();
+    sounds.playPunch(true);
+    const reach = 220;
+    const dmg = level === 2 ? 235 : 165;
+    fighter.venomTendril = {
+      timer: 0,
+      reach: reach,
+      damage: dmg,
+      active: true,
+      hasHit: false
+    };
+    if (fighter.opponent && !fighter.opponent.isDead) {
+      const dist = Math.abs(fighter.opponent.position.x - fighter.position.x);
+      const facingOpp = (fighter.opponent.position.x - fighter.position.x) * fighter.facing > 0;
+      if (facingOpp && dist < reach) {
+        fighter.venomTendril.hasHit = true;
+        const attackData = {
+          damage: dmg,
+          knockback: 18,
+          knockdown: true,
+          isHeavy: true,
+          attackerPower: fighter.attackPower
+        };
+        fighter.opponent.receiveHit(attackData, { x: fighter.opponent.position.x, y: fighter.opponent.position.y - 60 }, null);
+      }
+    }
     return true;
   }
   onSuper(fighter) {
     fighter.superType = 'VENOM_WE_ARE_VENOM';
-    fighter.superPhase = 'WE_ARE_VENOM';
+    fighter.superPhase = 'SYMBIOTE_MAW';
     sounds.playSuperCharge();
+    sounds.playWhoosh();
+    sounds.playPunch(true);
+    const target = fighter.opponent;
+    fighter.venomChomp = {
+      timer: 0,
+      target: target,
+      damage: 420,
+      active: true,
+      hitsLanded: 0
+    };
     return true;
   }
 }
 
 export class CarnageBehavior extends BaseCharacter {
   constructor() { super('carnage', 'Carnificina'); }
-  init(fighter) { fighter.isCarnage = true; }
+  init(fighter) {
+    fighter.isCarnage = true;
+    fighter.carnageScythe = null;
+    fighter.carnageSpikes = null;
+  }
+  reset(fighter) {
+    fighter.carnageScythe = null;
+    fighter.carnageSpikes = null;
+  }
   onSpecial(fighter, level) {
     fighter.extraType = 'CARNAGE_SCYTHES';
     sounds.playRapierSlash();
+    sounds.playPunch(true);
+    const reach = 160;
+    const dmg = level === 2 ? 245 : 175;
+    fighter.carnageScythe = {
+      timer: 0,
+      reach: reach,
+      damage: dmg,
+      active: true,
+      hasHit: false
+    };
+    if (fighter.opponent && !fighter.opponent.isDead) {
+      const dist = Math.abs(fighter.opponent.position.x - fighter.position.x);
+      const facingOpp = (fighter.opponent.position.x - fighter.position.x) * fighter.facing > 0;
+      if (facingOpp && dist < reach) {
+        fighter.carnageScythe.hasHit = true;
+        const attackData = {
+          damage: dmg,
+          knockback: 22,
+          knockdown: true,
+          isHeavy: true,
+          attackerPower: fighter.attackPower
+        };
+        fighter.opponent.receiveHit(attackData, { x: fighter.opponent.position.x, y: fighter.opponent.position.y - 60 }, null);
+      }
+    }
     return true;
   }
   onSuper(fighter) {
     fighter.superType = 'CARNAGE_MAXIMUM_CARNAGE';
-    fighter.superPhase = 'MAXIMUM_CARNAGE';
+    fighter.superPhase = 'CARNAGE_OUTBURST';
     sounds.playSuperCharge();
     sounds.playRapierSlash();
+    sounds.playThunderSlam();
+    fighter.carnageSpikes = {
+      timer: 0,
+      x: fighter.position.x,
+      y: fighter.position.y - 60,
+      damage: 430,
+      active: true,
+      spikesFired: 0
+    };
     return true;
   }
 }
 
-// 28 - HOMELANDER: Q voo por 3 a 6s segurando W e golpe caindo causa 200% de dano; Ult olhos a laser
+// 28 - HOMELANDER: Q voo livre com total mobilidade aérea; Ult postura fixa e raios contínuos dos olhos
 export class HomelanderBehavior extends BaseCharacter {
   constructor() { super('homelander', 'Capitão Pátria'); }
   init(fighter) {
     fighter.isHomelander = true;
     fighter.homelanderFlightTimer = 0;
+    fighter.homelanderEyeBlast = null;
+    fighter.homelanderLaser = null;
   }
   reset(fighter) {
     fighter.homelanderFlightTimer = 0;
+    fighter.homelanderEyeBlast = null;
+    fighter.homelanderLaser = null;
   }
   onSpecial(fighter, level) {
-    // Q rework: Permite voo por 3 a 6 segundos! Ao golpear caindo, dá 200% de dano
+    // Q rework: Voo livre por 4 a 6 segundos com total controle 2D e suspensão da gravidade!
     fighter.extraType = 'HOMELANDER_FLIGHT_MODE';
     sounds.playSuperCharge();
     sounds.playWhoosh();
-    fighter.homelanderFlightTimer = level === 2 ? 6.0 : 3.5;
-    fighter.velocity.y = -12; // Decola imediatamente!
+    fighter.homelanderFlightTimer = level === 2 ? 6.0 : 4.0;
+    fighter.velocity.y = -9; // Decola suavemente
     fighter.isGrounded = false;
     return true;
   }
   onSuper(fighter) {
-    // Ult: Olhos a laser devastadores
+    // Ult: Olhos a laser contínuos devastadores em postura fria e estática
     fighter.superType = 'HOMELANDER_LASER_EYES';
-    fighter.superPhase = 'LASER_SWEEP';
+    fighter.superPhase = 'GOD_COMPLEX_LASER';
     sounds.playSuperCharge();
     sounds.playLaser();
-    fighter.homelanderLaser = {
+    sounds.playFireCast();
+    fighter.velocity.x = 0;
+    fighter.velocity.y = 0;
+    fighter.isGrounded = true;
+    fighter.position.y = fighter.groundY;
+    fighter.homelanderEyeBlast = {
       timer: 0,
-      reach: 1200,
-      damage: 440,
-      active: true
+      reach: 1250,
+      width: 44,
+      damage: 425,
+      active: true,
+      tickTimer: 0
     };
     return true;
   }
   update(fighter, dt, stageWidth, particles) {
     if (fighter.homelanderFlightTimer > 0) {
       fighter.homelanderFlightTimer -= dt;
-      // Mantém flutuando enquanto durar o voo
-      fighter.velocity.y = Math.min(fighter.velocity.y, 1);
-      if (particles && Math.random() < 0.25) {
-        particles.emitSparks(fighter.position.x, fighter.position.y - 70, '#ef4444', 3, 2);
+      if (particles && Math.random() < 0.35) {
+        particles.emitSparks(fighter.position.x - fighter.facing * 10, fighter.position.y - 30, '#ef4444', 3, 2);
+        particles.emitDust(fighter.position.x, fighter.position.y, 1);
       }
     }
   }

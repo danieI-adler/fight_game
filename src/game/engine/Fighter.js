@@ -2679,8 +2679,25 @@ export class Fighter {
     // Fator de escala normalizado para 60 FPS
     const timeScale = dt * 60;
 
-    // 2. Gravidade
-    if (!this.isGrounded) {
+    // 2. Gravidade e Modo de Voo Livre (Homelander)
+    const isFreeFlying = Boolean(this.homelanderFlightTimer && this.homelanderFlightTimer > 0);
+
+    if (isFreeFlying) {
+      this.isGrounded = false;
+      this.position.y += this.velocity.y * timeScale;
+      // Amortece velocidade vertical suavemente quando não houver impulso
+      this.velocity.y *= Math.pow(0.88, timeScale);
+      if (Math.abs(this.velocity.y) < 0.05) this.velocity.y = 0;
+
+      // Limite superior e inferior da arena
+      if (this.position.y >= this.groundY) {
+        this.position.y = this.groundY;
+        if (this.velocity.y > 0) this.velocity.y = 0;
+      } else if (this.position.y < 120) {
+        this.position.y = 120;
+        if (this.velocity.y < 0) this.velocity.y = 0;
+      }
+    } else if (!this.isGrounded) {
       this.velocity.y += this.gravity * timeScale;
       this.position.y += this.velocity.y * timeScale;
 

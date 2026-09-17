@@ -1,4 +1,4 @@
-﻿import { BaseCharacter } from '../base/BaseCharacter.js';
+import { BaseCharacter } from '../base/BaseCharacter.js';
 import { sounds } from '../../audio/soundManager.js';
 
 export class JokerBehavior extends BaseCharacter {
@@ -33,6 +33,7 @@ export class JokerBehavior extends BaseCharacter {
     return true;
   }
   onSuper(fighter) {
+    fighter.superType = 'JOKER_GRAND_FINALE';
     fighter.superPhase = 'GRAND_FINALE_BOX';
     sounds.playSuperCharge();
     sounds.playStaffBell();

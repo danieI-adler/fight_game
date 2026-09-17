@@ -165,7 +165,29 @@ export class InputHandler {
     fighter.block(block);
 
     // Movimentação horizontal e Dash por Duplo Toque
-    if (!attackInitiated || fighter.extraType === 'MONOCO_STAFF_SPIN') {
+    const isFreeFlying = Boolean(fighter.homelanderFlightTimer && fighter.homelanderFlightTimer > 0);
+
+    if (isFreeFlying) {
+      // Voo livre 2D do Capitão Pátria (Homelander): W sobe, S desce, A/D voa lateralmente
+      const flightSpeed = fighter.getEffectiveSpeed() * 1.35;
+      const up = this.isPressed(binds.jump) || (gp && gp.up);
+
+      if (left && !right) {
+        fighter.velocity.x = -flightSpeed;
+        fighter.facing = -1;
+      } else if (right && !left) {
+        fighter.velocity.x = flightSpeed;
+        fighter.facing = 1;
+      } else {
+        fighter.velocity.x *= 0.82;
+      }
+
+      if (up && !down) {
+        fighter.velocity.y = -flightSpeed * 0.9;
+      } else if (down && !up) {
+        fighter.velocity.y = flightSpeed * 0.9;
+      }
+    } else if (!attackInitiated || fighter.extraType === 'MONOCO_STAFF_SPIN') {
       if (fighter.extraType === 'MONOCO_STAFF_SPIN') {
         // Monoco se move com velocidade de turbilhão (Garen E / Wukong R)
         if (left && !right) {
@@ -189,7 +211,7 @@ export class InputHandler {
     }
 
     // Pulo (Disparo Único por clique, sem loop de repetição)
-    if ((justPressed.jump || (gp && gp.up)) && !attackInitiated && !down) {
+    if (!isFreeFlying && (justPressed.jump || (gp && gp.up)) && !attackInitiated && !down) {
       const dirX = left ? -1 : (right ? 1 : 0);
       fighter.jump(dirX);
     }

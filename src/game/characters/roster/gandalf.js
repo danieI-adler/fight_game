@@ -1,4 +1,4 @@
-﻿import { BaseCharacter } from '../base/BaseCharacter.js';
+import { BaseCharacter } from '../base/BaseCharacter.js';
 import { sounds } from '../../audio/soundManager.js';
 
 export class GandalfBehavior extends BaseCharacter {
@@ -20,6 +20,7 @@ export class GandalfBehavior extends BaseCharacter {
     return true;
   }
   onSuper(fighter) {
+    fighter.superType = 'GANDALF_SHALL_NOT_PASS';
     fighter.superPhase = 'YOU_SHALL_NOT_PASS';
     sounds.playSuperCharge();
     sounds.playThunderSlam();

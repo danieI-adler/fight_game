@@ -246,6 +246,29 @@ export class FighterAnimator {
           p.leftFoot = { x: -24 * f, y: 0 };
           p.rightKnee = { x: 22 * f, y: -25 };
           p.rightFoot = { x: 30 * f, y: 0 };
+        } else if (fighter.superType === 'HOMELANDER_LASER_EYES') {
+          // Homelander: O único gesto dele é inclinar o corpo para frente e os raios saem dos olhos, sem mais nenhum movimento
+          const laserTremor = Math.sin(t * 60) * 1.2;
+          p.head.y = -108 + laserTremor;
+          p.head.x = 10 * f; // Cabeça inclinada firmemente para a frente
+          p.chest.y = -76 + laserTremor * 0.5;
+          p.chest.x = 12 * f; // Torso e peitoral projetados para a frente em postura intimidadora
+          p.pelvis.y = -46;
+          p.pelvis.x = 3 * f;
+
+          // Braços retos e firmes rente ao corpo ou punhos cerrados ligeiramente para trás
+          p.leftShoulder = { x: -6 * f, y: -80 };
+          p.leftElbow = { x: -12 * f, y: -58 };
+          p.leftHand = { x: -14 * f, y: -38 };
+          p.rightShoulder = { x: 8 * f, y: -80 };
+          p.rightElbow = { x: 12 * f, y: -58 };
+          p.rightHand = { x: 14 * f, y: -38 };
+
+          // Pernas firmes, plantadas no chão sustentando a postura inabalável
+          p.leftKnee = { x: -12 * f, y: -24 };
+          p.leftFoot = { x: -18 * f, y: 0 };
+          p.rightKnee = { x: 14 * f, y: -24 };
+          p.rightFoot = { x: 20 * f, y: 0 };
         } else if (fighter.superType === 'RENOIR_FLOWER') {
           // Renoir ergue a bengala solenemente aos céus para conjurar e arremessar a flor negra
           if (t < 1.2) {

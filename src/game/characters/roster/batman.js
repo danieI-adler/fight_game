@@ -36,6 +36,7 @@ export class BatmanBehavior extends BaseCharacter {
   }
 
   onSuper(fighter) {
+    fighter.superType = 'BATMAN_BATMOBILE';
     fighter.superPhase = 'SUMMON_CAR';
     sounds.playSuperCharge();
     sounds.playWhoosh();

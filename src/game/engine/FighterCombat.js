@@ -1526,7 +1526,7 @@ export class FighterCombat {
         }
 
         // --- 33. BANE: QUEBRA-COSTAS TITÂNICO ---
-        if (fighter.superType === 'BANE_BACKBREAKER') {
+        if (fighter.superType === 'BANE_BACKBREAKER' || fighter.superType === 'BANE_BACKBREAKER_SLAM') {
           fighter.isInvulnerable = true;
           fighter.velocity.x = 0;
           if (fighter.stateTime >= 1.35) {
@@ -1700,6 +1700,9 @@ export class FighterCombat {
         if (fighter.superType === 'HOMELANDER_LASER_EYES') {
           fighter.isInvulnerable = true;
           fighter.velocity.x = 0;
+          fighter.velocity.y = 0;
+          fighter.isGrounded = true;
+          fighter.position.y = fighter.groundY;
           if (fighter.stateTime >= 1.35) {
             fighter.isInvulnerable = false;
             fighter.superPhase = null;
@@ -1710,7 +1713,7 @@ export class FighterCombat {
         }
 
         // --- GUSTAVE / SUPER MOVE PADRÃO (Executa APENAS se for Gustave ou se superPhase === 'CHARGE') ---
-        const isGustaveSuper = fighter.superType === 'GUSTAVE_DESPERATE_SHOT' || fighter.superType === 'GUSTAVE_SUPER' || (!fighter.superType && fighter.superPhase === 'CHARGE');
+        const isGustaveSuper = fighter.superType === 'GUSTAVE_SMASH' || fighter.superType === 'GUSTAVE_SLAM' || fighter.superType === 'GUSTAVE_DESPERATE_SHOT' || fighter.superType === 'GUSTAVE_SUPER' || (!fighter.superType && fighter.superPhase === 'CHARGE');
         if (isGustaveSuper) {
           if (fighter.stateTime < 0.5) {
             fighter.velocity.x = 0;
