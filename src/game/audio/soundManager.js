@@ -603,11 +603,7 @@ class SoundManager {
         playPromise.catch((err) => {
           const fallback = new Audio('./assets/audio/kirito_starburst.mp3');
           fallback.volume = 1.0;
-          fallback.play().catch(() => {
-            const localFallback = new Audio('C:/Users/fogoy/Downloads/sao-c8763-2.mp3');
-            localFallback.volume = 1.0;
-            localFallback.play().catch((e) => console.warn('Erro ao tocar Starburst Stream do Kirito:', e));
-          });
+          fallback.play().catch(() => {});
         });
       }
     } catch (e) {

@@ -28,3 +28,5 @@ UnityProject/
 
 # Arquivos de mídia pesados locais
 public/assets/audio/
+!public/assets/audio/*.mp3
+
