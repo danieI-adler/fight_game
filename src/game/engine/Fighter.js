@@ -1186,9 +1186,3 @@ export class Fighter {
   }
 
 }
-    this.slowTimer = 0;
-    this.burnTimer = 0;
-    this.burnTickTimer = 0;
-    this.timeFreezeTimer = 0;
-    this.extraType = null;
-    this.extraAttackLevel = 1;
